@@ -17,6 +17,8 @@ const NAV_GROUPS = [
     items: [
       { href: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
       { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
+      { href: '/admin/cases', icon: Briefcase, label: 'Cases' },
+      { href: '/admin/evidence-moderation', icon: Shield, label: 'Evidence Moderation' },
     ],
   },
   {
@@ -25,23 +27,6 @@ const NAV_GROUPS = [
       { href: '/admin/users', icon: Users, label: 'Users (Clients)' },
       { href: '/admin/lawyers', icon: Scale, label: 'Lawyers' },
       { href: '/admin/lawyers/verification-queue', icon: Gavel, label: 'Verification Queue', badge: 'queue' },
-    ],
-  },
-  {
-    label: 'Operations',
-    items: [
-      { href: '/admin/cases', icon: Briefcase, label: 'Cases' },
-      { href: '/admin/evidence-moderation', icon: Shield, label: 'Evidence Moderation' },
-      { href: '/admin/proposals', icon: FileText, label: 'Proposals' },
-      { href: '/admin/appointments', icon: Calendar, label: 'Appointments' },
-    ],
-  },
-  {
-    label: 'Finance',
-    items: [
-      { href: '/admin/payments/transactions', icon: CreditCard, label: 'Transactions' },
-      { href: '/admin/payments/payouts', icon: CreditCard, label: 'Payouts' },
-      { href: '/admin/payments/refunds', icon: CreditCard, label: 'Refunds' },
     ],
   },
   {

@@ -9,34 +9,25 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import styles from './LawyerHome.styles';
-
-const newRequests = [
-  { name: 'Ahmed K. — Property', desc: 'Land dispute in Hyderabad — 2 documents attached' },
-  { name: 'Zara M. — Family',    desc: 'Custody case — Karachi courts' },
-];
-
-const pipeline = [
-  { dot: '#3b82f6', title: 'Raza vs. Malik — Property', sub: 'Hearing: 22 Apr · Civil Court Karachi', badge: 'Hearing', style: 'badgeBlue'  },
-  { dot: '#f59e0b', title: 'Khan Divorce Settlement',   sub: 'Docs needed · 3 evidence files',        badge: 'Docs',    style: 'badgeAmber' },
-  { dot: '#4ade80', title: 'Memon Inheritance — Sukkur',sub: 'Evidence submitted · Awaiting date',     badge: 'Active',  style: 'badgeGreen' },
-];
+import { useMockStore, lawyerProfile, caseRequests } from './MockStore';
 
 const quickActions = [
-  { icon: '📨', title: 'Case Requests', sub: '3 new requests',   route: '/(lawyer)/CaseRequests' },
-  { icon: '📅', title: 'My Schedule',   sub: '2 hearings today', route: '/(lawyer)/Schedule'     },
-  { icon: '📁', title: 'My Cases',      sub: 'View & manage',    route: '/(lawyer)/MyCases'      },
-  { icon: '💰', title: 'Earnings',      sub: 'View statements',  route: '/(lawyer)/Earnings'     },
+  { title: 'Case Requests', route: '/(lawyer)/CaseRequests' },
+  { title: 'My Schedule',   route: '/(lawyer)/Schedule'     },
+  { title: 'My Cases',      route: '/(lawyer)/MyCases'      },
+  { title: 'Other Lawyers', route: '/(lawyer)/OtherLawyers'  },
 ];
 
 const navItems = [
-  { id: 'home',     icon: '📊', label: 'Dashboard', route: null                      },
-  { id: 'requests', icon: '📨', label: 'Requests',  route: '/(lawyer)/CaseRequests'  },
-  { id: 'cases',    icon: '📁', label: 'Cases',     route: '/(lawyer)/MyCases'       },
-  { id: 'schedule', icon: '📅', label: 'Schedule',  route: '/(lawyer)/Schedule'      },
-  { id: 'earnings', icon: '💰', label: 'Earnings',  route: '/(lawyer)/Earnings'      },
+  { id: 'home',     label: 'Dashboard', route: null                       },
+  { id: 'requests', label: 'Requests',  route: '/(lawyer)/CaseRequests'   },
+  { id: 'cases',    label: 'Cases',     route: '/(lawyer)/MyCases'        },
+  { id: 'schedule', label: 'Schedule',  route: '/(lawyer)/Schedule'       },
+  { id: 'profile',  label: 'Profile',   route: '/(lawyer)/LawyerProfile'  },
 ];
 
 export default function LawyerHome() {
+  useMockStore();
   const router = useRouter();
   const [activeNav, setActiveNav] = useState('home');
 
@@ -49,43 +40,48 @@ export default function LawyerHome() {
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor="#0F2744" />
 
-      {/* ── HEADER ── */}
+      {/* HEADER */}
       <View style={styles.header}>
         <View style={styles.headerRow}>
-          <View style={styles.brand}>
-            <Text style={styles.brandName}>Barq-e-Insaf ⚡</Text>
-            <Text style={styles.brandSub}>Lawyer Portal</Text>
+          <View style={styles.brandRow}>
+            <View style={styles.logoBadge}>
+              <Text style={styles.logoBadgeText}>BI</Text>
+            </View>
+            <View style={styles.brand}>
+              <Text style={styles.brandName}>Barq-e-Insaf</Text>
+              <Text style={styles.brandSub}>Lawyer Portal</Text>
+            </View>
           </View>
           <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.notifBtn}>
-              <Text style={styles.notifIcon}>🔔</Text>
+            <TouchableOpacity style={styles.notifBtn} onPress={() => router.push('/(lawyer)/CaseRequests')}>
+              <Text style={styles.notifText}>Requests {caseRequests.length}</Text>
             </TouchableOpacity>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>SR</Text>
-            </View>
+            <TouchableOpacity style={styles.avatar} onPress={() => router.push('/(lawyer)/LawyerProfile')}>
+              <Text style={styles.avatarText}>{lawyerProfile.initials}</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.nameRow}>
-          <Text style={styles.lawyerName}>Sara Raza — Advocate, SBC #4421</Text>
-          <Text style={styles.stars}>★★★★★</Text>
+          <Text style={styles.lawyerName}>{lawyerProfile.name} - Advocate</Text>
+          <Text style={styles.licenseNo}>Licence: {lawyerProfile.sbc}</Text>
           <View style={styles.verifiedPill}>
-            <Text style={styles.verifiedText}>✓ SBC Verified</Text>
+            <Text style={styles.verifiedText}>SBC Verified</Text>
           </View>
         </View>
 
         <View style={styles.statsRow}>
           <View style={styles.statChip}>
-            <Text style={styles.statNum}>12</Text>
-            <Text style={styles.statLabel}>Active Cases</Text>
+            <Text style={styles.statNum}>{lawyerProfile.successfulCasesCount}</Text>
+            <Text style={styles.statLabel}>Successful Cases</Text>
           </View>
           <View style={styles.statChip}>
-            <Text style={styles.statNum}>3</Text>
+            <Text style={styles.statNum}>{caseRequests.length}</Text>
             <Text style={styles.statLabel}>New Requests</Text>
           </View>
           <View style={styles.statChip}>
-            <Text style={styles.statNum}>4.9</Text>
-            <Text style={styles.statLabel}>Rating</Text>
+            <Text style={styles.statNum}>{lawyerProfile.rating}</Text>
+            <Text style={styles.statLabel}>Client Rating</Text>
           </View>
         </View>
       </View>
@@ -95,59 +91,29 @@ export default function LawyerHome() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-
-        {/* ── NEW CLIENT REQUESTS ── */}
+        {/* NEW CLIENT REQUESTS */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionLabel, { marginTop: 0, marginBottom: 0 }]}>
-            New Client Requests
-          </Text>
+          <Text style={styles.sectionLabel}>New Client Requests</Text>
           <TouchableOpacity onPress={() => router.push('/(lawyer)/CaseRequests')}>
-            <Text style={styles.seeAllText}>See All →</Text>
+            <Text style={styles.seeAllText}>See All</Text>
           </TouchableOpacity>
         </View>
 
-        {newRequests.map((r, i) => (
+        {caseRequests.slice(0, 2).map((r, i) => (
           <TouchableOpacity
             key={i}
             style={styles.reqCard}
             onPress={() => router.push('/(lawyer)/CaseRequests')}
           >
             <View style={styles.reqTop}>
-              <Text style={styles.reqName}>{r.name}</Text>
+              <Text style={styles.reqName}>{r.name} - {r.spec}</Text>
               <Text style={styles.badgeNew}>New</Text>
             </View>
-            <Text style={styles.reqDesc}>{r.desc}</Text>
+            <Text style={styles.reqDesc} numberOfLines={2}>{r.desc}</Text>
           </TouchableOpacity>
         ))}
 
-        {/* ── CASE PIPELINE ── */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionLabel, { marginTop: 0, marginBottom: 0 }]}>
-            Case Pipeline
-          </Text>
-          <TouchableOpacity onPress={() => router.push('/(lawyer)/MyCases')}>
-            <Text style={styles.seeAllText}>View All →</Text>
-          </TouchableOpacity>
-        </View>
-
-        {pipeline.map((p, i) => (
-          <TouchableOpacity
-            key={i}
-            style={styles.pipeItem}
-            onPress={() => router.push('/(lawyer)/MyCases')}
-          >
-            <View style={styles.pipeTop}>
-              <View style={styles.pipeLeft}>
-                <View style={[styles.pipeDot, { backgroundColor: p.dot }]} />
-                <Text style={styles.pipeTitle}>{p.title}</Text>
-              </View>
-              <Text style={[styles.statusBadge, styles[p.style]]}>{p.badge}</Text>
-            </View>
-            <Text style={styles.pipeSub}>{p.sub}</Text>
-          </TouchableOpacity>
-        ))}
-
-        {/* ── QUICK ACTIONS ── */}
+        {/* QUICK ACTIONS */}
         <Text style={styles.sectionLabel}>Quick Actions</Text>
         <View style={styles.quickGrid}>
           {quickActions.map((q, i) => (
@@ -156,16 +122,13 @@ export default function LawyerHome() {
               style={styles.quickCard}
               onPress={() => router.push(q.route)}
             >
-              <Text style={styles.quickIcon}>{q.icon}</Text>
               <Text style={styles.quickTitle}>{q.title}</Text>
-              <Text style={styles.quickSub}>{q.sub}</Text>
             </TouchableOpacity>
           ))}
         </View>
-
       </ScrollView>
 
-      {/* ── BOTTOM NAV ── */}
+      {/* BOTTOM NAV */}
       <View style={styles.bottomNav}>
         {navItems.map((item) => (
           <TouchableOpacity
@@ -173,7 +136,6 @@ export default function LawyerHome() {
             style={styles.navItem}
             onPress={() => handleNav(item)}
           >
-            <Text style={styles.navIcon}>{item.icon}</Text>
             <Text style={[
               styles.navLabel,
               activeNav === item.id && styles.navLabelActive,
@@ -184,7 +146,6 @@ export default function LawyerHome() {
           </TouchableOpacity>
         ))}
       </View>
-
     </SafeAreaView>
   );
 }

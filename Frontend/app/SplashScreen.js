@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Image, Animated, StatusBar, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 
@@ -7,68 +7,58 @@ const { width, height } = Dimensions.get('window');
 
 export default function SplashScreen() {
   const router = useRouter();
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.85)).current;
 
   useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
+      Animated.spring(scaleAnim, { toValue: 1, friction: 6, useNativeDriver: true }),
+    ]).start();
+
+    // After 2.5s, transition smoothly
     const timer = setTimeout(() => {
-      router.replace('/RoleSelectScreen');
+      router.replace('/StartScreen');
     }, 2500);
+
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#140505" />
+      
+      {/* Background Image & Gradient */}
       <Image
-        source={require('../assets/images/splash-bgg.jpg')}
+        source={require('../assets/images/login-bg.jpeg')}
         style={styles.bgImage}
         resizeMode="cover"
       />
       <LinearGradient
-        colors={['rgba(60,10,10,0.3)', 'rgba(60,10,10,0.75)', '#3C0A0A']}
+        colors={['rgba(20,5,5,0.4)', 'rgba(20,5,5,0.85)', '#140505']}
         style={styles.gradient}
       />
-      <View style={styles.content}>
+
+      {/* Animated Logo & Title */}
+      <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}>
         <Image
           source={require('../assets/images/logo.png')}
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={styles.slogan}>Smart Decisions for Legal Matters</Text>
-      </View>
+        <Text style={styles.appName}>Barq-e-Insaf</Text>
+        <Text style={styles.tagline}>AI-Powered Legal Empowerment</Text>
+      </Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#3C0A0A',
-  },
-  bgImage: {
-    position: 'absolute',
-    width: width,
-    height: height,
-  },
-  gradient: {
-    position: 'absolute',
-    width: width,
-    height: height,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  logo: {
-    width: 400,
-    height: 400,
-    marginBottom: 18,
-  },
-  slogan: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.65)',
-    fontStyle: 'italic',
-    textAlign: 'center',
-    letterSpacing: 0.3,
-  },
+  container: { flex: 1, backgroundColor: '#140505', justifyContent: 'center', alignItems: 'center' },
+  bgImage: { position: 'absolute', width: width, height: height, top: 0 },
+  gradient: { position: 'absolute', width: width, height: height },
+  content: { alignItems: 'center', zIndex: 10 },
+  logo: { width: 100, height: 100, marginBottom: 16 },
+  appName: { fontSize: 32, fontWeight: '900', color: '#fff', letterSpacing: -0.5 },
+  tagline: { fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 6, fontWeight: '600', letterSpacing: 0.5 },
 });

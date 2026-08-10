@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barq-e-Insaf | AI Legal Chatbot Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Playfair+Display:ital,wght@0,500;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation (Glassmorphic) -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <div class="logo-icon">⚖️</div>
+                <div class="logo-text">
+                    <h1>Barq-e-Insaf</h1>
+                    <span>AI Legal Assistant</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Settings</h3>
+                <div class="form-group admin-only" style="display: none;">
+                    <label for="model-select"><i data-lucide="cpu"></i> AI Model</label>
+                    <select id="model-select">
+                        <option value="llama-3.3-70b-versatile" selected>Llama 3.3 70B (Recommended)</option>
+                        <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
+                        <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+                        <option value="gemma2-9b-it">Gemma 2 9B</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="lang-select"><i data-lucide="languages"></i> Preferred Language</label>
+                    <select id="lang-select">
+                        <option value="Auto-Detect" selected>Auto-Detect</option>
+                        <option value="English">English</option>
+                        <option value="Urdu">Urdu (اردو)</option>
+                        <option value="Sindhi">Sindhi (سنڌي)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group admin-only" style="display: none;">
+                    <label for="temp-slider"><i data-lucide="sliders"></i> Precision (Temperature)</label>
+                    <div class="slider-container">
+                        <input type="range" id="temp-slider" min="0.0" max="1.0" step="0.1" value="0.3">
+                        <span id="temp-value">0.3</span>
+                    </div>
+                    <span class="help-text">Lower is more precise & factual.</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section files-section admin-only" style="display: none;">
+                <div class="section-header">
+                    <h3><i data-lucide="folder-open"></i> Legal Documents</h3>
+                    <button id="reingest-btn" class="icon-btn" title="Re-Ingest PDFs">
+                        <i data-lucide="refresh-cw"></i>
+                    </button>
+                </div>
+                <div id="db-stats" class="db-stats">
+                    <span class="badge"><span class="indicator green"></span> <span id="chunk-count">0</span> law chunks indexed</span>
+                </div>
+                <ul id="file-list" class="file-list">
+                    <li class="loading-files">Loading files...</li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="connection-status">
+                    <span class="dot connected"></span>
+                    <span>Sindh Law Database V1.0</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace (Chat and Source Viewer Split) -->
+        <main class="workspace">
+            <!-- Chat Container (Left Pane) -->
+            <section class="chat-pane">
+                <header class="chat-header">
+                    <div class="header-title">
+                        <h2>Sindh Legal Information Chatbot</h2>
+                        <p>Providing guidance on Sindh family, property, and civil laws.</p>
+                    </div>
+                </header>
+
+                <div id="chat-messages" class="chat-messages">
+                    <!-- Welcome Message -->
+                    <div class="message system-msg welcome-msg">
+                        <div class="msg-icon">⚖️</div>
+                        <div class="msg-content">
+                            <h3>Assalam-o-Alaikum! Welcome to Barq-e-Insaf.</h3>
+                            <p>I am your AI legal assistant. I can guide you on property disputes, family matters (divorce/khula, custody, inheritance), and civil rights under Sindh and Pakistan laws.</p>
+                            <div class="disclaimer">
+                                <strong>Disclaimer:</strong> This chatbot provides general legal information based on official statutes. It is NOT a substitute for consulting a licensed advocate of the Sindh Bar Council.
+                            </div>
+                            <div class="quick-prompts">
+                                <h4>Common Legal Questions in Sindh:</h4>
+                                <div class="prompts-grid">
+                                    <button class="prompt-chip" data-question="What is the legal procedure for Khula in Sindh family court?">
+                                        ⚖️ Procedure for Khula
+                                    </button>
+                                    <button class="prompt-chip" data-question="Under Muslim Family Laws Ordinance 1961, what is the notice period for Talaq?">
+                                        📜 Notice period for Talaq
+                                    </button>
+                                    <button class="prompt-chip" data-question="How is property inherited by daughters and sons under Pakistan law?">
+                                        🏡 Daughter's share in inheritance
+                                    </button>
+                                    <button class="prompt-chip" data-question="What is the legal age of marriage for girls in Sindh?">
+                                        👧 Child Marriage Restraint Act (Sindh)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <form id="chat-form">
+                        <div class="input-wrapper">
+                            <textarea id="chat-input" placeholder="Type your legal question here... (e.g. Ask in English, Urdu, or Roman Urdu)" rows="1" required></textarea>
+                            <button type="submit" id="send-btn" class="send-btn" title="Send Message">
+                                <i data-lucide="send"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Source Viewer / Inspector (Right Pane) -->
+            <section class="inspector-pane" id="inspector-pane">
+                <div class="inspector-header">
+                    <h3><i data-lucide="search-code"></i> Reference Inspector</h3>
+                    <button class="close-inspector" id="close-inspector-btn"><i data-lucide="x"></i></button>
+                </div>
+                <div class="inspector-body" id="inspector-body">
+                    <div class="empty-inspector-state">
+                        <i data-lucide="book-open"></i>
+                        <p>Click on any reference citation in the chat response to inspect the exact legal section, text context, and page numbers of the Sindh Law books.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Trigger lucide icon replacement
+        document.addEventListener("DOMContentLoaded", function() {
+            lucide.createIcons();
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,26 +1,12 @@
-# Dependencies
 node_modules/
-**/node_modules/
-
-# Next.js build outputs
-.next/
-**/.next/
-
-# Expo
 .expo/
-**/.expo/
-
-# Builds
 dist/
-**/dist/
-build/
-**/build/
+admin-panel.zip
+*.zip
 
-# Environment variables
+# Python / Chatbot ignores
+venv/
+__pycache__/
 .env
-.env.local
-.env*.local
-
-# Logs and system
-*.log
-.DS_Store
+chroma_db/
+*.pyc

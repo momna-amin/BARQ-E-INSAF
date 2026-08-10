@@ -4,9 +4,10 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import AIChatFloatingButton from '../components/AIChatFloatingButton';
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  initialRouteName: '(tabs)',
 };
 
 export default function RootLayout() {
@@ -14,12 +15,30 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
+      <Stack screenOptions={{ headerShown: false }}>
+        {/* Core Startup Screens */}
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="SplashScreen" options={{ headerShown: false }} />
+        <Stack.Screen name="StartScreen" options={{ headerShown: false }} />
+        <Stack.Screen name="OnboardingScreen" options={{ headerShown: false }} />
+        <Stack.Screen name="LandingScreen" options={{ headerShown: false }} />
+        <Stack.Screen name="RoleSelectScreen" options={{ headerShown: false }} />
+        <Stack.Screen name="LoginScreen" options={{ headerShown: false }} />
+        
+        {/* Route Group Folders */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(Admin)" options={{ headerShown: false }} /> {/* YEH ADD KARO */}
+        <Stack.Screen name="(Admin)" options={{ headerShown: false }} />
+        <Stack.Screen name="(lawyer)" options={{ headerShown: false }} />
+        <Stack.Screen name="(citizen)" options={{ headerShown: false }} />
+        <Stack.Screen name="(ngo)" options={{ headerShown: false }} />
+
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
+
       <StatusBar style="auto" />
+      
+      {/* ⚡ Moveable Draggable AI Chatbot Button on ALL Screens */}
+      <AIChatFloatingButton />
     </ThemeProvider>
   );
 }

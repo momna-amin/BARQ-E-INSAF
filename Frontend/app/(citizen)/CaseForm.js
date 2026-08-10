@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,74 +8,93 @@ import {
   StatusBar,
   TextInput,
   Alert,
-  FlatList,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import styles from './CaseForm.styles';
+import { useMockStore, addCase } from './MockStore';
+
+const sindhCities = {
+  Karachi: ['Karachi Central', 'Karachi East', 'Karachi South', 'Karachi West', 'Malir', 'Korangi', 'Keamari'],
+  Hyderabad: ['Hyderabad City', 'Latifabad', 'Qasimabad', 'Tando Jam'],
+  Sukkur: ['Sukkur City', 'Rohri', 'Pano Aqil', 'Salehpat'],
+  Larkana: ['Larkana City', 'Ratodero', 'Dokri', 'Bakrani'],
+};
 
 export default function CaseForm() {
+  useMockStore();
   const router = useRouter();
   const params = useLocalSearchParams();
   const caseType = params.caseType || 'property';
   
+  const navItems = [
+    { id: 'home',     label: 'Home'    },
+    { id: 'cases',    label: 'Cases'   },
+    { id: 'lawyers',  label: 'Lawyers' },
+    { id: 'profile',  label: 'Profile' },
+  ];
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    location: '',
-    opposingParty: '',
-    dateOfIncident: '',
   });
-  
+
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
+
   const [evidenceList, setEvidenceList] = useState([
-    { id: '1', type: 'image', name: 'Property Document.jpg', size: '2.4 MB', date: '2024-01-15' },
-    { id: '2', type: 'video', name: 'Incident Recording.mp4', size: '45 MB', date: '2024-01-14' },
+    { id: '1', type: 'PDF', name: 'Sindh Land Deed.pdf', size: '2.4 MB', date: '2026-08-10' },
   ]);
 
-  const getCaseTypeIcon = () => {
-    switch(caseType) {
-      case 'property': return '🏠';
-      case 'family': return '👨‍👩‍👧';
-      case 'civil': return '⚖️';
-      default: return '📋';
+  useEffect(() => {
+    if (params.newFileName && params.newFileType) {
+      const newFile = {
+        id: String(evidenceList.length + 1),
+        type: params.newFileType,
+        name: params.newFileName,
+        size: '1.2 MB',
+        date: new Date().toISOString().split('T')[0]
+      };
+      setEvidenceList(prev => [...prev, newFile]);
     }
+  }, [params.newFileName, params.newFileType]);
+
+  const handleNav = (id) => {
+    if (id === 'home')    router.push('/(citizen)/CitizenHome');
+    if (id === 'cases')   router.push('/(citizen)/MyCases');
+    if (id === 'lawyers') router.push('/(citizen)/FindLawyer');
+    if (id === 'profile') router.push('/(citizen)/Profile');
   };
 
+  // Fixed: Get case type name based on the caseType parameter
   const getCaseTypeName = () => {
-    switch(caseType) {
-      case 'property': return 'Property Dispute';
-      case 'family': return 'Family Case';
-      case 'civil': return 'Civil Case';
-      default: return 'Case';
+    if (caseType === 'property') {
+      return 'Property Dispute';
+    } else if (caseType === 'family') {
+      return 'Family Case';
     }
+    return 'Property Dispute'; // Default fallback
   };
+
+  const todayDate = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
 
   const handleSubmit = () => {
-    if (!formData.title || !formData.description) {
+    if (!formData.title || !formData.description || !selectedCity || !selectedDistrict) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
+    
+    addCase({
+      title: formData.title,
+      type: caseType === 'property' ? 'Property' : 'Family',
+      description: formData.description,
+      district: `${selectedCity} - ${selectedDistrict}`,
+      evidence: evidenceList.map(item => item.name),
+    });
+
     Alert.alert('Success', 'Case submitted successfully!');
-    router.back();
-  };
-
-  const handleAddEvidence = () => {
-    Alert.alert(
-      'Add Evidence',
-      'Choose evidence type',
-      [
-        { text: '📷 Photo', onPress: () => console.log('Add photo') },
-        { text: '🎥 Video', onPress: () => console.log('Add video') },
-        { text: '📄 Document', onPress: () => console.log('Add document') },
-        { text: 'Cancel', style: 'cancel' },
-      ]
-    );
-  };
-
-  const handleEditEvidence = (item) => {
-    Alert.alert('Edit Evidence', `Editing ${item.name}`, [
-      { text: 'Update', onPress: () => console.log('Update evidence') },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
+    router.push('/(citizen)/MyCases');
   };
 
   const handleDeleteEvidence = (id) => {
@@ -89,28 +108,6 @@ export default function CaseForm() {
     );
   };
 
-  const renderEvidenceItem = ({ item }) => (
-    <View style={styles.evidenceItem}>
-      <View style={styles.evidenceIcon}>
-        <Text style={styles.evidenceIconText}>
-          {item.type === 'image' ? '🖼️' : item.type === 'video' ? '🎬' : '📄'}
-        </Text>
-      </View>
-      <View style={styles.evidenceInfo}>
-        <Text style={styles.evidenceName}>{item.name}</Text>
-        <Text style={styles.evidenceMeta}>{item.size} • {item.date}</Text>
-      </View>
-      <View style={styles.evidenceActions}>
-        <TouchableOpacity onPress={() => handleEditEvidence(item)} style={styles.evidenceActionBtn}>
-          <Text style={styles.evidenceActionText}>✏️</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleDeleteEvidence(item.id)} style={styles.evidenceActionBtn}>
-          <Text style={styles.evidenceActionText}>🗑️</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor="#5C1A1A" />
@@ -118,10 +115,14 @@ export default function CaseForm() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Text style={styles.backBtnText}>←</Text>
+          <Text style={styles.backBtnText}>Back</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Build Your Case</Text>
-        <View style={styles.headerRight} />
+        <View style={styles.brandBadgeRow}>
+          <View style={styles.logoBadge}>
+            <Text style={styles.logoBadgeText}>BI</Text>
+          </View>
+          <Text style={styles.headerTitle}>Build Your Case</Text>
+        </View>
       </View>
 
       <ScrollView 
@@ -130,7 +131,6 @@ export default function CaseForm() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.caseTypeBanner}>
-          <Text style={styles.caseTypeIcon}>{getCaseTypeIcon()}</Text>
           <Text style={styles.caseTypeName}>{getCaseTypeName()}</Text>
         </View>
 
@@ -150,73 +150,123 @@ export default function CaseForm() {
           <Text style={styles.formLabel}>Description *</Text>
           <TextInput
             style={[styles.formInput, styles.formTextArea]}
-            placeholder="Describe your case in detail. Include all relevant information, dates, and parties involved."
+            placeholder="Describe your case in detail. Include all relevant information."
             placeholderTextColor="#999"
             multiline
-            numberOfLines={6}
+            numberOfLines={5}
             value={formData.description}
             onChangeText={(text) => setFormData({...formData, description: text})}
           />
         </View>
 
+        {/* Sindh City Dropdown */}
         <View style={styles.formGroup}>
-          <Text style={styles.formLabel}>Location</Text>
-          <TextInput
-            style={styles.formInput}
-            placeholder="Enter location (City, District)"
-            placeholderTextColor="#999"
-            value={formData.location}
-            onChangeText={(text) => setFormData({...formData, location: text})}
-          />
+          <Text style={styles.formLabel}>Sindh City *</Text>
+          <TouchableOpacity 
+            style={styles.dropdownSelector}
+            onPress={() => {
+              setShowCityDropdown(!showCityDropdown);
+              setShowDistrictDropdown(false);
+            }}
+          >
+            <Text style={styles.dropdownValue}>
+              {selectedCity || 'Select Sindh City'}
+            </Text>
+          </TouchableOpacity>
+          
+          {showCityDropdown && (
+            <View style={styles.dropdownList}>
+              {Object.keys(sindhCities).map(city => (
+                <TouchableOpacity 
+                  key={city} 
+                  style={styles.dropdownItem}
+                  onPress={() => {
+                    setSelectedCity(city);
+                    setSelectedDistrict('');
+                    setShowCityDropdown(false);
+                  }}
+                >
+                  <Text style={styles.dropdownItemText}>{city}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
         </View>
 
-        <View style={styles.formGroup}>
-          <Text style={styles.formLabel}>Opposing Party</Text>
-          <TextInput
-            style={styles.formInput}
-            placeholder="Enter opposing party name"
-            placeholderTextColor="#999"
-            value={formData.opposingParty}
-            onChangeText={(text) => setFormData({...formData, opposingParty: text})}
-          />
-        </View>
+        {/* District Dropdown */}
+        {selectedCity !== '' && (
+          <View style={styles.formGroup}>
+            <Text style={styles.formLabel}>District *</Text>
+            <TouchableOpacity 
+              style={styles.dropdownSelector}
+              onPress={() => {
+                setShowDistrictDropdown(!showDistrictDropdown);
+                setShowCityDropdown(false);
+              }}
+            >
+              <Text style={styles.dropdownValue}>
+                {selectedDistrict || 'Select District'}
+              </Text>
+            </TouchableOpacity>
+            
+            {showDistrictDropdown && (
+              <View style={styles.dropdownList}>
+                {sindhCities[selectedCity].map(dist => (
+                  <TouchableOpacity 
+                    key={dist} 
+                    style={styles.dropdownItem}
+                    onPress={() => {
+                      setSelectedDistrict(dist);
+                      setShowDistrictDropdown(false);
+                    }}
+                  >
+                    <Text style={styles.dropdownItemText}>{dist}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
+        )}
 
+        {/* Uneditable Actual Date */}
         <View style={styles.formGroup}>
-          <Text style={styles.formLabel}>Date of Incident</Text>
-          <TextInput
-            style={styles.formInput}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor="#999"
-            value={formData.dateOfIncident}
-            onChangeText={(text) => setFormData({...formData, dateOfIncident: text})}
-          />
+          <Text style={styles.formLabel}>Filing Date</Text>
+          <View style={styles.uneditableField}>
+            <Text style={styles.uneditableFieldText}>{todayDate}</Text>
+          </View>
         </View>
 
         {/* Evidence Section */}
         <View style={styles.evidenceSection}>
           <View style={styles.evidenceHeader}>
-            <Text style={styles.evidenceTitle}>📎 Evidence Collection</Text>
-            <TouchableOpacity style={styles.addEvidenceBtn} onPress={handleAddEvidence}>
-              <Text style={styles.addEvidenceBtnText}>+ Add</Text>
+            <Text style={styles.evidenceTitle}>Secure Evidence Collection</Text>
+            <TouchableOpacity 
+              style={styles.addEvidenceBtn} 
+              onPress={() => router.push({
+                pathname: '/(citizen)/AddEvidence',
+                params: { caseType }
+              })}
+            >
+              <Text style={styles.addEvidenceBtnText}>+ Add Files</Text>
             </TouchableOpacity>
           </View>
           <Text style={styles.evidenceHint}>
-            Upload files, images, or videos as evidence. You can edit or delete them anytime.
+            Upload files from your phone explorer. Allowable formats: Photo, Video, PDF.
           </Text>
 
-          {evidenceList.length > 0 ? (
-            <FlatList
-              data={evidenceList}
-              renderItem={renderEvidenceItem}
-              keyExtractor={item => item.id}
-              scrollEnabled={false}
-            />
-          ) : (
-            <View style={styles.emptyEvidence}>
-              <Text style={styles.emptyEvidenceText}>No evidence added yet</Text>
-              <Text style={styles.emptyEvidenceSub}>Tap "Add" to upload files</Text>
+          {evidenceList.map((item, index) => (
+            <View key={index} style={styles.evidenceItem}>
+              <View style={styles.evidenceInfo}>
+                <Text style={styles.evidenceName}>{item.name}</Text>
+                <Text style={styles.evidenceMeta}>{item.type} • {item.size}</Text>
+              </View>
+              <View style={styles.evidenceActions}>
+                <TouchableOpacity onPress={() => handleDeleteEvidence(item.id)} style={styles.deleteBtn}>
+                  <Text style={styles.deleteBtnText}>Delete</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          )}
+          ))}
         </View>
 
         {/* Submit Button */}
@@ -224,6 +274,19 @@ export default function CaseForm() {
           <Text style={styles.submitBtnText}>Submit Case</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* FOOTER */}
+      <View style={styles.bottomNav}>
+        {navItems.map((item) => (
+          <TouchableOpacity
+            key={item.id}
+            style={styles.navItem}
+            onPress={() => handleNav(item.id)}
+          >
+            <Text style={styles.navLabel}>{item.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
     </SafeAreaView>
   );
 }
