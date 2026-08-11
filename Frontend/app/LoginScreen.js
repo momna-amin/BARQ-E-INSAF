@@ -14,9 +14,10 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import api from '../constants/api';
+import api from '../services/api';
 import { saveTokens, saveUser } from '../services/authStorage';
 import GoogleLoginButton from '../components/GoogleLoginButton';
+import InstallAppButton from '../components/InstallAppButton';
 
 const { width, height } = Dimensions.get('window');
 
@@ -330,6 +331,8 @@ export default function LoginScreen() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      const firstErrMsg = Object.values(newErrors)[0];
+      Alert.alert('Form Error ⚠️', firstErrMsg || 'Please fix the highlighted fields to continue.');
       return;
     }
 
@@ -389,6 +392,11 @@ export default function LoginScreen() {
           <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
             <Text style={styles.backText}>← Back</Text>
           </TouchableOpacity>
+
+          <View style={{ position: 'absolute', top: 48, right: 20, zIndex: 10 }}>
+            <InstallAppButton style={{ marginTop: 0 }} />
+          </View>
+
           <View style={styles.logoCircle}>
             <Text style={styles.logoEmoji}>⚡</Text>
           </View>

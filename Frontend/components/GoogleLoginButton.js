@@ -9,7 +9,7 @@
  *   role: 'citizen' | 'lawyer' | 'admin'
  */
 import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Alert } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import api from '../services/api';
@@ -17,20 +17,25 @@ import api from '../services/api';
 // Required to complete auth session on web
 WebBrowser.maybeCompleteAuthSession();
 
-// Google Client IDs — set these in your app.json extra or constants
-// For now, will read from a constants file; update with your real IDs
+// Google Client IDs — replace with real IDs from console.cloud.google.com
 const GOOGLE_CONFIG = {
-  webClientId: '000000000000-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com',
-  androidClientId: '000000000000-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com',
-  iosClientId: '000000000000-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com',
+  webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '',
+  androidClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '',
+  iosClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '',
 };
 
 export default function GoogleLoginButton({ role = 'citizen', onSuccess, onError, style }) {
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    webClientId: GOOGLE_CONFIG.webClientId,
-    androidClientId: GOOGLE_CONFIG.androidClientId,
-    iosClientId: GOOGLE_CONFIG.iosClientId,
-  });
+  const isConfigured = Boolean(GOOGLE_CONFIG.webClientId && !GOOGLE_CONFIG.webClientId.includes('000000000000'));
+
+  const [request, response, promptAsync] = Google.useAuthRequest(
+    isConfigured
+      ? {
+          webClientId: GOOGLE_CONFIG.webClientId,
+          androidClientId: GOOGLE_CONFIG.androidClientId,
+          iosClientId: GOOGLE_CONFIG.iosClientId,
+        }
+      : {}
+  );
 
   const [loading, setLoading] = React.useState(false);
 
@@ -47,6 +52,18 @@ export default function GoogleLoginButton({ role = 'citizen', onSuccess, onError
     }
   }, [response]);
 
+  const handlePress = () => {
+    if (!isConfigured) {
+      Alert.alert(
+        'Google Login Notice 🔑',
+        'Google OAuth Client ID abhi Google Cloud Console par setup nahi hai.\n\nPlease Email aur Password se Login/Register karein.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+    promptAsync();
+  };
+
   const handleGoogleToken = async (idToken) => {
     try {
       setLoading(true);
@@ -62,9 +79,9 @@ export default function GoogleLoginButton({ role = 'citizen', onSuccess, onError
 
   return (
     <TouchableOpacity
-      style={[styles.btn, style, (!request || loading) && styles.btnDisabled]}
-      onPress={() => promptAsync()}
-      disabled={!request || loading}
+      style={[styles.btn, style]}
+      onPress={handlePress}
+      disabled={loading}
       activeOpacity={0.85}
     >
       {loading ? (

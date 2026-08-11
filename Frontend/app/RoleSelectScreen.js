@@ -13,6 +13,8 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts, RacingSansOne_400Regular } from '@expo-google-fonts/racing-sans-one';
 
+import InstallAppButton from '../components/InstallAppButton';
+
 const { width, height } = Dimensions.get('window');
 
 const roles = [
@@ -110,6 +112,8 @@ export default function RoleSelectScreen() {
           ]}>
             Barq-e-Insaf
           </Text>
+          <View style={{ flex: 1 }} />
+          <InstallAppButton style={{ marginTop: 0 }} />
         </View>
         <Text style={styles.headerSub}>Select your role to continue</Text>
       </View>
@@ -173,6 +177,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#092d70',
+    width: '100%',
+    maxWidth: 480,
+    alignSelf: 'center',
+    overflow: 'hidden',
   },
   backgroundGradient: {
     position: 'absolute',
