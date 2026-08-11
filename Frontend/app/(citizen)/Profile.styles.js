@@ -296,4 +296,24 @@ export default StyleSheet.create({
   navLabelActive: {
     color: '#5C1A1A',
   },
+
+logoutBtn: {
+  backgroundColor: '#dc2626',
+  paddingVertical: 14,
+  borderRadius: 12,
+  alignItems: 'center',
+  marginTop: 16,
+  marginBottom: 20,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.15,
+  shadowRadius: 4,
+  elevation: 3,
+},
+logoutBtnText: {
+  color: '#fff',
+  fontSize: 15,
+  fontWeight: '700',
+  letterSpacing: 0.5,
+},
 });

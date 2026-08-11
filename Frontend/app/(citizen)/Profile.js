@@ -85,11 +85,7 @@ export default function Profile() {
       setNewPassword('');
       setConfirmPassword('');
 
-      if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
-        window.alert('🔑 Password Changed Successfully!\n\nYour new password has been updated in Database & Supabase.');
-      } else {
-        Alert.alert('Password Updated 🔑', 'Your password has been changed successfully!');
-      }
+      Alert.alert('Password Updated', 'Your password has been changed successfully!');
     } catch (err) {
       setLoading(false);
       setShowPwModal(false);
@@ -104,7 +100,7 @@ export default function Profile() {
       }
     } else {
       Alert.alert(
-        'Confirm Logout 🚪',
+        'Confirm Logout',
         'Are you sure you want to log out of Barq-e-Insaf?',
         [
           { text: 'Cancel', style: 'cancel' },
@@ -186,96 +182,96 @@ export default function Profile() {
               </View>
 
               <TouchableOpacity style={styles.editProfileBtn} onPress={() => setEditMode(true)}>
-                <Text style={styles.editProfileBtnText}>✏ Edit Account Details</Text>
+                <Text style={styles.editProfileBtnText}>Edit Account Details</Text>
               </TouchableOpacity>
             </View>
           )}
         </View>
 
-        {/* ACCOUNT ACTION BUTTONS: CHANGE PASSWORD & LOGOUT */}
+        {/* ACCOUNT ACTION BUTTONS */}
         <View style={styles.menuSection}>
           <TouchableOpacity style={styles.menuItem} onPress={() => setShowPwModal(true)}>
-            <Text style={styles.menuItemText}>🔑 Change Password</Text>
-            <Text style={styles.menuItemArrow}>Update →</Text>
+            <Text style={styles.menuItemText}>Change Password</Text>
+            <Text style={styles.menuItemArrow}>Update</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/(citizen)/MyCases')}>
-            <Text style={styles.menuItemText}>📋 My Cases & Consultations</Text>
-            <Text style={styles.menuItemArrow}>View →</Text>
+            <Text style={styles.menuItemText}>My Cases & Consultations</Text>
+            <Text style={styles.menuItemArrow}>View</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/(citizen)/FindLawyer')}>
-            <Text style={styles.menuItemText}>⚖️ Find Sindh Advocates</Text>
-            <Text style={styles.menuItemArrow}>Search →</Text>
+            <Text style={styles.menuItemText}>Find Sindh Advocates</Text>
+            <Text style={styles.menuItemArrow}>Search</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuItem} onPress={() => setShowSettings(true)}>
-            <Text style={styles.menuItemText}>⚙ System Settings & Help</Text>
-            <Text style={styles.menuItemArrow}>Open →</Text>
-          </TouchableOpacity>
-
-          {/* RED LOGOUT BUTTON */}
-          <TouchableOpacity
-            style={[styles.menuItem, { backgroundColor: '#fee2e2', borderLeftWidth: 4, borderLeftColor: '#dc2626', marginTop: 12 }]}
-            onPress={handleLogout}
-          >
-            <Text style={[styles.menuItemText, { color: '#dc2626', fontWeight: '800' }]}>🚪 Logout Account</Text>
-            <Text style={[styles.menuItemArrow, { color: '#dc2626', fontWeight: '800' }]}>Exit ➔</Text>
+            <Text style={styles.menuItemText}>System Settings & Help</Text>
+            <Text style={styles.menuItemArrow}>Open</Text>
           </TouchableOpacity>
         </View>
+
+        {/* LOGOUT BUTTON */}
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+          <Text style={styles.logoutBtnText}>Logout</Text>
+        </TouchableOpacity>
+
       </ScrollView>
 
       {/* CHANGE PASSWORD MODAL */}
       <Modal visible={showPwModal} animationType="slide" transparent>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <View style={{ width: '100%', maxWidth: 420, backgroundColor: '#fff', borderRadius: 20, padding: 24 }}>
-            <Text style={{ fontSize: 18, fontWeight: '800', color: '#0f172a', marginBottom: 4 }}>🔑 Change Password</Text>
-            <Text style={{ fontSize: 12, color: '#64748b', marginBottom: 16 }}>Update your Citizen Account Password (Saved to DB)</Text>
+        <View style={styles.passwordModalOverlay}>
+          <View style={styles.passwordModalContainer}>
+            <Text style={styles.passwordModalTitle}>Change Password</Text>
+            <Text style={styles.passwordModalSubtext}>Update your Citizen Account Password</Text>
 
-            <Text style={{ fontSize: 11, fontWeight: '700', color: '#475569', marginBottom: 6 }}>CURRENT PASSWORD</Text>
+            <Text style={styles.passwordModalLabel}>Current Password</Text>
             <TextInput
-              style={{ backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10, padding: 12, fontSize: 14, marginBottom: 12 }}
+              style={styles.passwordModalInput}
               value={currPassword}
               onChangeText={setCurrPassword}
               secureTextEntry={!showPw}
               placeholder="••••••••"
+              placeholderTextColor="#94a3b8"
             />
 
-            <Text style={{ fontSize: 11, fontWeight: '700', color: '#475569', marginBottom: 6 }}>NEW PASSWORD</Text>
+            <Text style={styles.passwordModalLabel}>New Password</Text>
             <TextInput
-              style={{ backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10, padding: 12, fontSize: 14, marginBottom: 12 }}
+              style={styles.passwordModalInput}
               value={newPassword}
               onChangeText={setNewPassword}
               secureTextEntry={!showPw}
               placeholder="••••••••"
+              placeholderTextColor="#94a3b8"
             />
 
-            <Text style={{ fontSize: 11, fontWeight: '700', color: '#475569', marginBottom: 6 }}>CONFIRM NEW PASSWORD</Text>
+            <Text style={styles.passwordModalLabel}>Confirm New Password</Text>
             <TextInput
-              style={{ backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10, padding: 12, fontSize: 14, marginBottom: 16 }}
+              style={styles.passwordModalInput}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry={!showPw}
               placeholder="••••••••"
+              placeholderTextColor="#94a3b8"
             />
 
-            <TouchableOpacity style={{ marginBottom: 16 }} onPress={() => setShowPw(v => !v)}>
-              <Text style={{ fontSize: 13, color: '#2563eb', fontWeight: '700' }}>{showPw ? '👁️ Hide Passwords' : '👁️‍🗨️ View Passwords'}</Text>
+            <TouchableOpacity style={styles.passwordVisibilityBtn} onPress={() => setShowPw(v => !v)}>
+              <Text style={styles.passwordVisibilityText}>{showPw ? 'Hide Passwords' : 'Show Passwords'}</Text>
             </TouchableOpacity>
 
-            <View style={{ flexDirection: 'row', gap: 10 }}>
+            <View style={styles.passwordModalActions}>
               <TouchableOpacity
-                style={{ flex: 1, backgroundColor: '#5C1A1A', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
+                style={[styles.passwordModalSaveBtn, loading && styles.passwordModalSaveBtnDisabled]}
                 onPress={handleChangePassword}
                 disabled={loading}
               >
-                <Text style={{ color: '#fff', fontWeight: '800' }}>{loading ? 'Updating...' : '💾 Save Password'}</Text>
+                <Text style={styles.passwordModalSaveText}>{loading ? 'Updating...' : 'Save Password'}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={{ paddingHorizontal: 16, paddingVertical: 14, borderRadius: 12, backgroundColor: '#f1f5f9' }}
+                style={styles.passwordModalCancelBtn}
                 onPress={() => setShowPwModal(false)}
               >
-                <Text style={{ color: '#475569', fontWeight: '700' }}>Cancel</Text>
+                <Text style={styles.passwordModalCancelText}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
