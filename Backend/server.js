@@ -15,10 +15,15 @@ app.use('/api/auth',    require('./routes/auth'));
 app.use('/api/lawyers', require('./routes/lawyers'));
 app.use('/api/cases',   require('./routes/cases'));
 app.use('/api/admin',   require('./routes/admin'));
+app.use('/api/chat',    require('./routes/chat'));
 
 app.get('/', (req, res) => {
-  res.json({ message: 'Barq-e-Insaf API running with Supabase' });
+  res.json({ message: 'Barq-e-Insaf API running with Supabase & Live Vercel' });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+module.exports = app;
