@@ -3,18 +3,33 @@ import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Styl
 import AdminSidebar from './AdminSidebar';
 
 export default function SystemSettings() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [maintenance, setMaintenance] = useState(false);
   const [requireCnic, setRequireCnic] = useState(true);
   const [aiChatActive, setAiChatActive] = useState(true);
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor="#0c0414" />
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <View style={styles.layoutRow}>
-        <AdminSidebar activeRoute="settings" />
+        <AdminSidebar
+          activeRoute="settings"
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
         <ScrollView style={styles.mainContent} contentContainerStyle={styles.contentPadding}>
-          <Text style={styles.headerTitle}>⚙️ System Configuration & Settings</Text>
-          <Text style={styles.headerSub}>Manage Vercel API production connections, Supabase keys, AI status & security policies</Text>
+          {/* TOP HEADER BAR WITH ☰ HAMBURGER MENU BUTTON */}
+          <View style={styles.headerBar}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <TouchableOpacity style={styles.hamburgerBtn} onPress={() => setSidebarOpen(v => !v)}>
+                <Text style={styles.hamburgerIcon}>☰</Text>
+              </TouchableOpacity>
+              <View>
+                <Text style={styles.headerTitle}>⚙️ System Configuration & Settings</Text>
+                <Text style={styles.headerSub}>Manage Vercel API production connections, Supabase keys, AI status & security policies</Text>
+              </View>
+            </View>
+          </View>
 
           <View style={styles.card}>
             <Text style={styles.cardTitle}>🌐 Live Environment Connections</Text>
@@ -70,20 +85,44 @@ export default function SystemSettings() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0c0414' },
-  layoutRow: { flex: 1, flexDirection: 'row' },
-  mainContent: { flex: 1, backgroundColor: '#0f172a' },
+  safe: { flex: 1, backgroundColor: '#ffffff' },
+  layoutRow: { flex: 1, flexDirection: 'row', position: 'relative' },
+  mainContent: { flex: 1, backgroundColor: '#f8fafc', width: '100%' },
   contentPadding: { padding: 24 },
-  headerTitle: { color: '#f8fafc', fontSize: 22, fontWeight: '800' },
-  headerSub: { color: '#94a3b8', fontSize: 13, marginTop: 4 },
-  card: { backgroundColor: '#1e293b', borderRadius: 16, padding: 20, marginTop: 20 },
-  cardTitle: { color: '#f8fafc', fontSize: 16, fontWeight: '700', marginBottom: 16 },
+  headerBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  hamburgerBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hamburgerIcon: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0f172a',
+  },
+  headerTitle: { color: '#0f172a', fontSize: 20, fontWeight: '800' },
+  headerSub: { color: '#475569', fontSize: 12, marginTop: 2 },
+  card: { backgroundColor: '#ffffff', borderRadius: 16, padding: 20, marginTop: 20, borderWidth: 1, borderColor: '#e2e8f0' },
+  cardTitle: { color: '#0f172a', fontSize: 16, fontWeight: '700', marginBottom: 16 },
   statusRow: { marginBottom: 12 },
-  label: { color: '#94a3b8', fontSize: 12, fontWeight: '600' },
-  valSuccess: { color: '#4ade80', fontSize: 13, fontWeight: '700', marginTop: 2 },
-  toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#334155' },
-  toggleLabel: { color: '#f8fafc', fontSize: 14, fontWeight: '700' },
+  label: { color: '#64748b', fontSize: 12, fontWeight: '600' },
+  valSuccess: { color: '#16a34a', fontSize: 13, fontWeight: '700', marginTop: 2 },
+  toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
+  toggleLabel: { color: '#0f172a', fontSize: 14, fontWeight: '700' },
   toggleSub: { color: '#64748b', fontSize: 11, marginTop: 2 },
-  saveBtn: { backgroundColor: '#3b82f6', borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginTop: 20 },
+  saveBtn: { backgroundColor: '#2563eb', borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginTop: 20 },
   saveBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
 });

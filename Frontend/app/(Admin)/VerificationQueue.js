@@ -16,6 +16,7 @@ import { useAdminStore } from './AdminStore';
 export default function VerificationQueue() {
   const router = useRouter();
   const { state, approveLawyer, rejectLawyer } = useAdminStore();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filter, setFilter] = useState('Pending');
 
   const filteredLawyers = state.lawyers.filter((l) => {
@@ -27,13 +28,24 @@ export default function VerificationQueue() {
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <View style={styles.layoutRow}>
-        <AdminSidebar activeRoute="queue" />
+        <AdminSidebar
+          activeRoute="queue"
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
 
         <ScrollView style={styles.mainContent} contentContainerStyle={styles.contentPadding}>
-          {/* HEADER */}
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>⏳ Lawyer Verification Queue</Text>
-            <Text style={styles.headerSub}>Verify Sindh Bar Council advocates, inspect licenses & approving platform credentials</Text>
+          {/* TOP HEADER BAR WITH ☰ HAMBURGER MENU BUTTON */}
+          <View style={styles.headerBar}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <TouchableOpacity style={styles.hamburgerBtn} onPress={() => setSidebarOpen(v => !v)}>
+                <Text style={styles.hamburgerIcon}>☰</Text>
+              </TouchableOpacity>
+              <View>
+                <Text style={styles.headerTitle}>⏳ Lawyer Verification Queue</Text>
+                <Text style={styles.headerSub}>Verify Sindh Bar Council advocates, inspect licenses & approving platform credentials</Text>
+              </View>
+            </View>
           </View>
 
           {/* FILTER TABS */}
@@ -160,26 +172,49 @@ const styles = StyleSheet.create({
   layoutRow: {
     flex: 1,
     flexDirection: 'row',
+    position: 'relative',
   },
   mainContent: {
     flex: 1,
     backgroundColor: '#f8fafc',
+    width: '100%',
   },
   contentPadding: {
     padding: 24,
   },
-  header: {
+  headerBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  hamburgerBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hamburgerIcon: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0f172a',
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '800',
     color: '#0f172a',
   },
   headerSub: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#475569',
-    marginTop: 4,
+    marginTop: 2,
   },
   filterTabs: {
     flexDirection: 'row',
