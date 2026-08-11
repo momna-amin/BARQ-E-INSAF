@@ -160,8 +160,13 @@ export default function StartScreen() {
         borderRadius: width * 0.22,
       }]} />
 
-      {/* Floating Top Right Install App Button */}
-      <View style={{ position: 'absolute', top: 44, right: 20, zIndex: 100 }}>
+      {/* Floating Fixed Top Right Install App Button */}
+      <View style={{
+        position: Platform.OS === 'web' ? 'fixed' : 'absolute',
+        top: Platform.OS === 'ios' ? 52 : 20,
+        right: 20,
+        zIndex: 99999,
+      }}>
         <InstallAppButton />
       </View>
 

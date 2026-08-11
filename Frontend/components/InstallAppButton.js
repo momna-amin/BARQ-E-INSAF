@@ -1,11 +1,10 @@
 /**
  * InstallAppButton.js
- * Shows Chrome's NATIVE install prompt directly — no manual instructions ever shown.
- * Button is hidden if:
- *   - Not on web
- *   - Already running as installed PWA (standalone)
- *   - Chrome hasn't fired beforeinstallprompt yet (not installable)
- * When pressed: triggers Chrome's own "Install / Cancel" dialog directly.
+ * "Install App 📲" button in fixed position.
+ * Always renders on web unless app is already running as installed standalone PWA.
+ * When pressed:
+ *   - Triggers Chrome's native install prompt if ready
+ *   - Shows guidance if browser is preparing PWA manifest
  */
 import React, { useEffect, useState } from 'react';
 import { Platform, TouchableOpacity, Text, StyleSheet, View, Animated } from 'react-native';
@@ -19,7 +18,7 @@ export default function InstallAppButton({ style }) {
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof window === 'undefined') return;
 
-    // Already running as installed PWA → never show
+    // Already running as installed PWA → hide
     if (
       window.matchMedia('(display-mode: standalone)').matches ||
       window.navigator.standalone === true
@@ -29,8 +28,8 @@ export default function InstallAppButton({ style }) {
     }
 
     const handleBeforeInstall = (e) => {
-      e.preventDefault();        // capture the event
-      setDeferredPrompt(e);      // store it — now button becomes visible
+      e.preventDefault();
+      setDeferredPrompt(e);
     };
 
     const handleInstalled = () => {
@@ -49,33 +48,40 @@ export default function InstallAppButton({ style }) {
 
   // Subtle pulse animation
   useEffect(() => {
-    if (installed || !deferredPrompt) return;
+    if (installed) return;
     const pulse = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 1.06, duration: 900, useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 1,    duration: 900, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1.05, duration: 1000, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1,    duration: 1000, useNativeDriver: true }),
       ])
     );
     pulse.start();
     return () => pulse.stop();
-  }, [installed, deferredPrompt]);
+  }, [installed]);
 
-  // ── HIDE if: native app, already installed, OR prompt not available yet ──
-  if (Platform.OS !== 'web' || installed || !deferredPrompt) return null;
+  // Hide on native builds or if already running as standalone PWA
+  if (Platform.OS !== 'web' || installed) return null;
 
   const handleInstall = async () => {
-    if (installing || !deferredPrompt) return;
-    setInstalling(true);
-    try {
-      // Triggers Chrome's own NATIVE "Install / Cancel" dialog — no custom UI
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') setInstalled(true);
-    } catch (err) {
-      console.warn('Install prompt error:', err);
-    } finally {
-      setInstalling(false);
-      setDeferredPrompt(null);
+    if (installing) return;
+    if (deferredPrompt) {
+      setInstalling(true);
+      try {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') setInstalled(true);
+      } catch (err) {
+        console.warn('Install prompt error:', err);
+      } finally {
+        setInstalling(false);
+        setDeferredPrompt(null);
+      }
+    } else {
+      if (typeof window !== 'undefined' && window.alert) {
+        window.alert(
+          '📲 Install Barq-e-Insaf App\n\nChrome / Browser Menu (⋮) par click karke "Install app" ya "Add to Home Screen" select karein!'
+        );
+      }
     }
   };
 
@@ -106,21 +112,21 @@ const styles = StyleSheet.create({
     gap: 8,
     backgroundColor: '#0b5d3b',
     borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.3)',
+    borderColor: 'rgba(255,255,255,0.4)',
     paddingVertical: 7,
-    paddingHorizontal: 12,
+    paddingHorizontal: 13,
     borderRadius: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 8,
   },
   badgeBox: {
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.25)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -134,9 +140,9 @@ const styles = StyleSheet.create({
     lineHeight: 14,
   },
   btnSub: {
-    color: 'rgba(255,255,255,0.75)',
+    color: 'rgba(255,255,255,0.85)',
     fontSize: 9,
-    fontWeight: '500',
+    fontWeight: '600',
     lineHeight: 11,
   },
 });
