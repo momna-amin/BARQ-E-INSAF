@@ -16,6 +16,7 @@ import { useAdminStore } from './AdminStore';
 export default function AdminDashboard() {
   const router = useRouter();
   const { state, approveLawyer, rejectLawyer } = useAdminStore();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const pendingLawyersList = state.lawyers.filter((l) => l.status === 'Pending');
   const openDisputesList = state.disputes.filter((d) => d.status === 'Open');
@@ -25,16 +26,25 @@ export default function AdminDashboard() {
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
 
       <View style={styles.layoutRow}>
-        {/* SIDE PANEL ALWAYS VISIBLE DIRECTLY FROM LOGIN */}
-        <AdminSidebar activeRoute="dashboard" />
+        {/* RESPONSIVE TOGGLEABLE SIDE PANEL */}
+        <AdminSidebar
+          activeRoute="dashboard"
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
 
         {/* MAIN DASHBOARD CONTENT */}
         <ScrollView style={styles.mainScroll} contentContainerStyle={styles.contentPadding}>
-          {/* HEADER BAR */}
+          {/* TOP HEADER BAR WITH ☰ HAMBURGER BUTTON */}
           <View style={styles.headerBar}>
-            <View>
-              <Text style={styles.welcomeTitle}>Welcome back, Super Admin 👋</Text>
-              <Text style={styles.welcomeSub}>Sindh Legal Access Platform Overview — All Services Operational</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <TouchableOpacity style={styles.hamburgerBtn} onPress={() => setSidebarOpen(v => !v)}>
+                <Text style={styles.hamburgerIcon}>☰</Text>
+              </TouchableOpacity>
+              <View>
+                <Text style={styles.welcomeTitle}>Welcome back, Super Admin 👋</Text>
+                <Text style={styles.welcomeSub}>Sindh Legal Access Platform Overview — All Services Operational</Text>
+              </View>
             </View>
             <View style={styles.systemStatusPill}>
               <Text style={styles.systemStatusText}>● System Live (Vercel & Supabase)</Text>
@@ -173,15 +183,30 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e2e8f0',
   },
+  hamburgerBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hamburgerIcon: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0f172a',
+  },
   welcomeTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '800',
     color: '#0f172a',
   },
   welcomeSub: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#475569',
-    marginTop: 4,
+    marginTop: 2,
   },
   systemStatusPill: {
     backgroundColor: '#dcfce7',

@@ -19,7 +19,7 @@ const MENU_ITEMS = [
   { id: 'settings', label: 'System Settings', icon: '⚙️', route: '/(Admin)/SystemSettings' },
 ];
 
-export default function AdminSidebar({ activeRoute }) {
+export default function AdminSidebar({ activeRoute, isOpen = true, onClose }) {
   const router = useRouter();
   const currentPath = usePathname();
 
@@ -34,6 +34,7 @@ export default function AdminSidebar({ activeRoute }) {
 
   const handleNavigate = (item) => {
     router.push(item.route);
+    if (onClose) onClose();
   };
 
   const handleLogout = () => {
@@ -69,126 +70,151 @@ export default function AdminSidebar({ activeRoute }) {
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <View style={styles.sidebar}>
-      {/* BRAND HEADER */}
-      <View style={styles.brandContainer}>
-        <View style={styles.brandIcon}>
-          <Text style={styles.brandIconText}>⚡</Text>
-        </View>
-        <View>
-          <Text style={styles.brandTitle}>Barq-e-Insaf</Text>
-          <Text style={styles.brandBadge}>Super Admin Panel</Text>
-        </View>
-      </View>
+    <View style={styles.sidebarWrapper}>
+      {/* BACKGROUND BACKDROP FOR RESPONSIVE CLOSING */}
+      {onClose && (
+        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
+      )}
 
-      {/* NAVIGATION MENU */}
-      <ScrollView style={styles.menuScroll} showsVerticalScrollIndicator={false}>
-        <Text style={styles.sectionLabel}>MAIN NAVIGATION</Text>
-
-        {MENU_ITEMS.map((item) => {
-          const isActive = currentPath === item.route || activeRoute === item.id;
-          return (
-            <TouchableOpacity
-              key={item.id}
-              style={[styles.navItem, isActive && styles.navItemActive]}
-              onPress={() => handleNavigate(item)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.navIcon}>{item.icon}</Text>
-              <Text style={[styles.navText, isActive && styles.navTextActive]}>
-                {item.label}
-              </Text>
-              {item.badge && (
-                <View style={[styles.badgePill, isActive && styles.badgePillActive]}>
-                  <Text style={[styles.badgeText, isActive && styles.badgeTextActive]}>
-                    {item.badge}
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
-
-      {/* FOOTER USER PROFILE & EDIT BUTTON */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }} onPress={() => setProfileModal(true)}>
-          <View style={styles.userAvatar}>
-            <Text style={styles.avatarText}>{adminName.charAt(0)}</Text>
+      <View style={styles.sidebar}>
+        {/* BRAND HEADER & CLOSE BUTTON */}
+        <View style={styles.brandContainer}>
+          <View style={styles.brandIcon}>
+            <Text style={styles.brandIconText}>⚡</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.userName} numberOfLines={1}>{adminName}</Text>
-            <Text style={styles.userRole}>⚙ Edit Profile & Pass</Text>
+            <Text style={styles.brandTitle}>Barq-e-Insaf</Text>
+            <Text style={styles.brandBadge}>Super Admin Panel</Text>
           </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-          <Text style={styles.logoutIcon}>🚪</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* ADMIN PROFILE & CREDENTIALS MODAL */}
-      <Modal visible={profileModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>🛡️ Super Admin Profile & Security</Text>
-            <Text style={styles.modalSub}>Update Admin Name, Password & Avatar (Saved to Supabase DB)</Text>
-
-            <Text style={styles.inputLabel}>ADMIN FULL NAME</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={adminName}
-              onChangeText={setAdminName}
-              placeholder="Asad Khan"
-            />
-
-            <Text style={styles.inputLabel}>ADMIN EMAIL</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={adminEmail}
-              onChangeText={setAdminEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-
-            <Text style={styles.inputLabel}>ADMIN AUTHENTICATION PASSWORD</Text>
-            <View style={styles.pwRow}>
-              <TextInput
-                style={[styles.modalInput, { flex: 1, marginBottom: 0 }]}
-                value={adminPassword}
-                onChangeText={setAdminPassword}
-                secureTextEntry={!showPw}
-              />
-              <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPw(v => !v)}>
-                <Text style={styles.eyeBtnText}>{showPw ? '👁️ Hide' : '👁️‍🗨️ View'}</Text>
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styles.inputLabel}>PROFILE PICTURE / AVATAR URL</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={avatarUrl}
-              onChangeText={setAvatarUrl}
-              placeholder="https://..."
-            />
-
-            <View style={styles.modalBtnRow}>
-              <TouchableOpacity style={styles.saveModalBtn} onPress={handleSaveAdminProfile} disabled={loading}>
-                <Text style={styles.saveModalBtnText}>{loading ? 'Saving...' : '💾 Save to Database'}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.cancelModalBtn} onPress={() => setProfileModal(false)}>
-                <Text style={styles.cancelModalBtnText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          {onClose && (
+            <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+              <Text style={styles.closeBtnText}>✕</Text>
+            </TouchableOpacity>
+          )}
         </View>
-      </Modal>
+
+        {/* NAVIGATION MENU */}
+        <ScrollView style={styles.menuScroll} showsVerticalScrollIndicator={false}>
+          <Text style={styles.sectionLabel}>MAIN NAVIGATION</Text>
+
+          {MENU_ITEMS.map((item) => {
+            const isActive = currentPath === item.route || activeRoute === item.id;
+            return (
+              <TouchableOpacity
+                key={item.id}
+                style={[styles.navItem, isActive && styles.navItemActive]}
+                onPress={() => handleNavigate(item)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.navIcon}>{item.icon}</Text>
+                <Text style={[styles.navText, isActive && styles.navTextActive]}>
+                  {item.label}
+                </Text>
+                {item.badge && (
+                  <View style={[styles.badgePill, isActive && styles.badgePillActive]}>
+                    <Text style={[styles.badgeText, isActive && styles.badgeTextActive]}>
+                      {item.badge}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
+        {/* FOOTER USER PROFILE & EDIT BUTTON */}
+        <View style={styles.footer}>
+          <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }} onPress={() => setProfileModal(true)}>
+            <View style={styles.userAvatar}>
+              <Text style={styles.avatarText}>{adminName.charAt(0)}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.userName} numberOfLines={1}>{adminName}</Text>
+              <Text style={styles.userRole}>⚙ Edit Profile & Pass</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+            <Text style={styles.logoutIcon}>🚪</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* ADMIN PROFILE & CREDENTIALS MODAL */}
+        <Modal visible={profileModal} animationType="slide" transparent>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>🛡️ Super Admin Profile & Security</Text>
+              <Text style={styles.modalSub}>Update Admin Name, Password & Avatar (Saved to Supabase DB)</Text>
+
+              <Text style={styles.inputLabel}>ADMIN FULL NAME</Text>
+              <TextInput
+                style={styles.modalInput}
+                value={adminName}
+                onChangeText={setAdminName}
+                placeholder="Asad Khan"
+              />
+
+              <Text style={styles.inputLabel}>ADMIN EMAIL</Text>
+              <TextInput
+                style={styles.modalInput}
+                value={adminEmail}
+                onChangeText={setAdminEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+
+              <Text style={styles.inputLabel}>ADMIN AUTHENTICATION PASSWORD</Text>
+              <View style={styles.pwRow}>
+                <TextInput
+                  style={[styles.modalInput, { flex: 1, marginBottom: 0 }]}
+                  value={adminPassword}
+                  onChangeText={setAdminPassword}
+                  secureTextEntry={!showPw}
+                />
+                <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPw(v => !v)}>
+                  <Text style={styles.eyeBtnText}>{showPw ? '👁️ Hide' : '👁️‍🗨️ View'}</Text>
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.inputLabel}>PROFILE PICTURE / AVATAR URL</Text>
+              <TextInput
+                style={styles.modalInput}
+                value={avatarUrl}
+                onChangeText={setAvatarUrl}
+                placeholder="https://..."
+              />
+
+              <View style={styles.modalBtnRow}>
+                <TouchableOpacity style={styles.saveModalBtn} onPress={handleSaveAdminProfile} disabled={loading}>
+                  <Text style={styles.saveModalBtnText}>{loading ? 'Saving...' : '💾 Save to Database'}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.cancelModalBtn} onPress={() => setProfileModal(false)}>
+                  <Text style={styles.cancelModalBtnText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  sidebarWrapper: {
+    position: 'relative',
+    zIndex: 100,
+    height: '100%',
+  },
+  backdrop: {
+    position: 'absolute',
+    top: 0, left: 0, right: -2000, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    zIndex: 99,
+  },
   sidebar: {
     width: 260,
     backgroundColor: '#ffffff',
@@ -198,6 +224,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     height: '100%',
     justifyContent: 'space-between',
+    zIndex: 100,
   },
   brandContainer: {
     flexDirection: 'row',
@@ -213,12 +240,14 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 12,
     backgroundColor: '#2563eb',
-    justify: 'center',
+    justifyContent: 'center',
     alignItems: 'center',
   },
   brandIconText: { fontSize: 20 },
   brandTitle: { color: '#0f172a', fontSize: 17, fontWeight: '800' },
   brandBadge: { color: '#d97706', fontSize: 10, fontWeight: '700', marginTop: 1 },
+  closeBtn: { padding: 6, borderRadius: 8, backgroundColor: '#f1f5f9' },
+  closeBtnText: { color: '#64748b', fontSize: 14, fontWeight: '800' },
   menuScroll: { flex: 1 },
   sectionLabel: { color: '#64748b', fontSize: 10, fontWeight: '800', letterSpacing: 1.2, marginBottom: 12, marginTop: 4 },
   navItem: {
