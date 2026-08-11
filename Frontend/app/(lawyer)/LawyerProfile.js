@@ -246,28 +246,6 @@ export default function LawyerProfile() {
           </TouchableOpacity>
         )}
 
-<<<<<<< HEAD
-=======
-        {/* Logout Button */}
-        {!editMode && (
-          <TouchableOpacity 
-            style={{
-              backgroundColor: 'rgba(239,68,68,0.1)',
-              borderRadius: 12,
-              paddingVertical: 16,
-              alignItems: 'center',
-              marginTop: 16,
-              marginBottom: 30,
-              borderWidth: 1,
-              borderColor: 'rgba(239,68,68,0.2)',
-            }}
-            onPress={() => router.replace('/LoginScreen')}
-          >
-            <Text style={{ color: '#ef4444', fontSize: 14, fontWeight: '800', letterSpacing: 1 }}>LOGOUT</Text>
-          </TouchableOpacity>
-        )}
-
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
       </ScrollView>
 
       {/* DP Change Modal */}

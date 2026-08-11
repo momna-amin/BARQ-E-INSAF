@@ -35,25 +35,6 @@ const SINDH_DISTRICTS = [
   'Tharparkar', 'Thatta', 'Umerkot',
 ];
 
-<<<<<<< HEAD
-=======
-// -- CROSS-PLATFORM POPUP NOTIFICATION HELPERS ------------------------------
-
-const showAlert = (title, message, onOk) => {
-  if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
-    window.alert(`⚡ ${title}\n\n${message}`);
-    if (onOk) onOk();
-  } else {
-    Alert.alert(
-      title,
-      message,
-      [{ text: 'OK', onPress: onOk }],
-      { cancelable: true }
-    );
-  }
-};
-
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
 // -- VALIDATION HELPERS -----------------------------------------------------
 
 const validateName = (val) => {
@@ -82,14 +63,10 @@ const validatePhone = (val) => {
 
 const validatePassword = (val) => {
   if (!val) return 'Password is required';
-<<<<<<< HEAD
   if (val.length < 8) return 'Password must be at least 8 characters';
   if (!/[a-z]/.test(val)) return 'Must contain at least one lowercase letter';
   if (!/[0-9]/.test(val)) return 'Must contain at least one number';
   if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(val)) return 'Must contain at least one special character';
-=======
-  if (val.length < 5) return 'Password must be at least 5 characters';
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
   return null;
 };
 
@@ -100,7 +77,6 @@ const validateEmail = (val) => {
   return null;
 };
 
-<<<<<<< HEAD
 const getPasswordStrength = (val) => {
   if (!val) return { label: '', color: '#ccc', width: '0%' };
   let score = 0;
@@ -114,8 +90,6 @@ const getPasswordStrength = (val) => {
   return           { label: 'Strong', color: '#09ff00', width: '100%' };
 };
 
-=======
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
 const formatCNIC = (val) => {
   const digits = val.replace(/[^\d]/g, '');
   if (digits.length <= 5) return digits;
@@ -123,7 +97,6 @@ const formatCNIC = (val) => {
   return `${digits.slice(0,5)}-${digits.slice(5,12)}-${digits.slice(12,13)}`;
 };
 
-<<<<<<< HEAD
 // -- REUSABLE COMPONENTS ----------------------------------------------------
 
 const PasswordInput = ({ label, value, onChangeText, color }) => {
@@ -161,55 +134,6 @@ const PasswordInput = ({ label, value, onChangeText, color }) => {
       </View>
       <View style={[styles.inputUnderline, { backgroundColor: color || '#e8e4e0' }]} />
     </>
-=======
-// -- REUSABLE PASSWORD INPUT WITH EYE TOGGLE ICON ---------------------------
-
-const PasswordInputWithEye = ({ value, onChangeText, placeholder = '••••••••' }) => {
-  const [showPassword, setShowPassword] = useState(false);
-  return (
-    <View style={styles.passwordWrapper}>
-      <TextInput
-        style={styles.passwordInputText}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor="#999"
-        secureTextEntry={!showPassword}
-        autoCapitalize="none"
-      />
-      <TouchableOpacity
-        style={styles.eyeToggleBtn}
-        onPress={() => setShowPassword(prev => !prev)}
-        activeOpacity={0.7}
-      >
-        <Text style={styles.eyeToggleText}>
-          {showPassword ? '👁️ Hide' : '👁️‍🗨️ View'}
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
-
-const GenderPicker = ({ value, onSelect, color }) => {
-  return (
-    <View style={styles.genderRow}>
-      {['Male', 'Female'].map((g) => (
-        <TouchableOpacity
-          key={g}
-          style={[
-            styles.genderBtn,
-            value === g && { backgroundColor: color || '#5C1A1A', borderColor: color || '#5C1A1A' },
-          ]}
-          onPress={() => onSelect(g)}
-          activeOpacity={0.8}
-        >
-          <Text style={[styles.genderText, value === g && { color: '#fff', fontWeight: '700' }]}>
-            {g === 'Male' ? '👨 Male' : '👩 Female'}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
   );
 };
 
@@ -222,11 +146,7 @@ const DistrictPicker = ({ value, onSelect, color }) => {
         onPress={() => setOpen(!open)}
       >
         <Text style={[styles.dropdownValue, !value && { color: '#bbb' }]}>
-<<<<<<< HEAD
           {value || 'Select District'}
-=======
-          {value || 'Select Sindh District'}
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
         </Text>
         <Text style={styles.dropdownArrow}>{open ? '▲' : '▼'}</Text>
       </TouchableOpacity>
@@ -235,11 +155,7 @@ const DistrictPicker = ({ value, onSelect, color }) => {
         <View style={styles.dropdownList}>
           <ScrollView
             nestedScrollEnabled
-<<<<<<< HEAD
             style={{ maxHeight: 200 }}
-=======
-            style={{ maxHeight: 180 }}
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
             showsVerticalScrollIndicator
           >
             {SINDH_DISTRICTS.map((d) => (
@@ -271,12 +187,7 @@ const DistrictPicker = ({ value, onSelect, color }) => {
 export default function LoginScreen() {
   const { role } = useLocalSearchParams();
   const router   = useRouter();
-<<<<<<< HEAD
   const config   = roleConfig[role] || roleConfig.citizen;
-=======
-  const currentRole = role || 'citizen';
-  const config   = roleConfig[currentRole] || roleConfig.citizen;
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
 
   const [activeTab,   setActiveTab]   = useState('login');
   const [email,       setEmail]       = useState('');
@@ -286,16 +197,11 @@ export default function LoginScreen() {
   const [phone,       setPhone]       = useState('');
   const [district,    setDistrict]    = useState('');
   const [cnic,        setCnic]        = useState('');
-<<<<<<< HEAD
-=======
-  const [gender,      setGender]      = useState('Male');
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
   const [sbcNumber,   setSbcNumber]   = useState('');
   const [specialty,   setSpecialty]   = useState('');
   const [loading,     setLoading]     = useState(false);
   const [errors,      setErrors]      = useState({});
 
-<<<<<<< HEAD
   const strength = getPasswordStrength(password);
 
   const clearErrors = () => setErrors({});
@@ -334,110 +240,6 @@ export default function LoginScreen() {
     const newErrors = {};
 
     // Common validations
-=======
-  const clearErrors = () => setErrors({});
-
-  // -- 100% AUTHENTIC LOGIN WITH POPUP GUIDANCE -----------------------------
-  const handleLogin = async () => {
-    if (!email || !password) {
-      showAlert('Input Error', 'Please enter your registered Email Address and Password.');
-      return;
-    }
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanPw    = password.trim();
-
-    setLoading(true);
-
-    try {
-      // 1. Check API authentication first
-      const res = await api.post('/auth/login', { email: cleanEmail, password: cleanPw });
-      const user = res.data;
-
-      if (user.role !== currentRole) {
-        setLoading(false);
-        showAlert(
-          'Portal Mismatch Error',
-          `This account is registered as a ${user.role.toUpperCase()}. Please select the correct ${user.role.toUpperCase()} portal to log in.`
-        );
-        return;
-      }
-
-      setLoading(false);
-      showAlert('Login Successful! ⚡', `Welcome back, ${user.name}! Opening your ${currentRole.toUpperCase()} portal...`, () => {
-        if (user.role === 'citizen') router.replace('/(citizen)/CitizenHome');
-        else if (user.role === 'lawyer')  router.replace('/(lawyer)/LawyerHome');
-        else if (user.role === 'admin')   router.replace('/(Admin)');
-        else if (user.role === 'ngo')     router.replace('/(ngo)/NGOHome');
-      });
-      return;
-    } catch (apiErr) {
-      // 2. Direct Authentic Local Verification (Fast & Instant Guarantee)
-      // Check Admin
-      if (currentRole === 'admin' && cleanEmail === 'admin@barqeinsaf.pk' &&
-          ['superadmin@barq2026!', 'admin@barq2026!', 'admin@123'].includes(cleanPw.toLowerCase())) {
-        setLoading(false);
-        showAlert('Admin Access Granted 🛡️', 'Welcome Super Admin! Launching Administrative Panel...', () => {
-          router.replace('/(Admin)');
-        });
-        return;
-      }
-
-      // Check SBC Lawyers
-      if (currentRole === 'lawyer') {
-        if (cleanEmail === 'aysha.begum@barqeinsaf.pk' && ['lawyer@aysha2026!', 'aysha123!', '123456'].includes(cleanPw.toLowerCase())) {
-          setLoading(false);
-          showAlert('Advocate Verified ⚖️', 'Welcome Miss Aysha Begum (SBC #20345)! Opening Lawyer Portal...', () => {
-            router.replace('/(lawyer)/LawyerHome');
-          });
-          return;
-        }
-        if (cleanEmail === 'nasrullah.sahito@barqeinsaf.pk' && ['lawyer@nasrullah2026!', 'nasrullah123!', '123456'].includes(cleanPw.toLowerCase())) {
-          setLoading(false);
-          showAlert('Advocate Verified ⚖️', 'Welcome Mr. Nasrullah (SBC #475)! Opening Lawyer Portal...', () => {
-            router.replace('/(lawyer)/LawyerHome');
-          });
-          return;
-        }
-        if (cleanEmail === 'ali.hassan@law.pk' && ['lawyer@ali2026!', '123456'].includes(cleanPw.toLowerCase())) {
-          setLoading(false);
-          showAlert('Advocate Verified ⚖️', 'Welcome Ali Hassan! Opening Lawyer Portal...', () => {
-            router.replace('/(lawyer)/LawyerHome');
-          });
-          return;
-        }
-      }
-
-      // Check Citizens
-      if (currentRole === 'citizen') {
-        if (cleanEmail === 'usman@gmail.com' && ['usman@barq2026!', 'usman123!', '123456', '........'].includes(cleanPw.toLowerCase())) {
-          setLoading(false);
-          showAlert('Citizen Login Successful 👤', 'Welcome Muhammad Usman! Opening Citizen Portal...', () => {
-            router.replace('/(citizen)/CitizenHome');
-          });
-          return;
-        }
-        if (cleanEmail === 'fatima.z@gmail.com' && ['fatima@barq2026!', 'fatima123!', '123456'].includes(cleanPw.toLowerCase())) {
-          setLoading(false);
-          showAlert('Citizen Login Successful 👤', 'Welcome Fatima Zahra! Opening Citizen Portal...', () => {
-            router.replace('/(citizen)/CitizenHome');
-          });
-          return;
-        }
-      }
-
-      setLoading(false);
-      showAlert(
-        'Authentication Failed ❌',
-        `Invalid email address or password for the ${currentRole.toUpperCase()} portal.\n\nPlease double-check your password or select Sign Up to register a new account.`
-      );
-    }
-  };
-
-  // -- AUTHENTIC SIGNUP WITH POPUP GUIDANCE --------------------------------
-  const handleSignup = async () => {
-    const newErrors = {};
-
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
     const nameErr = validateName(name);
     const emailErr = validateEmail(email);
     const passErr = validatePassword(password);
@@ -448,17 +250,12 @@ export default function LoginScreen() {
     if (!retypePass) newErrors.retypePass = 'Re-type password';
     if (password !== retypePass) newErrors.retypePass = 'Passwords do not match';
 
-<<<<<<< HEAD
     // Citizen-specific validations
     if (role === 'citizen') {
-=======
-    if (currentRole === 'citizen' || currentRole === 'lawyer' || currentRole === 'ngo') {
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
       const cnicErr  = validateCNIC(cnic);
       const phoneErr = validatePhone(phone);
       if (cnicErr)  newErrors.cnic     = cnicErr;
       if (phoneErr) newErrors.phone    = phoneErr;
-<<<<<<< HEAD
       if (!district) newErrors.district = 'Please select your district';
     }
 
@@ -484,25 +281,11 @@ export default function LoginScreen() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-=======
-      if (!district) newErrors.district = 'Please select your Sindh district';
-    }
-
-    if (currentRole === 'lawyer') {
-      if (!sbcNumber) newErrors.sbcNumber = 'SBC license number is required';
-      if (!specialty) newErrors.specialty = 'Specialty is required';
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      showAlert('Form Error ⚠️', 'Please fix highlighted errors before submitting registration.');
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
       return;
     }
 
     try {
       setLoading(true);
-<<<<<<< HEAD
       const body = { name, email, password, role, phone, district, cnic };
       if (role === 'lawyer') {
         body.sbcNumber = sbcNumber;
@@ -528,37 +311,6 @@ export default function LoginScreen() {
   };
 
   // -- RENDER ---------------------------------------------------------------
-=======
-      const body = {
-        name, email: email.trim().toLowerCase(), password, role: currentRole,
-        phone, district, cnic, gender
-      };
-      if (currentRole === 'lawyer') {
-        body.sbcNumber = sbcNumber;
-        body.specialty = specialty;
-      }
-
-      await api.post('/auth/register', body);
-      setLoading(false);
-
-      showAlert('Registration Successful! 🎉', `Your account has been saved to the database. Welcome to Barq-e-Insaf!`, () => {
-        if (currentRole === 'citizen') router.replace('/(citizen)/CitizenHome');
-        else if (currentRole === 'lawyer')  router.replace('/(lawyer)/LawyerHome');
-        else if (currentRole === 'admin')   router.replace('/(Admin)');
-        else router.replace('/(ngo)/NGOHome');
-      });
-    } catch (error) {
-      setLoading(false);
-      showAlert('Account Created & Registered! 🎉', `Welcome ${name}! Opening your portal...`, () => {
-        if (currentRole === 'citizen') router.replace('/(citizen)/CitizenHome');
-        else if (currentRole === 'lawyer')  router.replace('/(lawyer)/LawyerHome');
-        else if (currentRole === 'admin')   router.replace('/(Admin)');
-        else router.replace('/(ngo)/NGOHome');
-      });
-    }
-  };
-
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -569,11 +321,8 @@ export default function LoginScreen() {
           colors={[config.topColor, config.color, '#0d0d0d']}
           style={styles.topGradient}
         />
-<<<<<<< HEAD
         <View style={styles.circle1} />
         <View style={styles.circle2} />
-=======
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
 
         {/* TOP SECTION */}
         <View style={styles.topSection}>
@@ -593,11 +342,7 @@ export default function LoginScreen() {
           style={styles.formScroll}
           keyboardShouldPersistTaps="handled"
         >
-<<<<<<< HEAD
           {/* TABS - Hide signup tab for admin */}
-=======
-          {/* TABS */}
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
           <View style={styles.tabRow}>
             <TouchableOpacity
               style={[styles.tabBtn, activeTab === 'login' && styles.tabActive]}
@@ -607,11 +352,7 @@ export default function LoginScreen() {
                 Login
               </Text>
             </TouchableOpacity>
-<<<<<<< HEAD
             {role !== 'admin' && (
-=======
-            {currentRole !== 'admin' && (
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
               <TouchableOpacity
                 style={[styles.tabBtn, activeTab === 'signup' && styles.tabActive]}
                 onPress={() => { setActiveTab('signup'); clearErrors(); }}
@@ -623,7 +364,6 @@ export default function LoginScreen() {
             )}
           </View>
 
-<<<<<<< HEAD
           {/* -- SIGNUP FIELDS -- */}
           {activeTab === 'signup' && role !== 'admin' && (
             <>
@@ -631,16 +371,6 @@ export default function LoginScreen() {
               <Text style={styles.inputLabel}>Full Name</Text>
               <TextInput
                 style={styles.input}
-=======
-          {/* SIGNUP FIELDS */}
-          {activeTab === 'signup' && currentRole !== 'admin' && (
-            <>
-              <Text style={styles.inputLabel}>Full Name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter full name"
-                placeholderTextColor="#999"
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
                 value={name}
                 onChangeText={(v) => {
                   if (/^[a-zA-Z\s]*$/.test(v)) setName(v);
@@ -648,21 +378,10 @@ export default function LoginScreen() {
               />
               {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
 
-<<<<<<< HEAD
               {/* PHONE */}
               <Text style={styles.inputLabel}>Phone Number</Text>
               <TextInput
                 style={styles.input}
-=======
-              <Text style={styles.inputLabel}>Gender</Text>
-              <GenderPicker value={gender} onSelect={setGender} color={config.color} />
-
-              <Text style={styles.inputLabel}>Phone Number (11 Digits)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="03001234567"
-                placeholderTextColor="#999"
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
                 value={phone}
                 onChangeText={(v) => {
                   if (/^\d*$/.test(v) && v.length <= 11) setPhone(v);
@@ -672,18 +391,10 @@ export default function LoginScreen() {
               />
               {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
 
-<<<<<<< HEAD
               {/* CNIC - for all roles */}
               <Text style={styles.inputLabel}>CNIC</Text>
               <TextInput
                 style={styles.input}
-=======
-              <Text style={styles.inputLabel}>CNIC (Sindh)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="42201-1234567-1"
-                placeholderTextColor="#999"
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
                 value={cnic}
                 onChangeText={(v) => {
                   const formatted = formatCNIC(v);
@@ -694,12 +405,8 @@ export default function LoginScreen() {
               />
               {errors.cnic && <Text style={styles.errorText}>{errors.cnic}</Text>}
 
-<<<<<<< HEAD
               {/* DISTRICT - dropdown for all roles */}
               <Text style={styles.inputLabel}>District</Text>
-=======
-              <Text style={styles.inputLabel}>Sindh District</Text>
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
               <DistrictPicker
                 value={district}
                 onSelect={setDistrict}
@@ -707,7 +414,6 @@ export default function LoginScreen() {
               />
               {errors.district && <Text style={styles.errorText}>{errors.district}</Text>}
 
-<<<<<<< HEAD
               {/* LAWYER FIELDS */}
               {role === 'lawyer' && (
                 <>
@@ -716,15 +422,6 @@ export default function LoginScreen() {
                     style={styles.input}
                     placeholder="SBC-4421"
                     placeholderTextColor="#bbb"
-=======
-              {currentRole === 'lawyer' && (
-                <>
-                  <Text style={styles.inputLabel}>SBC License Number</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="20345"
-                    placeholderTextColor="#999"
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
                     value={sbcNumber}
                     onChangeText={setSbcNumber}
                   />
@@ -733,13 +430,8 @@ export default function LoginScreen() {
                   <Text style={styles.inputLabel}>Specialty</Text>
                   <TextInput
                     style={styles.input}
-<<<<<<< HEAD
                     placeholder="Property / Family"
                     placeholderTextColor="#bbb"
-=======
-                    placeholder="High Court / Civil / Property"
-                    placeholderTextColor="#999"
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
                     value={specialty}
                     onChangeText={setSpecialty}
                   />
@@ -749,19 +441,10 @@ export default function LoginScreen() {
             </>
           )}
 
-<<<<<<< HEAD
           {/* -- COMMON FIELDS -- */}
           <Text style={styles.inputLabel}>Email Address</Text>
           <TextInput
             style={styles.input}
-=======
-          {/* COMMON EMAIL FIELD */}
-          <Text style={styles.inputLabel}>Email Address</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="example@gmail.com"
-            placeholderTextColor="#999"
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -769,7 +452,6 @@ export default function LoginScreen() {
           />
           {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
-<<<<<<< HEAD
           {/* PASSWORD */}
           <PasswordInput
             label="Password"
@@ -829,30 +511,10 @@ export default function LoginScreen() {
                   {password === retypePass ? '✓ Passwords match' : '✗ Passwords do not match'}
                 </Text>
               )}
-=======
-          {/* PASSWORD FIELD WITH EYE ICON */}
-          <Text style={styles.inputLabel}>Password</Text>
-          <PasswordInputWithEye
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Enter password"
-          />
-          {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
-
-          {activeTab === 'signup' && currentRole !== 'admin' && (
-            <>
-              <Text style={styles.inputLabel}>Re-Type Password</Text>
-              <PasswordInputWithEye
-                value={retypePass}
-                onChangeText={setRetypePass}
-                placeholder="Re-enter password"
-              />
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
               {errors.retypePass && <Text style={styles.errorText}>{errors.retypePass}</Text>}
             </>
           )}
 
-<<<<<<< HEAD
           {/* FORGOT PASSWORD */}
           {activeTab === 'login' && (
             <TouchableOpacity>
@@ -875,30 +537,12 @@ export default function LoginScreen() {
             }
           </TouchableOpacity>
 
-=======
-          {/* SUBMIT BUTTON */}
-          <TouchableOpacity
-            style={[styles.submitBtn, { backgroundColor: config.color }]}
-            onPress={activeTab === 'login' ? handleLogin : handleSignup}
-            disabled={loading}
-            activeOpacity={0.85}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.submitBtnText}>
-                {activeTab === 'login' ? 'Login to Portal' : 'Create Account'}
-              </Text>
-            )}
-          </TouchableOpacity>
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
         </ScrollView>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
-<<<<<<< HEAD
 // -- STYLES -----------------------------------------------------------------
 const styles = StyleSheet.create({
   container: {
@@ -978,95 +622,11 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 15, fontWeight: '600', color: '#ccc',
-=======
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0d0d0d',
-  },
-  topGradient: {
-    height: 180,
-    width: '100%',
-  },
-  topSection: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    right: 20,
-    alignItems: 'center',
-  },
-  backBtn: {
-    position: 'absolute',
-    left: 0,
-    top: 4,
-  },
-  backText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  logoCircle: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  logoEmoji: {
-    fontSize: 22,
-  },
-  appName: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#fff',
-  },
-  portalName: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.7)',
-    fontWeight: '500',
-  },
-  formScroll: {
-    flex: 1,
-    marginTop: -20,
-  },
-  formWrapper: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 40,
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    minHeight: height - 160,
-  },
-  tabRow: {
-    flexDirection: 'row',
-    backgroundColor: '#f2f0ec',
-    borderRadius: 14,
-    padding: 4,
-    marginBottom: 20,
-  },
-  tabBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    borderRadius: 10,
-  },
-  tabActive: {
-    backgroundColor: '#fff',
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#777',
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
   },
   tabTextActive: {
     color: '#1a1a1a',
   },
   inputLabel: {
-<<<<<<< HEAD
     fontSize: 11, fontWeight: '700', color: '#aaa',
     letterSpacing: 0.5, textTransform: 'uppercase',
     marginBottom: 6, marginTop: 16,
@@ -1192,98 +752,10 @@ const styles = StyleSheet.create({
   },
   dropdownArrow: {
     fontSize: 11, color: '#aaa',
-=======
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#444',
-    marginTop: 12,
-    marginBottom: 6,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  input: {
-    backgroundColor: '#f8f8f7',
-    borderWidth: 1,
-    borderColor: '#e2e0dc',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: '#1a1a1a',
-  },
-  passwordWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f8f8f7',
-    borderWidth: 1,
-    borderColor: '#e2e0dc',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-  },
-  passwordInputText: {
-    flex: 1,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: '#1a1a1a',
-  },
-  eyeToggleBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 8,
-    backgroundColor: '#0F2744',
-    marginLeft: 8,
-  },
-  eyeToggleText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#ffffff',
-  },
-  genderRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginVertical: 4,
-  },
-  genderBtn: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e2e0dc',
-    backgroundColor: '#f8f8f7',
-    alignItems: 'center',
-  },
-  genderText: {
-    fontSize: 14,
-    color: '#555',
-    fontWeight: '600',
-  },
-  dropdownBtn: {
-    backgroundColor: '#f8f8f7',
-    borderWidth: 1,
-    borderColor: '#e2e0dc',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  dropdownValue: {
-    fontSize: 14,
-    color: '#1a1a1a',
-  },
-  dropdownArrow: {
-    fontSize: 10,
-    color: '#888',
-  },
-  inputUnderline: {
-    height: 0,
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
   },
   dropdownList: {
     backgroundColor: '#fff',
     borderWidth: 1,
-<<<<<<< HEAD
     borderColor: '#ece9e4',
     borderRadius: 12,
     marginTop: 4,
@@ -1302,37 +774,5 @@ const styles = StyleSheet.create({
   },
   dropdownItemText: {
     fontSize: 13, color: '#333', fontWeight: '500',
-=======
-    borderColor: '#e2e0dc',
-    borderRadius: 12,
-    marginTop: 4,
-    elevation: 3,
-  },
-  dropdownItem: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  dropdownItemText: {
-    fontSize: 13,
-    color: '#333',
-  },
-  errorText: {
-    fontSize: 11,
-    color: '#dc2626',
-    marginTop: 4,
-  },
-  submitBtn: {
-    borderRadius: 14,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 24,
-  },
-  submitBtnText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
   },
 });

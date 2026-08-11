@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   StatusBar,
-<<<<<<< HEAD
   Image,
   Dimensions,
 } from 'react-native';
@@ -15,76 +14,49 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts, RacingSansOne_400Regular } from '@expo-google-fonts/racing-sans-one';
 
 const { width, height } = Dimensions.get('window');
-=======
-} from 'react-native';
-import { useRouter } from 'expo-router';
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
 
 const roles = [
   {
     id: 'citizen',
     label: 'Citizen',
     subtitle: 'File cases & find lawyers',
-<<<<<<< HEAD
     accentColor: '#f87171',
     accentLight: 'rgba(248,113,113,0.12)',
     accentBorder: 'rgba(248,113,113,0.22)',
     icon: require('../assets/images/img1.png'),
-=======
-    color: '#5C1A1A',
-    emoji: '👤',
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
   },
   {
     id: 'lawyer',
     label: 'Lawyer',
     subtitle: 'Manage cases & clients',
-<<<<<<< HEAD
     accentColor: '#60a5fa',
     accentLight: 'rgba(96,165,250,0.12)',
     accentBorder: 'rgba(96,165,250,0.22)',
     icon: require('../assets/images/img1.png'),
-=======
-    color: '#0F2744',
-    emoji: '⚖️',
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
   },
   {
     id: 'ngo',
     label: 'NGO / Media',
     subtitle: 'Analytics & reporting',
-<<<<<<< HEAD
     accentColor: '#4ade80',
     accentLight: 'rgba(74,222,128,0.12)',
     accentBorder: 'rgba(74,222,128,0.22)',
     icon: require('../assets/images/img1.png'),
-=======
-    color: '#1B4332',
-    emoji: '📊',
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
   },
   {
     id: 'admin',
     label: 'Admin',
     subtitle: 'Platform management',
-<<<<<<< HEAD
     accentColor: '#cbd5e1',
     accentLight: 'rgba(203,213,225,0.08)',
     accentBorder: 'rgba(203,213,225,0.15)',
     icon: require('../assets/images/img1.png'),
-=======
-    color: '#1A0533',
-    emoji: '🛡️',
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
   },
 ];
 
 export default function RoleSelectScreen() {
   const router = useRouter();
-<<<<<<< HEAD
   const [fontsLoaded] = useFonts({ RacingSansOne_400Regular });
-=======
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
 
   const handleSelect = (roleId) => {
     router.push({ pathname: '/LoginScreen', params: { role: roleId } });
@@ -92,7 +64,6 @@ export default function RoleSelectScreen() {
 
   return (
     <SafeAreaProvider style={styles.container}>
-<<<<<<< HEAD
       <StatusBar barStyle="light-content" backgroundColor="#07152e" />
 
       {/* Background — matches StartScreen exactly */}
@@ -144,19 +115,10 @@ export default function RoleSelectScreen() {
       </View>
 
       {/* Role cards */}
-=======
-      <StatusBar barStyle="dark-content" />
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Barq-e-Insaf ⚡</Text>
-        <Text style={styles.headerSub}>Select your role to continue</Text>
-      </View>
-
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
       <View style={styles.rolesContainer}>
         {roles.map((role) => (
           <TouchableOpacity
             key={role.id}
-<<<<<<< HEAD
             onPress={() => handleSelect(role.id)}
             activeOpacity={0.88}
             style={styles.cardTouch}
@@ -203,21 +165,6 @@ export default function RoleSelectScreen() {
         </Text>
       </View>
 
-=======
-            style={[styles.roleCard, { backgroundColor: role.color }]}
-            onPress={() => handleSelect(role.id)}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.roleEmoji}>{role.emoji}</Text>
-            <View style={styles.roleText}>
-              <Text style={styles.roleLabel}>{role.label}</Text>
-              <Text style={styles.roleSubtitle}>{role.subtitle}</Text>
-            </View>
-            <Text style={styles.arrow}>›</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
     </SafeAreaProvider>
   );
 }
@@ -225,7 +172,6 @@ export default function RoleSelectScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-<<<<<<< HEAD
     backgroundColor: '#092d70',
   },
   backgroundGradient: {
@@ -320,49 +266,10 @@ const styles = StyleSheet.create({
   },
 
   // Text
-=======
-    backgroundColor: '#F5F3EF',
-  },
-  header: {
-    paddingHorizontal: 24,
-    paddingTop: 32,
-    paddingBottom: 24,
-  },
-  headerTitle: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#1a1a1a',
-    letterSpacing: -0.5,
-    marginBottom: 4,
-  },
-  headerSub: {
-    fontSize: 14,
-    color: '#888',
-    fontWeight: '500',
-  },
-  rolesContainer: {
-    flex: 1,
-    paddingHorizontal: 20,
-    gap: 12,
-  },
-  roleCard: {
-    flex: 1,
-    borderRadius: 18,
-    paddingHorizontal: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    maxHeight: 110,
-  },
-  roleEmoji: {
-    fontSize: 32,
-  },
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
   roleText: {
     flex: 1,
   },
   roleLabel: {
-<<<<<<< HEAD
     fontSize: 15,
     fontWeight: '700',
     color: '#fff',
@@ -402,22 +309,5 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     letterSpacing: 0.4,
     textAlign: 'center',
-=======
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#fff',
-    letterSpacing: -0.3,
-  },
-  roleSubtitle: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.55)',
-    marginTop: 3,
-    fontWeight: '500',
-  },
-  arrow: {
-    fontSize: 28,
-    color: 'rgba(255,255,255,0.4)',
-    fontWeight: '300',
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
   },
 });

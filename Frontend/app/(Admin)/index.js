@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
@@ -305,7 +304,3 @@ const s = StyleSheet.create({
   navLabelActive:{ color: '#1A0533' },
   navDot:        { width: 4, height: 4, borderRadius: 2, backgroundColor: '#1A0533', marginTop: 1 },
 });
-=======
-import AdminDashboard from './AdminDashboard';
-export default AdminDashboard;
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169

@@ -15,10 +15,6 @@ app.use('/api/auth',    require('./routes/auth'));
 app.use('/api/lawyers', require('./routes/lawyers'));
 app.use('/api/cases',   require('./routes/cases'));
 app.use('/api/admin',   require('./routes/admin'));
-<<<<<<< HEAD
-=======
-app.use('/api/chat',    require('./routes/chat'));
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
 
 app.get('/', (req, res) => {
   res.json({ message: 'Barq-e-Insaf API running with Supabase' });
