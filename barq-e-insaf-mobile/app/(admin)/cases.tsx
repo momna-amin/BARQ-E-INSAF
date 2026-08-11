@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, TextInput, Pressable, TouchableOpacity,
+  View, Text, ScrollView, StyleSheet, TextInput, Pressable, TouchableOpacity, Alert,
 } from 'react-native';
 import { Search, XCircle, PauseCircle } from 'lucide-react-native';
 import { Colors } from '@/lib/theme';
@@ -31,7 +31,12 @@ export default function CasesScreen() {
 
   function doAction(reason?: string) {
     const sm = { hold: 'On Hold', cancel: 'Cancelled' } as const;
-    updateCase(confirm.caseId, { status: sm[confirm.action] });
+    const newSt = sm[confirm.action];
+    updateCase(confirm.caseId, { status: newSt });
+    Alert.alert(
+      'Case Status Updated',
+      `Case "${confirm.caseId}" status changed to ${newSt}.${reason ? '\n\nReason: ' + reason : ''}`
+    );
   }
 
   const configs = {

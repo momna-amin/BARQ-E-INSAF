@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  TextInput, Pressable,
+  TextInput, Pressable, Alert,
 } from 'react-native';
 import { Search, CheckCircle, XCircle, PauseCircle, Star } from 'lucide-react-native';
 import { Colors } from '@/lib/theme';
@@ -36,7 +36,13 @@ export default function LawyersScreen() {
     const statusMap: Record<'verify' | 'reject' | 'suspend' | 'activate', 'Verified' | 'Rejected' | 'Suspended' | 'Pending'> = {
       verify: 'Verified', reject: 'Rejected', suspend: 'Suspended', activate: 'Verified',
     };
-    updateLawyer(confirm.lawyerId, { status: statusMap[confirm.action] });
+    const target = lawyers.find(l => l.id === confirm.lawyerId);
+    const newSt = statusMap[confirm.action];
+    updateLawyer(confirm.lawyerId, { status: newSt });
+    Alert.alert(
+      'Lawyer Status Updated',
+      `Advocate "${target?.name || confirm.lawyerId}" status changed to ${newSt}.${reason ? '\n\nReason recorded: ' + reason : ''}`
+    );
   }
 
   const actionConfig = {

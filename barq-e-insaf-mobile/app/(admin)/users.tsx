@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  TextInput, Pressable,
+  TextInput, Pressable, Alert,
 } from 'react-native';
 import { Search, UserX, UserCheck, Shield, User } from 'lucide-react-native';
 import { Colors } from '@/lib/theme';
@@ -34,7 +34,12 @@ export default function UsersScreen() {
 
   function doAction(reason?: string) {
     const newStatus = confirm.action === 'suspend' ? 'Suspended' : 'Active';
+    const targetUser = users.find(u => u.id === confirm.userId);
     updateUser(confirm.userId, { status: newStatus as any });
+    Alert.alert(
+      'Action Completed',
+      `User ${targetUser?.name ? '"' + targetUser.name + '"' : ''} has been set to ${newStatus}.${reason ? '\n\nReason: ' + reason : ''}`
+    );
   }
 
   return (

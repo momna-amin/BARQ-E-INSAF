@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity, Pressable,
+  View, Text, ScrollView, StyleSheet, TouchableOpacity, Pressable, Alert,
 } from 'react-native';
 import { CheckCircle, XCircle, Clock } from 'lucide-react-native';
 import { Colors } from '@/lib/theme';
@@ -23,7 +23,13 @@ export default function VerificationQueueScreen() {
 
   function doAction(reason?: string) {
     const statusMap = { verify: 'Verified', reject: 'Rejected', review: 'Under Review' } as const;
-    updateLawyer(confirm.lawyerId, { status: statusMap[confirm.action] });
+    const newSt = statusMap[confirm.action];
+    const target = lawyers.find(l => l.id === confirm.lawyerId);
+    updateLawyer(confirm.lawyerId, { status: newSt });
+    Alert.alert(
+      'Verification Updated',
+      `Advocate "${target?.name || confirm.lawyerId}" has been marked as ${newSt}.${reason ? '\n\nReason: ' + reason : ''}`
+    );
   }
 
   const actionConfig = {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Pressable, Alert } from 'react-native';
 import { CheckCircle, XCircle } from 'lucide-react-native';
 import { Colors } from '@/lib/theme';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -21,7 +21,12 @@ export default function ReportsScreen() {
 
   function doAction(reason?: string) {
     const sm = { resolve: 'Resolved', dismiss: 'Dismissed', investigate: 'Investigating' } as const;
-    updateReport(confirm.reportId, { status: sm[confirm.action] });
+    const newSt = sm[confirm.action];
+    updateReport(confirm.reportId, { status: newSt });
+    Alert.alert(
+      'Report Action Updated',
+      `Report "${confirm.reportId}" has been marked as ${newSt}.${reason ? '\n\nReason: ' + reason : ''}`
+    );
   }
 
   const configs = {

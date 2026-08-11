@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Pressable, Alert } from 'react-native';
 import { CheckCircle, XCircle, ArrowUpCircle } from 'lucide-react-native';
 import { Colors } from '@/lib/theme';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -25,7 +25,12 @@ export default function DisputesScreen() {
     const statusMap = {
       resolve: 'Resolved', reject: 'Rejected', escalate: 'Escalated', review: 'Under Review',
     } as const;
-    updateDispute(confirm.disputeId, { status: statusMap[confirm.action] });
+    const newSt = statusMap[confirm.action];
+    updateDispute(confirm.disputeId, { status: newSt });
+    Alert.alert(
+      'Dispute Action Updated',
+      `Dispute "${confirm.disputeId}" status set to ${newSt}.${reason ? '\n\nReason recorded: ' + reason : ''}`
+    );
   }
 
   const configs = {

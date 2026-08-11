@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Pressable, Alert } from 'react-native';
 import { Star, Trash2, Flag } from 'lucide-react-native';
 import { Colors } from '@/lib/theme';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -21,7 +21,12 @@ export default function ReviewsScreen() {
 
   function doAction(reason?: string) {
     const sm = { remove: 'Removed', flag: 'Flagged', unflag: 'Published' } as const;
-    updateReview(confirm.reviewId, { status: sm[confirm.action] });
+    const newSt = sm[confirm.action];
+    updateReview(confirm.reviewId, { status: newSt });
+    Alert.alert(
+      'Review Updated',
+      `Review "${confirm.reviewId}" has been set to ${newSt}.${reason ? '\n\nReason: ' + reason : ''}`
+    );
   }
 
   const configs = {

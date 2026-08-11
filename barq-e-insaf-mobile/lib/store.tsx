@@ -78,7 +78,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setLawyers(p => p.map(l => l.id === id ? { ...l, ...patch } : l));
     addAuditLog({ actor: 'Super Admin', action: `lawyer.${Object.keys(patch)[0]}`, entityType: 'Lawyer', entityId: id, ip: '192.168.1.1', timestamp: new Date().toISOString(), details: JSON.stringify(patch) });
   }
-  function updateCase(id: string, patch: Partial<typeof MOCK_CASES[0]>) { setCases(p => p.map(c => c.id === id ? { ...c, ...patch } : c)); }
+  function updateCase(id: string, patch: Partial<typeof MOCK_CASES[0]>) { setCases(p => p.map(c => c.id === id ? ({ ...c, ...patch } as any) : c)); }
   function updateDispute(id: string, patch: Partial<typeof MOCK_DISPUTES[0]>) { setDisputes(p => p.map(d => d.id === id ? { ...d, ...patch } : d)); }
   function updateReport(id: string, patch: Partial<typeof MOCK_REPORTS[0]>) { setReports(p => p.map(r => r.id === id ? { ...r, ...patch } : r)); }
   function updateReview(id: string, patch: Partial<typeof MOCK_REVIEWS[0]>) { setReviews(p => p.map(r => r.id === id ? { ...r, ...patch } : r)); }
