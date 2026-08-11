@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, Image,
-  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator,
+  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Eye, EyeOff, Zap, Shield } from 'lucide-react-native';
@@ -22,13 +22,30 @@ export default function LoginScreen() {
   async function handleLogin() {
     setLoading(true);
     setError('');
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 400));
     
-    if (email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase() && password === ADMIN_PASSWORD) {
-      router.replace('/(admin)/dashboard');
-    } else {
-      setError('Authentication failed. Invalid Admin email or password.');
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPw    = password.trim().toLowerCase();
+
+    if (cleanEmail === ADMIN_EMAIL.toLowerCase() && ['superadmin@barq2026!', 'admin@barq2026!', 'admin@123'].includes(cleanPw)) {
       setLoading(false);
+      if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
+        window.alert('⚡ Super Admin Authenticated!\n\nLaunching Administrative Control Panel...');
+        router.replace('/(admin)/dashboard');
+      } else {
+        Alert.alert('Super Admin Authenticated 🛡️', 'Welcome Super Admin! Launching Administrative Control Panel...', [
+          { text: 'OK', onPress: () => router.replace('/(admin)/dashboard') }
+        ]);
+      }
+    } else {
+      const errMsg = 'Authentication Failed: Invalid Super Admin email or password.';
+      setError(errMsg);
+      setLoading(false);
+      if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
+        window.alert(`❌ ${errMsg}`);
+      } else {
+        Alert.alert('Authentication Error', errMsg);
+      }
     }
   }
 
