@@ -7,7 +7,11 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import AIChatFloatingButton from '../components/AIChatFloatingButton';
 
 export const unstable_settings = {
+<<<<<<< HEAD
   initialRouteName: '(tabs)',
+=======
+  initialRouteName: 'index',
+>>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
 };
 
 export default function RootLayout() {

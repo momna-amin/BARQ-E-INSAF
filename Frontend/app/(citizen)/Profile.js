@@ -170,6 +170,20 @@ export default function Profile() {
             <Text style={styles.menuItemText}>Settings</Text>
             <Text style={styles.menuItemArrow}>Open</Text>
           </TouchableOpacity>
+<<<<<<< HEAD
+=======
+
+          <TouchableOpacity 
+            style={[styles.menuItem, { backgroundColor: 'rgba(239,68,68,0.1)', borderBottomWidth: 0, marginTop: 8 }]}
+            onPress={() => {
+              setShowSettings(false);
+              router.replace('/LoginScreen');
+            }}
+          >
+            <Text style={[styles.menuItemText, { color: '#ef4444', fontWeight: '700' }]}>Logout</Text>
+            <Text style={[styles.menuItemArrow, { color: '#ef4444' }]}>Exit</Text>
+          </TouchableOpacity>
+>>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
         </View>
       </ScrollView>
 
@@ -201,6 +215,24 @@ export default function Profile() {
               <Text style={styles.settingsItemLabel}>Help and Support</Text>
               <Text style={styles.settingsItemValue}>Open</Text>
             </View>
+<<<<<<< HEAD
+=======
+            <TouchableOpacity 
+              style={{
+                backgroundColor: 'rgba(239,68,68,0.1)',
+                paddingVertical: 14,
+                borderRadius: 12,
+                marginTop: 16,
+                alignItems: 'center',
+              }}
+              onPress={() => {
+                setShowSettings(false);
+                router.replace('/LoginScreen');
+              }}
+            >
+              <Text style={{ color: '#ef4444', fontSize: 14, fontWeight: '700' }}>Logout</Text>
+            </TouchableOpacity>
+>>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
           </View>
         </View>
       </Modal>

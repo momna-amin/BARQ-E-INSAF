@@ -5,10 +5,17 @@ const protect = async (req, res, next) => {
   let token;
 
   if (req.headers.authorization &&
+<<<<<<< HEAD
       req.headers.authorization.startsWith('Bearer')) {
     try {
       token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+=======
+    req.headers.authorization.startsWith('Bearer')) {
+    try {
+      token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || '6A0B08FB-FD82-405B-BE80-46853142BF22');
+>>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
 
       const { data, error } = await supabase
         .from('users')

@@ -11,7 +11,10 @@
     "lint": "expo lint"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@expo-google-fonts/racing-sans-one": "^0.4.1",
+=======
+>>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
     "@expo/vector-icons": "^15.0.3",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
