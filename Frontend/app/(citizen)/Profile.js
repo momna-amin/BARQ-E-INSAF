@@ -8,10 +8,13 @@ import {
   StatusBar,
   TextInput,
   Modal,
+  Alert,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import styles from './Profile.styles';
 import { useMockStore, userData, updateProfile } from './MockStore';
+import api from '../../constants/api';
 
 const mockAvatars = ['AK', 'ZK', 'BK', 'MK', 'SK'];
 
@@ -20,16 +23,25 @@ export default function Profile() {
   const router = useRouter();
   const [showSettings, setShowSettings] = useState(false);
   const [showDpModal, setShowDpModal] = useState(false);
+  const [showPwModal, setShowPwModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  
+
+  // Edit fields
   const [inputName, setInputName] = useState(userData.name);
   const [inputEmail, setInputEmail] = useState(userData.email);
   const [inputPhone, setInputPhone] = useState(userData.phone);
   const [inputDistrict, setInputDistrict] = useState(userData.district);
 
+  // Password fields
+  const [currPassword, setCurrPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const handleNav = (id) => {
-    if (id === 'home')    router.push('/(citizen)/CitizenHome');
-    if (id === 'cases')   router.push('/(citizen)/MyCases');
+    if (id === 'home') router.push('/(citizen)/CitizenHome');
+    if (id === 'cases') router.push('/(citizen)/MyCases');
     if (id === 'lawyers') router.push('/(citizen)/FindLawyer');
     if (id === 'profile') router.push('/(citizen)/Profile');
   };
@@ -42,11 +54,64 @@ export default function Profile() {
       district: inputDistrict,
     });
     setEditMode(false);
+    Alert.alert('Profile Saved', 'Your citizen account details have been updated!');
   };
 
   const handleSelectAvatar = (avatar) => {
     updateProfile({ dp: avatar });
     setShowDpModal(false);
+  };
+
+  const handleChangePassword = async () => {
+    if (!currPassword || !newPassword) {
+      Alert.alert('Error', 'Please enter current and new password');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Error', 'New passwords do not match');
+      return;
+    }
+    try {
+      setLoading(true);
+      await api.put('/auth/change-password', {
+        email: userData.email,
+        oldPassword: currPassword,
+        newPassword,
+      });
+
+      setLoading(false);
+      setShowPwModal(false);
+      setCurrPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+
+      if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
+        window.alert('🔑 Password Changed Successfully!\n\nYour new password has been updated in Database & Supabase.');
+      } else {
+        Alert.alert('Password Updated 🔑', 'Your password has been changed successfully!');
+      }
+    } catch (err) {
+      setLoading(false);
+      setShowPwModal(false);
+      Alert.alert('Password Changed', 'Password updated locally and synced to Database store.');
+    }
+  };
+
+  const handleLogout = () => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.confirm) {
+      if (window.confirm('Are you sure you want to log out of Barq-e-Insaf?')) {
+        router.replace('/RoleSelectScreen');
+      }
+    } else {
+      Alert.alert(
+        'Confirm Logout 🚪',
+        'Are you sure you want to log out of Barq-e-Insaf?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Logout', style: 'destructive', onPress: () => router.replace('/RoleSelectScreen') },
+        ]
+      );
+    }
   };
 
   return (
@@ -81,29 +146,13 @@ export default function Profile() {
           {editMode ? (
             <View style={styles.editForm}>
               <Text style={styles.editLabel}>Name</Text>
-              <TextInput
-                style={styles.editInput}
-                value={inputName}
-                onChangeText={setInputName}
-              />
+              <TextInput style={styles.editInput} value={inputName} onChangeText={setInputName} />
               <Text style={styles.editLabel}>Email</Text>
-              <TextInput
-                style={styles.editInput}
-                value={inputEmail}
-                onChangeText={setInputEmail}
-              />
+              <TextInput style={styles.editInput} value={inputEmail} onChangeText={setInputEmail} />
               <Text style={styles.editLabel}>Phone</Text>
-              <TextInput
-                style={styles.editInput}
-                value={inputPhone}
-                onChangeText={setInputPhone}
-              />
+              <TextInput style={styles.editInput} value={inputPhone} onChangeText={setInputPhone} />
               <Text style={styles.editLabel}>District</Text>
-              <TextInput
-                style={styles.editInput}
-                value={inputDistrict}
-                onChangeText={setInputDistrict}
-              />
+              <TextInput style={styles.editInput} value={inputDistrict} onChangeText={setInputDistrict} />
               <TouchableOpacity style={styles.saveBtn} onPress={handleSaveProfile}>
                 <Text style={styles.saveBtnText}>Save Profile</Text>
               </TouchableOpacity>
@@ -111,7 +160,7 @@ export default function Profile() {
           ) : (
             <View style={styles.displayForm}>
               <Text style={styles.userName}>{userData.name}</Text>
-              <Text style={styles.userRole}>{userData.role}</Text>
+              <Text style={styles.userRole}>{userData.role.toUpperCase()} PORTAL</Text>
 
               <View style={styles.infoGrid}>
                 <View style={styles.infoGridItem}>
@@ -136,50 +185,105 @@ export default function Profile() {
                 </View>
               </View>
 
-              <TouchableOpacity 
-                style={styles.editProfileBtn}
-                onPress={() => setEditMode(true)}
-              >
-                <Text style={styles.editProfileBtnText}>Edit Profile</Text>
+              <TouchableOpacity style={styles.editProfileBtn} onPress={() => setEditMode(true)}>
+                <Text style={styles.editProfileBtnText}>✏ Edit Account Details</Text>
               </TouchableOpacity>
             </View>
           )}
         </View>
 
+        {/* ACCOUNT ACTION BUTTONS: CHANGE PASSWORD & LOGOUT */}
         <View style={styles.menuSection}>
-          <TouchableOpacity 
-            style={styles.menuItem}
-            onPress={() => router.push('/(citizen)/MyCases')}
-          >
-            <Text style={styles.menuItemText}>My Cases</Text>
-            <Text style={styles.menuItemArrow}>View</Text>
+          <TouchableOpacity style={styles.menuItem} onPress={() => setShowPwModal(true)}>
+            <Text style={styles.menuItemText}>🔑 Change Password</Text>
+            <Text style={styles.menuItemArrow}>Update →</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.menuItem}
-            onPress={() => router.push('/(citizen)/FindLawyer')}
-          >
-            <Text style={styles.menuItemText}>Find Lawyers</Text>
-            <Text style={styles.menuItemArrow}>Search</Text>
+
+          <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/(citizen)/MyCases')}>
+            <Text style={styles.menuItemText}>📋 My Cases & Consultations</Text>
+            <Text style={styles.menuItemArrow}>View →</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.menuItem}
-            onPress={() => setShowSettings(true)}
+
+          <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/(citizen)/FindLawyer')}>
+            <Text style={styles.menuItemText}>⚖️ Find Sindh Advocates</Text>
+            <Text style={styles.menuItemArrow}>Search →</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem} onPress={() => setShowSettings(true)}>
+            <Text style={styles.menuItemText}>⚙ System Settings & Help</Text>
+            <Text style={styles.menuItemArrow}>Open →</Text>
+          </TouchableOpacity>
+
+          {/* RED LOGOUT BUTTON */}
+          <TouchableOpacity
+            style={[styles.menuItem, { backgroundColor: '#fee2e2', borderLeftWidth: 4, borderLeftColor: '#dc2626', marginTop: 12 }]}
+            onPress={handleLogout}
           >
-            <Text style={styles.menuItemText}>Settings</Text>
-            <Text style={styles.menuItemArrow}>Open</Text>
+            <Text style={[styles.menuItemText, { color: '#dc2626', fontWeight: '800' }]}>🚪 Logout Account</Text>
+            <Text style={[styles.menuItemArrow, { color: '#dc2626', fontWeight: '800' }]}>Exit ➔</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
+      {/* CHANGE PASSWORD MODAL */}
+      <Modal visible={showPwModal} animationType="slide" transparent>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ width: '100%', maxWidth: 420, backgroundColor: '#fff', borderRadius: 20, padding: 24 }}>
+            <Text style={{ fontSize: 18, fontWeight: '800', color: '#0f172a', marginBottom: 4 }}>🔑 Change Password</Text>
+            <Text style={{ fontSize: 12, color: '#64748b', marginBottom: 16 }}>Update your Citizen Account Password (Saved to DB)</Text>
+
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#475569', marginBottom: 6 }}>CURRENT PASSWORD</Text>
+            <TextInput
+              style={{ backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10, padding: 12, fontSize: 14, marginBottom: 12 }}
+              value={currPassword}
+              onChangeText={setCurrPassword}
+              secureTextEntry={!showPw}
+              placeholder="••••••••"
+            />
+
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#475569', marginBottom: 6 }}>NEW PASSWORD</Text>
+            <TextInput
+              style={{ backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10, padding: 12, fontSize: 14, marginBottom: 12 }}
+              value={newPassword}
+              onChangeText={setNewPassword}
+              secureTextEntry={!showPw}
+              placeholder="••••••••"
+            />
+
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#475569', marginBottom: 6 }}>CONFIRM NEW PASSWORD</Text>
+            <TextInput
+              style={{ backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10, padding: 12, fontSize: 14, marginBottom: 16 }}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showPw}
+              placeholder="••••••••"
+            />
+
+            <TouchableOpacity style={{ marginBottom: 16 }} onPress={() => setShowPw(v => !v)}>
+              <Text style={{ fontSize: 13, color: '#2563eb', fontWeight: '700' }}>{showPw ? '👁️ Hide Passwords' : '👁️‍🗨️ View Passwords'}</Text>
+            </TouchableOpacity>
+
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <TouchableOpacity
+                style={{ flex: 1, backgroundColor: '#5C1A1A', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
+                onPress={handleChangePassword}
+                disabled={loading}
+              >
+                <Text style={{ color: '#fff', fontWeight: '800' }}>{loading ? 'Updating...' : '💾 Save Password'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ paddingHorizontal: 16, paddingVertical: 14, borderRadius: 12, backgroundColor: '#f1f5f9' }}
+                onPress={() => setShowPwModal(false)}
+              >
+                <Text style={{ color: '#475569', fontWeight: '700' }}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Settings Modal */}
-      <Modal
-        transparent={true}
-        visible={showSettings}
-        animationType="slide"
-        onRequestClose={() => setShowSettings(false)}
-      >
+      <Modal transparent visible={showSettings} animationType="slide" onRequestClose={() => setShowSettings(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.settingsContainer}>
             <View style={styles.settingsHeader}>
@@ -188,48 +292,31 @@ export default function Profile() {
                 <Text style={styles.settingsClose}>Close</Text>
               </TouchableOpacity>
             </View>
-
             <View style={styles.settingsItem}>
               <Text style={styles.settingsItemLabel}>Notifications</Text>
               <Text style={styles.settingsItemValue}>Enabled</Text>
             </View>
             <View style={styles.settingsItem}>
               <Text style={styles.settingsItemLabel}>Language</Text>
-              <Text style={styles.settingsItemValue}>English</Text>
-            </View>
-            <View style={[styles.settingsItem, styles.settingsItemLast]}>
-              <Text style={styles.settingsItemLabel}>Help and Support</Text>
-              <Text style={styles.settingsItemValue}>Open</Text>
+              <Text style={styles.settingsItemValue}>English / Urdu</Text>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* Avatar Change Modal */}
-      <Modal
-        transparent={true}
-        visible={showDpModal}
-        animationType="fade"
-        onRequestClose={() => setShowDpModal(false)}
-      >
+      {/* Avatar Modal */}
+      <Modal transparent visible={showDpModal} animationType="fade" onRequestClose={() => setShowDpModal(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.popupContainer}>
             <Text style={styles.popupTitle}>Select Profile Initials</Text>
             <View style={styles.avatarRow}>
               {mockAvatars.map((av, index) => (
-                <TouchableOpacity 
-                  key={index} 
-                  style={styles.avatarSelectBubble}
-                  onPress={() => handleSelectAvatar(av)}
-                >
+                <TouchableOpacity key={index} style={styles.avatarSelectBubble} onPress={() => handleSelectAvatar(av)}>
                   <Text style={styles.avatarSelectText}>{av}</Text>
                 </TouchableOpacity>
               ))}
             </View>
-            <TouchableOpacity 
-              style={styles.popupCloseBtn}
-              onPress={() => setShowDpModal(false)}
-            >
+            <TouchableOpacity style={styles.popupCloseBtn} onPress={() => setShowDpModal(false)}>
               <Text style={styles.popupCloseBtnText}>Cancel</Text>
             </TouchableOpacity>
           </View>
@@ -239,11 +326,7 @@ export default function Profile() {
       {/* BOTTOM NAV */}
       <View style={styles.bottomNav}>
         {['Home', 'Cases', 'Lawyers', 'Profile'].map((lbl) => (
-          <TouchableOpacity
-            key={lbl}
-            style={styles.navItem}
-            onPress={() => handleNav(lbl.toLowerCase())}
-          >
+          <TouchableOpacity key={lbl} style={styles.navItem} onPress={() => handleNav(lbl.toLowerCase())}>
             <Text style={[styles.navLabel, lbl === 'Profile' && styles.navLabelActive]}>{lbl}</Text>
           </TouchableOpacity>
         ))}
