@@ -159,6 +159,11 @@ export default function StartScreen() {
         borderRadius: width * 0.22,
       }]} />
 
+      {/* Floating Top Right Install App Button */}
+      <View style={{ position: 'absolute', top: 44, right: 20, zIndex: 100 }}>
+        <InstallAppButton />
+      </View>
+
       {/* Particles */}
       {particles.map((p, i) => (
         <Animated.View

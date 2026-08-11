@@ -1,19 +1,11 @@
 /**
  * InstallAppButton.js
- * One-step PWA install button for Chrome on Expo Web (Vercel deploy).
- *
- * How it works:
- * 1. Chrome fires `beforeinstallprompt` when the page qualifies as installable PWA
- *    (valid manifest.json + service worker + HTTPS — Vercel gives all 3 ✅)
- * 2. We capture and suppress Chrome's default mini-infobar
- * 3. On button press: call deferredPrompt.prompt() → Chrome's native install dialog
- * 4. One user tap → icon on Home Screen / App Drawer + listed in Chrome Apps
- *
- * Button only renders on web and only when Chrome says the PWA is installable.
- * If already installed (standalone mode), button is hidden.
+ * 1-Step PWA Install Button for Chrome on Expo Web (Vercel & Local).
+ * ALWAYS VISIBLE on web landing, role selection, & login screens.
+ * Pressing it triggers Chrome's native prompt or instant installation guide.
  */
 import React, { useEffect, useState } from 'react';
-import { Platform, TouchableOpacity, Text, StyleSheet, View, Animated } from 'react-native';
+import { Platform, TouchableOpacity, Text, StyleSheet, View, Animated, Alert } from 'react-native';
 
 export default function InstallAppButton({ style }) {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -25,15 +17,18 @@ export default function InstallAppButton({ style }) {
     // Only run on web
     if (Platform.OS !== 'web' || typeof window === 'undefined') return;
 
-    // Already running as installed PWA?
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    // Check if running as installed PWA standalone
+    if (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true
+    ) {
       setInstalled(true);
       return;
     }
 
     const handleBeforeInstall = (e) => {
-      e.preventDefault(); // prevent Chrome's auto mini-infobar
-      setDeferredPrompt(e); // save — will trigger manually on button press
+      e.preventDefault();
+      setDeferredPrompt(e);
     };
 
     const handleInstalled = () => {
@@ -50,34 +45,52 @@ export default function InstallAppButton({ style }) {
     };
   }, []);
 
-  // Pulse animation when button is visible
+  // Continuous subtle pulse animation
   useEffect(() => {
-    if (!deferredPrompt || installed) return;
+    if (installed) return;
     const pulse = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 1.04, duration: 800, useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1.05, duration: 900, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 900, useNativeDriver: true }),
       ])
     );
     pulse.start();
     return () => pulse.stop();
-  }, [deferredPrompt, installed]);
+  }, [installed]);
 
-  // Hide on native, when installed, or when prompt not captured yet
-  if (Platform.OS !== 'web' || installed || !deferredPrompt) return null;
+  // Don't show if on native platforms or if already running as installed PWA
+  if (Platform.OS !== 'web' || installed) return null;
 
   const handleInstall = async () => {
-    if (!deferredPrompt || installing) return;
-    setInstalling(true);
-    try {
-      deferredPrompt.prompt(); // Chrome's native "Install app?" dialog opens
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') setInstalled(true);
-    } catch (err) {
-      console.warn('Install prompt error:', err);
-    } finally {
-      setInstalling(false);
-      setDeferredPrompt(null); // one-time use
+    if (installing) return;
+
+    if (deferredPrompt) {
+      setInstalling(true);
+      try {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') setInstalled(true);
+      } catch (err) {
+        console.warn('Install prompt error:', err);
+      } finally {
+        setInstalling(false);
+        setDeferredPrompt(null);
+      }
+    } else {
+      // Fallback instruction if Chrome prompt hasn't fired yet
+      if (typeof window !== 'undefined' && window.alert) {
+        window.alert(
+          '📱 Install Barq-e-Insaf App:\n\n' +
+          '1. Chrome Browser menu (3 dots ⋮ at top right) dabayein.\n' +
+          '2. "Install App" ya "Add to Home Screen" select karein.\n\n' +
+          'App aap ki Home Screen aur App Drawer mein add ho jayegi!'
+        );
+      } else {
+        Alert.alert(
+          'Install App 📱',
+          'Chrome menu (3 dots ⋮) -> "Install App" / "Add to Home Screen" dabayein app install karne ke liye.'
+        );
+      }
     }
   };
 
@@ -87,12 +100,14 @@ export default function InstallAppButton({ style }) {
         onPress={handleInstall}
         disabled={installing}
         style={styles.btn}
-        activeOpacity={0.88}
+        activeOpacity={0.85}
       >
-        <Text style={styles.icon}>📲</Text>
-        <View>
-          <Text style={styles.btnTitle}>{installing ? 'Install Ho Raha Hai...' : 'App Install Karein'}</Text>
-          <Text style={styles.btnSub}>Home Screen pe add karein</Text>
+        <View style={styles.badgeBox}>
+          <Text style={styles.badgeIcon}>📲</Text>
+        </View>
+        <View style={styles.textColumn}>
+          <Text style={styles.btnTitle}>{installing ? 'Installing...' : 'Install App'}</Text>
+          <Text style={styles.btnSub}>App Drawer / Home Screen</Text>
         </View>
       </TouchableOpacity>
     </Animated.View>
@@ -103,27 +118,42 @@ const styles = StyleSheet.create({
   btn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
+    gap: 8,
     backgroundColor: '#0b5d3b',
-    paddingVertical: 14,
-    paddingHorizontal: 22,
-    borderRadius: 14,
-    shadowColor: '#0b5d3b',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.3)',
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
-  icon: { fontSize: 26 },
+  badgeBox: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeIcon: { fontSize: 13 },
+  textColumn: {
+    justifyContent: 'center',
+  },
   btnTitle: {
     color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '700',
-    letterSpacing: 0.3,
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+    lineHeight: 14,
   },
   btnSub: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 11,
-    marginTop: 1,
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: 9,
+    fontWeight: '500',
+    lineHeight: 11,
   },
 });
