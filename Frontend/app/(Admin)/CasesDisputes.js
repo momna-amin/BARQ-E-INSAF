@@ -32,10 +32,7 @@ export default function CasesDisputes() {
         <ScrollView style={styles.mainContent} contentContainerStyle={styles.contentPadding}>
           {/* HEADER BAR WITH ☰ HAMBURGER MENU BUTTON */}
           <View style={styles.headerBar}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-              <TouchableOpacity style={styles.hamburgerBtn} onPress={() => setSidebarOpen(v => !v)}>
-                <Text style={styles.hamburgerIcon}>☰</Text>
-              </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingLeft: 54 }}>
               <View>
                 <Text style={styles.headerTitle}>📁 Cases & Disputes Moderation</Text>
                 <Text style={styles.headerSub}>Monitor active legal cases, track hearings & resolve client-advocate disputes</Text>

@@ -37,10 +37,7 @@ export default function AdminDashboard() {
         <ScrollView style={styles.mainScroll} contentContainerStyle={styles.contentPadding}>
           {/* TOP HEADER BAR WITH ☰ HAMBURGER BUTTON */}
           <View style={styles.headerBar}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-              <TouchableOpacity style={styles.hamburgerBtn} onPress={() => setSidebarOpen(v => !v)}>
-                <Text style={styles.hamburgerIcon}>☰</Text>
-              </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingLeft: 54 }}>
               <View>
                 <Text style={styles.welcomeTitle}>Welcome back, Super Admin 👋</Text>
                 <Text style={styles.welcomeSub}>Sindh Legal Access Platform Overview — All Services Operational</Text>
