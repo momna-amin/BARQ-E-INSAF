@@ -15,29 +15,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useFonts, RacingSansOne_400Regular } from '@expo-google-fonts/racing-sans-one';
 import InstallAppButton from '../components/InstallAppButton';
-import { getUser } from '../services/authStorage';
 
 const { width, height } = Dimensions.get('window');
 
 export default function StartScreen() {
   const router = useRouter();
-
-  // Smart role press: if session already saved for this role → go home directly
-  const handleRolePress = async (role) => {
-    try {
-      const user = await getUser();
-      if (user && user.role === role) {
-        const dest =
-          role === 'citizen' ? '/(citizen)/CitizenHome' :
-          role === 'lawyer'  ? '/(lawyer)/LawyerHome'  :
-          role === 'admin'   ? '/(Admin)/AdminDashboard' :
-          role === 'ngo'     ? '/(ngo)/NGOHome' : null;
-        if (dest) { router.replace(dest); return; }
-      }
-    } catch { /* ignore storage errors */ }
-    // No active session for this role → go to LoginScreen directly
-    router.push({ pathname: '/LoginScreen', params: { role } });
-  };
 
   const floatY      = useRef(new Animated.Value(0)).current;
   const floatX      = useRef(new Animated.Value(0)).current;
@@ -294,86 +276,28 @@ export default function StartScreen() {
           <Text style={styles.urduPoetryLine}>وکیلِ حق جو ملے تو ہر مسافر چلے۔</Text>
         </View>
 
-        {/* Role Selection Buttons — Session-Aware */}
+        {/* Buttons */}
         <View style={styles.btnStack}>
 
-          {/* ROW 1: Citizen + Lawyer */}
-          <View style={styles.roleRow}>
-            <Animated.View style={[styles.roleHalf, { transform: [{ scale: pulseBtn }] }]}>
-              <TouchableOpacity
-                style={styles.roleHalf}
-                activeOpacity={0.86}
-                onPress={() => handleRolePress('citizen')}
-              >
-                <LinearGradient
-                  colors={['#7f1d1d', '#b91c1c', '#ef4444']}
-                  style={styles.roleBtn}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <Text style={styles.roleBtnIcon}>👤</Text>
-                  <Text style={styles.roleBtnText}>CITIZEN</Text>
-                  <Text style={styles.roleBtnSub}>Login / Sign Up</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            </Animated.View>
-
-            <Animated.View style={[styles.roleHalf, { transform: [{ scale: pulseBtn }] }]}>
-              <TouchableOpacity
-                style={styles.roleHalf}
-                activeOpacity={0.86}
-                onPress={() => handleRolePress('lawyer')}
-              >
-                <LinearGradient
-                  colors={['#1e3a8a', '#1d4ed8', '#3b82f6']}
-                  style={styles.roleBtn}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <Text style={styles.roleBtnIcon}>⚖️</Text>
-                  <Text style={styles.roleBtnText}>LAWYER</Text>
-                  <Text style={styles.roleBtnSub}>Login / Sign Up</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
-
-          {/* ROW 2: NGO + Admin */}
-          <View style={styles.roleRow}>
+          <Animated.View style={[styles.btnFull, { transform: [{ scale: pulseBtn }] }]}>
             <TouchableOpacity
-              style={styles.roleHalf}
+              style={styles.btnFull}
               activeOpacity={0.86}
-              onPress={() => handleRolePress('ngo')}
+              onPress={() => router.push('/RoleSelectScreen')}
             >
               <LinearGradient
-                colors={['#064e3b', '#059669', '#34d399']}
-                style={styles.roleBtn}
+                colors={['#0232b6', '#2563eb', '#5694f8']}
+                style={styles.primaryBtn}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+                end={{ x: 1, y: 0 }}
               >
-                <Text style={styles.roleBtnIcon}>🏛️</Text>
-                <Text style={styles.roleBtnText}>NGO / MEDIA</Text>
-                <Text style={styles.roleBtnSub}>Login / Sign Up</Text>
+                <Text style={styles.primaryBtnText}>GET STARTED</Text>
+                <View style={styles.primaryBtnArrowBox}>
+                  <Text style={styles.primaryBtnArrow}>ᯓ➤</Text>
+                </View>
               </LinearGradient>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.roleHalf}
-              activeOpacity={0.86}
-              onPress={() => handleRolePress('admin')}
-            >
-              <LinearGradient
-                colors={['#312e81', '#6d28d9', '#a78bfa']}
-                style={styles.roleBtn}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Text style={styles.roleBtnIcon}>🛡️</Text>
-                <Text style={styles.roleBtnText}>ADMIN</Text>
-                <Text style={styles.roleBtnSub}>Login Only</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
+          </Animated.View>
 
           <TouchableOpacity
             style={styles.secondaryBtn}
@@ -399,15 +323,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0D1B2A',
-    overflow: 'hidden',   // fix horizontal scroll on web
-    maxWidth: '100%',
+    overflow: 'hidden',
   },
   gradient: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    width,
+    height,
   },
   ambientBlob: {
     position: 'absolute',
@@ -613,40 +534,6 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: 10,
     marginBottom: 12,
-  },
-  roleRow: {
-    flexDirection: 'row',
-    gap: 10,
-    width: '100%',
-  },
-  roleHalf: {
-    flex: 1,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  roleBtn: {
-    paddingVertical: 16,
-    paddingHorizontal: 14,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 3,
-    minHeight: 84,
-  },
-  roleBtnIcon: {
-    fontSize: 22,
-    marginBottom: 2,
-  },
-  roleBtnText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  roleBtnSub: {
-    color: 'rgba(255,255,255,0.65)',
-    fontSize: 9,
-    fontWeight: '500',
   },
   btnFull: {
     width: '100%',
