@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, StyleSheet, Alert, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, StyleSheet, Alert } from 'react-native';
 import AdminSidebar from './AdminSidebar';
 
 export default function CasesDisputes() {
-  const [search, setSearch] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('cases');
 
   const casesList = [
@@ -19,14 +19,28 @@ export default function CasesDisputes() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor="#0c0414" />
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <View style={styles.layoutRow}>
-        <AdminSidebar activeRoute="cases" />
+        {/* OVERLAY RESPONSIVE DRAWER SIDEBAR */}
+        <AdminSidebar
+          activeRoute="cases"
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
 
+        {/* FULL WIDTH MAIN CONTENT */}
         <ScrollView style={styles.mainContent} contentContainerStyle={styles.contentPadding}>
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>📁 Cases & Disputes Moderation</Text>
-            <Text style={styles.headerSub}>Monitor active legal cases, track hearings & resolve client-advocate disputes</Text>
+          {/* HEADER BAR WITH ☰ HAMBURGER MENU BUTTON */}
+          <View style={styles.headerBar}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <TouchableOpacity style={styles.hamburgerBtn} onPress={() => setSidebarOpen(v => !v)}>
+                <Text style={styles.hamburgerIcon}>☰</Text>
+              </TouchableOpacity>
+              <View>
+                <Text style={styles.headerTitle}>📁 Cases & Disputes Moderation</Text>
+                <Text style={styles.headerSub}>Monitor active legal cases, track hearings & resolve client-advocate disputes</Text>
+              </View>
+            </View>
           </View>
 
           <View style={styles.tabToggleRow}>
@@ -50,9 +64,9 @@ export default function CasesDisputes() {
                   </View>
                   <Text style={styles.cardTitle}>{c.category}</Text>
                   <View style={styles.metaRow}>
-                    <Text style={styles.metaItem}>👤 Client: <Text style={{ color: '#fff' }}>{c.client}</Text></Text>
-                    <Text style={styles.metaItem}>⚖️ Lawyer: <Text style={{ color: '#fff' }}>{c.lawyer}</Text></Text>
-                    <Text style={styles.metaItem}>📍 District: <Text style={{ color: '#fff' }}>{c.district}</Text></Text>
+                    <Text style={styles.metaItem}>👤 Client: <Text style={{ color: '#0f172a', fontWeight: '700' }}>{c.client}</Text></Text>
+                    <Text style={styles.metaItem}>⚖️ Lawyer: <Text style={{ color: '#0f172a', fontWeight: '700' }}>{c.lawyer}</Text></Text>
+                    <Text style={styles.metaItem}>📍 District: <Text style={{ color: '#0f172a', fontWeight: '700' }}>{c.district}</Text></Text>
                   </View>
                 </View>
               ))}
@@ -60,7 +74,7 @@ export default function CasesDisputes() {
           ) : (
             <View style={styles.listSection}>
               {disputesList.map(d => (
-                <View key={d.id} style={[styles.card, { borderLeftColor: '#ef4444' }]}>
+                <View key={d.id} style={[styles.card, { borderLeftColor: '#dc2626' }]}>
                   <View style={styles.cardTop}>
                     <Text style={styles.monoId}>{d.id} · {d.caseId}</Text>
                     <View style={[styles.badge, styles.badgeDisputed]}>
@@ -68,8 +82,8 @@ export default function CasesDisputes() {
                     </View>
                   </View>
                   <Text style={styles.cardReason}>{d.reason}</Text>
-                  <Text style={styles.metaItem}>Raised By: <Text style={{ color: '#fff' }}>{d.raisedBy}</Text> · Age: {d.age}</Text>
-                  <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+                  <Text style={styles.metaItem}>Raised By: <Text style={{ color: '#0f172a', fontWeight: '700' }}>{d.raisedBy}</Text> · Age: {d.age}</Text>
+                  <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
                     <TouchableOpacity style={styles.btnSuccess} onPress={() => Alert.alert('Dispute Resolved', `Dispute ${d.id} has been marked as Resolved.`)}>
                       <Text style={styles.btnText}>✓ Resolve Dispute</Text>
                     </TouchableOpacity>
@@ -88,31 +102,54 @@ export default function CasesDisputes() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0c0414' },
-  layoutRow: { flex: 1, flexDirection: 'row' },
-  mainContent: { flex: 1, backgroundColor: '#0f172a' },
+  safe: { flex: 1, backgroundColor: '#ffffff' },
+  layoutRow: { flex: 1, flexDirection: 'row', position: 'relative' },
+  mainContent: { flex: 1, backgroundColor: '#f8fafc', width: '100%' },
   contentPadding: { padding: 24 },
-  header: { marginBottom: 20 },
-  headerTitle: { color: '#f8fafc', fontSize: 22, fontWeight: '800' },
-  headerSub: { color: '#94a3b8', fontSize: 13, marginTop: 4 },
+  headerBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  hamburgerBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hamburgerIcon: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0f172a',
+  },
+  headerTitle: { color: '#0f172a', fontSize: 20, fontWeight: '800' },
+  headerSub: { color: '#475569', fontSize: 12, marginTop: 2 },
   tabToggleRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
-  toggleBtn: { flex: 1, paddingVertical: 12, backgroundColor: '#1e293b', borderRadius: 12, alignItems: 'center' },
-  toggleBtnActive: { backgroundColor: '#3b82f6' },
-  toggleText: { color: '#94a3b8', fontSize: 13, fontWeight: '700' },
+  toggleBtn: { flex: 1, paddingVertical: 12, backgroundColor: '#ffffff', borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#e2e8f0' },
+  toggleBtnActive: { backgroundColor: '#2563eb', borderColor: '#2563eb' },
+  toggleText: { color: '#475569', fontSize: 13, fontWeight: '700' },
   toggleTextActive: { color: '#ffffff' },
   listSection: { gap: 12 },
-  card: { backgroundColor: '#1e293b', borderRadius: 16, borderLeftWidth: 4, borderLeftColor: '#3b82f6', padding: 18, marginBottom: 12 },
+  card: { backgroundColor: '#ffffff', borderRadius: 16, borderLeftWidth: 4, borderLeftColor: '#2563eb', padding: 18, marginBottom: 12, borderWidth: 1, borderColor: '#e2e8f0' },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  monoId: { color: '#94a3b8', fontSize: 12, fontWeight: '700', fontFamily: 'monospace' },
+  monoId: { color: '#64748b', fontSize: 12, fontWeight: '700' },
   badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  badgeActive: { backgroundColor: 'rgba(59,130,246,0.2)' },
-  badgeCompleted: { backgroundColor: 'rgba(34,197,94,0.2)' },
-  badgeDisputed: { backgroundColor: 'rgba(239,68,68,0.2)' },
-  badgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
-  cardTitle: { color: '#f8fafc', fontSize: 16, fontWeight: '700', marginBottom: 8 },
-  cardReason: { color: '#f1f5f9', fontSize: 14, marginBottom: 8, fontStyle: 'italic' },
+  badgeActive: { backgroundColor: '#dbeafe' },
+  badgeCompleted: { backgroundColor: '#dcfce7' },
+  badgeDisputed: { backgroundColor: '#fee2e2' },
+  badgeText: { color: '#1d4ed8', fontSize: 11, fontWeight: '700' },
+  cardTitle: { color: '#0f172a', fontSize: 16, fontWeight: '800', marginBottom: 8 },
+  cardReason: { color: '#334155', fontSize: 14, marginBottom: 8, fontStyle: 'italic' },
   metaRow: { flexDirection: 'row', gap: 16, flexWrap: 'wrap' },
-  metaItem: { color: '#94a3b8', fontSize: 12 },
+  metaItem: { color: '#64748b', fontSize: 12 },
   btnSuccess: { backgroundColor: '#16a34a', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8 },
   btnWarning: { backgroundColor: '#d97706', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8 },
   btnText: { color: '#fff', fontSize: 12, fontWeight: '700' },

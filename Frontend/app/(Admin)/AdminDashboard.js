@@ -16,7 +16,7 @@ import { useAdminStore } from './AdminStore';
 export default function AdminDashboard() {
   const router = useRouter();
   const { state, approveLawyer, rejectLawyer } = useAdminStore();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const pendingLawyersList = state.lawyers.filter((l) => l.status === 'Pending');
   const openDisputesList = state.disputes.filter((d) => d.status === 'Open');

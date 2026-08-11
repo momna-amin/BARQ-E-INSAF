@@ -73,14 +73,16 @@ export default function AdminSidebar({ activeRoute, isOpen = true, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <View style={styles.sidebarWrapper}>
+    <View style={styles.sidebarOverlayContainer}>
       {/* BACKGROUND BACKDROP FOR RESPONSIVE CLOSING */}
-      {onClose && (
-        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
-      )}
+      <TouchableOpacity
+        style={styles.backdrop}
+        activeOpacity={1}
+        onPress={() => { if (onClose) onClose(); }}
+      />
 
       <View style={styles.sidebar}>
-        {/* BRAND HEADER & CLOSE BUTTON */}
+        {/* BRAND HEADER & PERMANENT CLOSE BUTTON */}
         <View style={styles.brandContainer}>
           <View style={styles.brandIcon}>
             <Text style={styles.brandIconText}>⚡</Text>
@@ -89,11 +91,15 @@ export default function AdminSidebar({ activeRoute, isOpen = true, onClose }) {
             <Text style={styles.brandTitle}>Barq-e-Insaf</Text>
             <Text style={styles.brandBadge}>Super Admin Panel</Text>
           </View>
-          {onClose && (
-            <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-              <Text style={styles.closeBtnText}>✕</Text>
-            </TouchableOpacity>
-          )}
+
+          {/* PERMANENT CLOSE BUTTON FOR ALL SECTIONS */}
+          <TouchableOpacity
+            style={styles.closeBtn}
+            onPress={() => { if (onClose) onClose(); }}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.closeBtnText}>✕</Text>
+          </TouchableOpacity>
         </View>
 
         {/* NAVIGATION MENU */}
@@ -204,19 +210,23 @@ export default function AdminSidebar({ activeRoute, isOpen = true, onClose }) {
 }
 
 const styles = StyleSheet.create({
-  sidebarWrapper: {
-    position: 'relative',
-    zIndex: 100,
-    height: '100%',
+  sidebarOverlayContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    zIndex: 9999,
+    flexDirection: 'row',
   },
   backdrop: {
     position: 'absolute',
-    top: 0, left: 0, right: -2000, bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    zIndex: 99,
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(15, 23, 42, 0.55)',
+    zIndex: 9998,
   },
   sidebar: {
-    width: 260,
+    width: 280,
     backgroundColor: '#ffffff',
     borderRightWidth: 1,
     borderRightColor: '#e2e8f0',
@@ -224,30 +234,44 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     height: '100%',
     justifyContent: 'space-between',
-    zIndex: 100,
+    zIndex: 9999,
+    shadowColor: '#000',
+    shadowOffset: { width: 4, height: 0 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 24,
   },
   brandContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingBottom: 20,
+    gap: 10,
+    paddingBottom: 16,
     marginBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#f1f5f9',
   },
   brandIcon: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
     borderRadius: 12,
     backgroundColor: '#2563eb',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  brandIconText: { fontSize: 20 },
-  brandTitle: { color: '#0f172a', fontSize: 17, fontWeight: '800' },
+  brandIconText: { fontSize: 18 },
+  brandTitle: { color: '#0f172a', fontSize: 16, fontWeight: '800' },
   brandBadge: { color: '#d97706', fontSize: 10, fontWeight: '700', marginTop: 1 },
-  closeBtn: { padding: 6, borderRadius: 8, backgroundColor: '#f1f5f9' },
-  closeBtnText: { color: '#64748b', fontSize: 14, fontWeight: '800' },
+  closeBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#f1f5f9',
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeBtnText: { color: '#334155', fontSize: 14, fontWeight: '900' },
   menuScroll: { flex: 1 },
   sectionLabel: { color: '#64748b', fontSize: 10, fontWeight: '800', letterSpacing: 1.2, marginBottom: 12, marginTop: 4 },
   navItem: {
