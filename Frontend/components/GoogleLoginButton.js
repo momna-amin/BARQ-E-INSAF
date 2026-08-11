@@ -20,15 +20,14 @@ try {
   /* noop */
 }
 
-const DUMMY_CLIENT_ID = '123456789000-dummyclientid.apps.googleusercontent.com';
-
-const rawClientId = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '';
+const HARDCODED_CLIENT_ID = '350642767663-tlq3bnh9rimtbo1ai7v15armceq6qj9r.apps.googleusercontent.com';
+const rawClientId = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || HARDCODED_CLIENT_ID;
 const isConfigured = Boolean(rawClientId && !rawClientId.includes('dummyclientid'));
 
 const GOOGLE_CONFIG = {
-  webClientId: isConfigured ? rawClientId : DUMMY_CLIENT_ID,
-  androidClientId: isConfigured ? rawClientId : DUMMY_CLIENT_ID,
-  iosClientId: isConfigured ? rawClientId : DUMMY_CLIENT_ID,
+  webClientId: isConfigured ? rawClientId : HARDCODED_CLIENT_ID,
+  androidClientId: isConfigured ? rawClientId : HARDCODED_CLIENT_ID,
+  iosClientId: isConfigured ? rawClientId : HARDCODED_CLIENT_ID,
 };
 
 export default function GoogleLoginButton({ role = 'citizen', onSuccess, onError, style }) {
