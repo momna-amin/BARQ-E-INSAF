@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'expo-router';
 import styles from './FindLawyer.styles';
 import { useMockStore, lawyers } from './MockStore';
+import SendRequestButton from '../../components/SendRequestButton';
 
 const specialties = ['All', 'Property Law', 'Family Law'];
 
@@ -212,18 +213,11 @@ export default function FindLawyer() {
                   </View>
                 ))}
 
-                <TouchableOpacity 
-                  style={styles.sendRequestBtn}
-                  onPress={() => {
-                    setShowLawyerProfile(false);
-                    router.push({
-                      pathname: '/(citizen)/RequestConsultation',
-                      params: { lawyerId: selectedLawyer.id }
-                    });
-                  }}
-                >
-                  <Text style={styles.sendRequestBtnText}>Send Consultation Request</Text>
-                </TouchableOpacity>
+                <SendRequestButton
+                  lawyerId={selectedLawyer.id}
+                  lawyerName={selectedLawyer.name}
+                  style={{ marginTop: 20, marginBottom: 12 }}
+                />
               </ScrollView>
             )}
           </View>

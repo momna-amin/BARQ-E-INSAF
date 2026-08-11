@@ -11,11 +11,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use('/api/auth',    require('./routes/auth'));
-app.use('/api/lawyers', require('./routes/lawyers'));
-app.use('/api/cases',   require('./routes/cases'));
-app.use('/api/admin',   require('./routes/admin'));
-app.use('/api/chat',    require('./routes/chat'));
+app.use('/api/auth',     require('./routes/auth'));
+app.use('/api/lawyers',  require('./routes/lawyers'));
+app.use('/api/cases',    require('./routes/cases'));
+app.use('/api/admin',    require('./routes/admin'));
+app.use('/api/chat',     require('./routes/chat'));
+app.use('/api/requests', require('./routes/requests')); // Lawyer request flow + notifications
 
 app.get('/', (req, res) => {
   res.json({ message: 'Barq-e-Insaf API running with Supabase & Live Vercel' });

@@ -30,11 +30,11 @@ export default function LawyerHome() {
   const [loading, setLoading] = useState(false);
 
   const handleNav = (id) => {
-    if (id === 'home') router.push('/(lawyer)/LawyerHome');
-    if (id === 'requests') router.push('/(lawyer)/CaseRequests');
-    if (id === 'cases') router.push('/(lawyer)/MyCases');
+    if (id === 'home')     router.push('/(lawyer)/LawyerHome');
+    if (id === 'requests') router.push('/(lawyer)/IncomingRequests'); // ← new screen
+    if (id === 'cases')    router.push('/(lawyer)/MyCases');
     if (id === 'schedule') router.push('/(lawyer)/Schedule');
-    if (id === 'profile') setShowProfileModal(true);
+    if (id === 'profile')  setShowProfileModal(true);
   };
 
   const handleChangePassword = async () => {

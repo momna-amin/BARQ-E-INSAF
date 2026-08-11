@@ -15,6 +15,8 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import api from '../constants/api';
+import { saveTokens, saveUser } from '../services/authStorage';
+import GoogleLoginButton from '../components/GoogleLoginButton';
 
 const { width, height } = Dimensions.get('window');
 
@@ -236,39 +238,49 @@ export default function LoginScreen() {
       const res  = await api.post('/auth/login', { email: cleanEmail, password: cleanPw });
       const user = res.data;
 
-      const destination = 
+      // ── Save tokens for persistent session ─────────────────────────────
+      if (user.accessToken && user.refreshToken) {
+        await saveTokens(user.accessToken, user.refreshToken);
+      } else if (user.token) {
+        // Backward compat: single token — save as accessToken
+        await saveTokens(user.token, user.token);
+      }
+      await saveUser({ id: user.id, name: user.name, email: user.email, role: user.role });
+      // ───────────────────────────────────────────────────────────────────
+
+      const destination =
         user.role === 'citizen' ? '/(citizen)/CitizenHome' :
-        user.role === 'lawyer' ? '/(lawyer)/LawyerHome' :
-        user.role === 'admin' ? '/(Admin)/AdminDashboard' :
+        user.role === 'lawyer'  ? '/(lawyer)/LawyerHome' :
+        user.role === 'admin'   ? '/(Admin)/AdminDashboard' :
         '/(ngo)/NGOHome';
 
-      if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
-        window.alert(`⚡ ${user.role.toUpperCase()} Authenticated!\n\nLaunching ${user.role.toUpperCase()} Portal...`);
-        router.replace(destination);
-      } else {
-        Alert.alert('Authenticated ⚡', `Welcome to Barq-e-Insaf ${user.role.toUpperCase()} Portal!`, [
-          { text: 'OK', onPress: () => router.replace(destination) }
-        ]);
-      }
+      router.replace(destination);
 
     } catch (error) {
-      // Local Database Fallback for Citizen, Lawyer, Admin & NGO
-      const targetRoute = 
-        role === 'citizen' ? '/(citizen)/CitizenHome' :
-        role === 'lawyer' ? '/(lawyer)/LawyerHome' :
-        role === 'admin' ? '/(Admin)/AdminDashboard' :
-        '/(ngo)/NGOHome';
-
-      if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
-        window.alert(`⚡ Authenticated!\n\nLaunching ${role.toUpperCase()} Portal...`);
-        router.replace(targetRoute);
-      } else {
-        Alert.alert('Authenticated ⚡', `Opening ${role.toUpperCase()} Portal...`, [
-          { text: 'OK', onPress: () => router.replace(targetRoute) }
-        ]);
-      }
+      const errorMsg = error?.response?.data?.message || 'Login failed — please check your credentials or register a new account.';
+      Alert.alert('Login Error ⚠️', errorMsg);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ── Google OAuth success handler ────────────────────────────────────────
+  const handleGoogleSuccess = async (data) => {
+    try {
+      if (data.accessToken && data.refreshToken) {
+        await saveTokens(data.accessToken, data.refreshToken);
+      } else if (data.token) {
+        await saveTokens(data.token, data.token);
+      }
+      await saveUser({ id: data.id, name: data.name, email: data.email, role: data.role });
+      const dest =
+        data.role === 'citizen' ? '/(citizen)/CitizenHome' :
+        data.role === 'lawyer'  ? '/(lawyer)/LawyerHome' :
+        data.role === 'admin'   ? '/(Admin)/AdminDashboard' :
+        '/(ngo)/NGOHome';
+      router.replace(dest);
+    } catch (err) {
+      Alert.alert('Error', 'Login succeeded but failed to save session');
     }
   };
 
@@ -331,44 +343,28 @@ export default function LoginScreen() {
       const res  = await api.post('/auth/register', body);
       const user = res.data;
 
+      // Save tokens upon registration
+      if (user.accessToken && user.refreshToken) {
+        await saveTokens(user.accessToken, user.refreshToken);
+      } else if (user.token) {
+        await saveTokens(user.token, user.token);
+      }
+      await saveUser({ id: user.id, name: user.name, email: user.email, role: user.role });
+
       const userRole = user.role || role;
 
-      if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
-        window.alert(`🎉 Account Created & Saved to Database!\n\nWelcome to Barq-e-Insaf ${userRole.toUpperCase()} Portal.`);
-        if (userRole === 'citizen') router.replace('/(citizen)/CitizenHome');
-        if (userRole === 'lawyer')  router.replace('/(lawyer)/LawyerHome');
-        if (userRole === 'admin')   router.replace('/(Admin)/AdminDashboard');
-        if (userRole === 'ngo')     router.replace('/(ngo)/NGOHome');
-      } else {
-        Alert.alert('Registration Successful 🎉', `Your ${userRole.toUpperCase()} account has been saved to Database!`, [{
-          text: 'Open Portal',
-          onPress: () => {
-            if (userRole === 'citizen') router.replace('/(citizen)/CitizenHome');
-            if (userRole === 'lawyer')  router.replace('/(lawyer)/LawyerHome');
-            if (userRole === 'admin')   router.replace('/(Admin)/AdminDashboard');
-            if (userRole === 'ngo')     router.replace('/(ngo)/NGOHome');
-          },
-        }]);
-      }
+      Alert.alert('Registration Successful 🎉', `Welcome to Barq-e-Insaf ${userRole.toUpperCase()} Portal!`, [{
+        text: 'Open Portal',
+        onPress: () => {
+          if (userRole === 'citizen') router.replace('/(citizen)/CitizenHome');
+          if (userRole === 'lawyer')  router.replace('/(lawyer)/LawyerHome');
+          if (userRole === 'admin')   router.replace('/(Admin)/AdminDashboard');
+          if (userRole === 'ngo')     router.replace('/(ngo)/NGOHome');
+        },
+      }]);
     } catch (error) {
-      // Local Database Registration Fallback
-      if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
-        window.alert(`🎉 Registration Complete!\n\nWelcome to Barq-e-Insaf ${role.toUpperCase()} Portal.`);
-        if (role === 'citizen') router.replace('/(citizen)/CitizenHome');
-        if (role === 'lawyer')  router.replace('/(lawyer)/LawyerHome');
-        if (role === 'admin')   router.replace('/(Admin)/AdminDashboard');
-        if (role === 'ngo')     router.replace('/(ngo)/NGOHome');
-      } else {
-        Alert.alert('Registration Complete 🎉', `Opening ${role.toUpperCase()} Portal...`, [{
-          text: 'OK',
-          onPress: () => {
-            if (role === 'citizen') router.replace('/(citizen)/CitizenHome');
-            if (role === 'lawyer')  router.replace('/(lawyer)/LawyerHome');
-            if (role === 'admin')   router.replace('/(Admin)/AdminDashboard');
-            if (role === 'ngo')     router.replace('/(ngo)/NGOHome');
-          },
-        }]);
-      }
+      const errorMsg = error?.response?.data?.message || 'Registration failed. Please check details and try again.';
+      Alert.alert('Registration Error ⚠️', errorMsg);
     } finally {
       setLoading(false);
     }
@@ -581,8 +577,8 @@ export default function LoginScreen() {
 
           {/* FORGOT PASSWORD */}
           {activeTab === 'login' && (
-            <TouchableOpacity>
-              <Text style={styles.forgotText}>Forgot password?</Text>
+            <TouchableOpacity onPress={() => router.push('/ForgotPassword')}>
+              <Text style={styles.forgotText}>Forgot password? / Password Bhool Gaye?</Text>
             </TouchableOpacity>
           )}
 
@@ -600,6 +596,22 @@ export default function LoginScreen() {
                 </Text>
             }
           </TouchableOpacity>
+
+          {/* GOOGLE OAUTH DIVIDER + BUTTON */}
+          {activeTab === 'login' && (
+            <>
+              <View style={styles.dividerRow}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>ya</Text>
+                <View style={styles.dividerLine} />
+              </View>
+              <GoogleLoginButton
+                role={role}
+                onSuccess={handleGoogleSuccess}
+                onError={(msg) => Alert.alert('Google Login Error', msg)}
+              />
+            </>
+          )}
 
         </ScrollView>
       </View>
@@ -767,6 +779,16 @@ const styles = StyleSheet.create({
   loginBtnText: {
     color: '#fff', fontSize: 14,
     fontWeight: '800', letterSpacing: 1.5,
+  },
+  dividerRow: {
+    flexDirection: 'row', alignItems: 'center',
+    marginTop: 24, marginBottom: 16, gap: 12,
+  },
+  dividerLine: {
+    flex: 1, height: 1, backgroundColor: '#e8e4e0',
+  },
+  dividerText: {
+    color: '#aaa', fontSize: 12, fontWeight: '600', letterSpacing: 1,
   },
   errorText: {
     fontSize: 11, color: '#ef4444',
