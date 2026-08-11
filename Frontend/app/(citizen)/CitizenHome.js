@@ -14,7 +14,8 @@ import {
 import { useRouter } from 'expo-router';
 import styles from './CitizenHome.styles';
 import { useMockStore, userData, lawyers, activeCases } from './MockStore';
-import api from '../../constants/api';
+import api from '../../services/api';
+import { clearTokens } from '../../services/authStorage';
 
 const navItems = [
   { id: 'home', label: 'Home' },
@@ -109,9 +110,17 @@ export default function CitizenHome() {
       }
     } catch (err) {
       setLoading(false);
-      setShowPwModal(false);
-      setShowProfileModal(false);
-      Alert.alert('Password Changed', 'Password updated locally and synced to Database store.');
+      const msg = err?.response?.data?.message || 'Password change nahi ho saka. Dobara koshish karein.';
+      Alert.alert('Password Change Failed ⚠️', msg);
+    }
+  };
+
+  const doLogout = async () => {
+    await clearTokens();
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.location.href = '/RoleSelectScreen';
+    } else {
+      router.replace('/RoleSelectScreen');
     }
   };
 
@@ -119,12 +128,12 @@ export default function CitizenHome() {
     setShowProfileModal(false);
     if (Platform.OS === 'web' && typeof window !== 'undefined' && window.confirm) {
       if (window.confirm('Are you sure you want to log out of Barq-e-Insaf?')) {
-        router.replace('/RoleSelectScreen');
+        doLogout();
       }
     } else {
       Alert.alert('Confirm Logout 🚪', 'Are you sure you want to log out of Barq-e-Insaf?', [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Logout', style: 'destructive', onPress: () => router.replace('/RoleSelectScreen') },
+        { text: 'Logout', style: 'destructive', onPress: doLogout },
       ]);
     }
   };

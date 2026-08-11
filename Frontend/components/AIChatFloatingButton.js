@@ -106,6 +106,12 @@ export default function AIChatFloatingButton() {
     }
   };
 
+  // Chatbot only allowed on the entry screens (Start + Role Select).
+  // Everywhere else — login, signup, dashboards, admin, etc. — it stays hidden.
+  const ALLOWED_PATHS = ['/', '/StartScreen', '/RoleSelectScreen'];
+  const isAllowed = ALLOWED_PATHS.includes(pathname);
+  if (!isAllowed) return null;
+
   return (
     <>
       {/* ⚡ ULTRA-ATTRACTIVE DRAGGABLE FLOATING BUTTON ⚡ */}

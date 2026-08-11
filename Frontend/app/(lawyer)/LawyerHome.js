@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,8 +13,9 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import styles from './LawyerHome.styles';
-import { useMockStore, lawyerProfile, caseRequests, activeCases } from './MockStore';
-import api from '../../constants/api';
+import { useMockStore, lawyerProfile, caseRequests, activeCases, updateLawyerProfile } from './MockStore';
+import api from '../../services/api';
+import { clearTokens, getUser } from '../../services/authStorage';
 
 export default function LawyerHome() {
   useMockStore();
@@ -28,6 +29,27 @@ export default function LawyerHome() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // ── Load the REAL logged-in lawyer's data (was hardcoded dummy data before)
+  useEffect(() => {
+    (async () => {
+      try {
+        const stored = await getUser();
+        if (stored) updateLawyerProfile({ name: stored.name, email: stored.email });
+        const res = await api.get('/auth/me');
+        if (res?.data) {
+          updateLawyerProfile({
+            name: res.data.name || lawyerProfile.name,
+            email: res.data.email || lawyerProfile.email,
+            phone: res.data.phone || lawyerProfile.phone,
+            district: res.data.district || lawyerProfile.district,
+          });
+        }
+      } catch {
+        // Backend fetch failed — keep whatever was saved locally at login
+      }
+    })();
+  }, []);
 
   const handleNav = (id) => {
     if (id === 'home')     router.push('/(lawyer)/LawyerHome');
@@ -68,9 +90,18 @@ export default function LawyerHome() {
       }
     } catch (err) {
       setLoading(false);
-      setShowPwModal(false);
-      setShowProfileModal(false);
-      Alert.alert('Password Changed', 'Password updated locally and synced to Database store.');
+      const msg = err?.response?.data?.message || 'Password change nahi ho saka. Dobara koshish karein.';
+      Alert.alert('Password Change Failed ⚠️', msg);
+    }
+  };
+
+  const doLogout = async () => {
+    await clearTokens(); // must clear BEFORE navigating, or the next screen's
+                          // session check will silently log the user back in
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.location.href = '/RoleSelectScreen'; // hard reload — matches nav
+    } else {                                       // strategy used elsewhere
+      router.replace('/RoleSelectScreen');
     }
   };
 
@@ -78,12 +109,12 @@ export default function LawyerHome() {
     setShowProfileModal(false);
     if (Platform.OS === 'web' && typeof window !== 'undefined' && window.confirm) {
       if (window.confirm('Are you sure you want to log out of Barq-e-Insaf Advocate Portal?')) {
-        router.replace('/RoleSelectScreen');
+        doLogout();
       }
     } else {
       Alert.alert('Confirm Logout 🚪', 'Are you sure you want to log out of Barq-e-Insaf Advocate Portal?', [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Logout', style: 'destructive', onPress: () => router.replace('/RoleSelectScreen') },
+        { text: 'Logout', style: 'destructive', onPress: doLogout },
       ]);
     }
   };

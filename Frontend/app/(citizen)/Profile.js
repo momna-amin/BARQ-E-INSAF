@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import { useRouter } from 'expo-router';
 import styles from './Profile.styles';
 import { useMockStore, userData, updateProfile } from './MockStore';
 import api from '../../services/api';
-import { clearTokens } from '../../services/authStorage';
+import { clearTokens, getUser } from '../../services/authStorage';
 
 const mockAvatars = ['AK', 'ZK', 'BK', 'MK', 'SK'];
 
@@ -32,6 +32,43 @@ export default function Profile() {
   const [inputEmail, setInputEmail] = useState(userData.email);
   const [inputPhone, setInputPhone] = useState(userData.phone);
   const [inputDistrict, setInputDistrict] = useState(userData.district);
+
+  // ── Load the REAL logged-in user's data (was hardcoded dummy data before) ──
+  // MockStore.userData is used as the live "current user" cache: whatever
+  // was saved at login/register is pulled in here and overwrites the
+  // placeholder, so the profile always shows the actual account's name/
+  // email/etc — not the same fixed dummy every time.
+  useEffect(() => {
+    (async () => {
+      try {
+        const stored = await getUser(); // saved at login/register time
+        if (stored) {
+          updateProfile({
+            name: stored.name || userData.name,
+            email: stored.email || userData.email,
+            role: stored.role || userData.role,
+          });
+        }
+        // Pull the full, authoritative profile from the backend too
+        const res = await api.get('/auth/me');
+        if (res?.data) {
+          updateProfile({
+            name: res.data.name || userData.name,
+            email: res.data.email || userData.email,
+            phone: res.data.phone || userData.phone,
+            district: res.data.district || userData.district,
+            role: res.data.role || userData.role,
+          });
+          setInputName(res.data.name || userData.name);
+          setInputEmail(res.data.email || userData.email);
+          setInputPhone(res.data.phone || userData.phone);
+          setInputDistrict(res.data.district || userData.district);
+        }
+      } catch {
+        // Backend fetch failed — keep whatever was saved locally at login
+      }
+    })();
+  }, []);
 
   // Password fields
   const [currPassword, setCurrPassword] = useState('');
@@ -89,8 +126,8 @@ export default function Profile() {
       Alert.alert('Password Updated', 'Your password has been changed successfully!');
     } catch (err) {
       setLoading(false);
-      setShowPwModal(false);
-      Alert.alert('Password Changed', 'Password updated locally and synced to Database store.');
+      const msg = err?.response?.data?.message || 'Password change nahi ho saka. Dobara koshish karein.';
+      Alert.alert('Password Change Failed ⚠️', msg);
     }
   };
 

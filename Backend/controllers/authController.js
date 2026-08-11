@@ -279,7 +279,7 @@ const verifyRegisterOtpAndCreate = async (req, res) => {
 // ──────────────────────────────────────────────────────────────────────────────
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Email aur password dono darj karein' });
@@ -342,6 +342,13 @@ const login = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({
         message: '❌ Password galat hai. Dobara check karein ya "Forgot Password" use karein.'
+      });
+    }
+
+    // ── Reject if this account's real role doesn't match the portal used to log in
+    if (role && user.role !== role) {
+      return res.status(403).json({
+        message: `❌ Yeh account "${user.role}" hai. Barah-e-karam "${user.role}" portal se login karein.`
       });
     }
 
@@ -495,6 +502,50 @@ const resetPassword = async (req, res) => {
 };
 
 // ──────────────────────────────────────────────────────────────────────────────
+// PUT /api/auth/change-password  — logged-in user changes their own password
+// (req.user comes from the `protect` middleware — this route must be protected)
+// ──────────────────────────────────────────────────────────────────────────────
+const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: 'Purana aur naya password dono zaroori hain' });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: 'Naya password kam az kam 8 characters ka hona chahiye' });
+    }
+
+    const { data: user, error: fetchError } = await supabase
+      .from('users').select('id, password').eq('id', req.user.id).single();
+
+    if (fetchError || !user) {
+      return res.status(404).json({ message: 'User nahi mila' });
+    }
+    if (!user.password) {
+      return res.status(400).json({ message: 'Yeh account Google se bana hai — is mein password change nahi ho sakta' });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword.trim(), user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: '❌ Purana password galat hai' });
+    }
+
+    const hashed = await bcrypt.hash(newPassword.trim(), 10);
+    const { error: updateError } = await supabase
+      .from('users').update({ password: hashed }).eq('id', req.user.id);
+
+    if (updateError) {
+      return res.status(500).json({ message: 'Password update nahi ho saka: ' + updateError.message });
+    }
+
+    return res.json({ message: 'Password successfully update ho gaya' });
+  } catch (err) {
+    console.error('changePassword error:', err);
+    return res.status(500).json({ message: err.message || 'Password change karte waqt masla hua' });
+  }
+};
+
+// ──────────────────────────────────────────────────────────────────────────────
 // POST /api/auth/google  — Google OAuth (disabled until GOOGLE_CLIENT_ID is set)
 // ──────────────────────────────────────────────────────────────────────────────
 const googleAuth = async (req, res) => {
@@ -548,4 +599,5 @@ module.exports = {
   verifyOtp,
   resetPassword,
   googleAuth,
+  changePassword,
 };

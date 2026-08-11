@@ -1,80 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import React from 'react';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import AIChatFloatingButton from '../components/AIChatFloatingButton';
-import { getTokens, getUser, clearTokens } from '../services/authStorage';
-import api from '../services/api';
 
 // NOTE: Do NOT set initialRouteName here — it breaks
 // Vercel static export by forcing the stack to start at
 // (tabs) instead of following the current browser URL.
 export const unstable_settings = {};
 
+// NOTE: session/auto-login checking intentionally does NOT happen here anymore.
+// It used to run on every cold boot and force-redirect away from whatever
+// screen (StartScreen, RoleSelect, etc.) the user landed on — racing with
+// SplashScreen's own navigation and getting stuck on a green loading screen
+// that never resolved. Session checking now happens only on LoginScreen,
+// scoped to the role the user actually selected. See LoginScreen.js.
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const router = useRouter();
-  const [checking, setChecking] = useState(true); // true = still checking session
-
-  // ── Auto-login on every app boot ──────────────────────────────────────────
-  useEffect(() => {
-    (async () => {
-      try {
-        const { refreshToken, accessToken } = await getTokens();
-
-        // No token at all → just show the stack at current URL immediately
-        if (!refreshToken && !accessToken) {
-          setChecking(false);
-          return;
-        }
-
-        // Try to refresh session silently
-        try {
-          const res = await api.post('/auth/refresh', { refreshToken });
-          const { accessToken: newAccess, refreshToken: newRefresh, user } = res.data;
-
-          // Save fresh tokens
-          const { saveTokens, saveUser } = await import('../services/authStorage');
-          await saveTokens(newAccess, newRefresh);
-          if (user) await saveUser(user);
-
-          // Route by role
-          const role = user?.role || (await getUser())?.role;
-          const dest =
-            role === 'citizen' ? '/(citizen)/CitizenHome' :
-              role === 'lawyer' ? '/(lawyer)/LawyerHome' :
-                role === 'admin' ? '/(Admin)/AdminDashboard' :
-                  role === 'ngo' ? '/(ngo)/NGOHome' :
-                    null;
-
-          if (dest) {
-            router.replace(dest as any);
-            return;
-          }
-        } catch {
-          // Refresh failed → clear tokens → show the stack at current URL
-          await clearTokens();
-        }
-      } catch {
-        // Any unexpected error → safe fallback: show stack at current URL
-      } finally {
-        setChecking(false);
-      }
-    })();
-  }, []);
-
-  // Show a minimal splash while session check runs
-  if (checking) {
-    return (
-      <View style={{ flex: 1, backgroundColor: '#0b5d3b', alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="large" color="#ffffff" />
-      </View>
-    );
-  }
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

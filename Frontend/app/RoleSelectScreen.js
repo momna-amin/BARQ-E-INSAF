@@ -104,6 +104,18 @@ export default function RoleSelectScreen() {
 
       {/* Header */}
       <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => {
+            if (Platform.OS === 'web' && typeof window !== 'undefined') {
+              window.location.href = '/StartScreen';
+            } else {
+              router.back();
+            }
+          }}
+          style={{ position: 'absolute', top: 12, left: 16, zIndex: 10, padding: 8 }}
+        >
+          <Text style={{ color: '#fff', fontSize: 22, fontWeight: '700' }}>←</Text>
+        </TouchableOpacity>
         <View style={styles.brandRow}>
           <Image
             source={require('../assets/images/logo.png')}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import api from '../services/api';
-import { saveTokens, saveUser } from '../services/authStorage';
+import { saveTokens, saveUser, getTokens, getUser, clearTokens } from '../services/authStorage';
 import GoogleLoginButton from '../components/GoogleLoginButton';
 import InstallAppButton from '../components/InstallAppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
@@ -207,10 +207,59 @@ export default function LoginScreen() {
   const [specialty,   setSpecialty]   = useState('');
   const [loading,     setLoading]     = useState(false);
   const [errors,      setErrors]      = useState({});
+  const [sessionChecking, setSessionChecking] = useState(true);
 
   const strength = getPasswordStrength(password);
 
   const clearErrors = () => setErrors({});
+
+  // ── Scoped session check (only runs on THIS screen, for THIS role) ────────
+  // If a valid session already exists AND belongs to this exact role, skip
+  // the form and go straight to that role's dashboard. If the session
+  // belongs to a different role, or there's no session, just show the
+  // login/signup form normally — never force-navigate away from here.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { refreshToken, accessToken } = await getTokens();
+        if (!refreshToken && !accessToken) {
+          if (!cancelled) setSessionChecking(false);
+          return;
+        }
+
+        const res = await api.post('/auth/refresh', { refreshToken });
+        const { accessToken: newAccess, refreshToken: newRefresh, ...sessionUser } = res.data;
+
+        if (!sessionUser?.role || sessionUser.role !== role) {
+          // No usable session, or it belongs to a different role/account —
+          // let the person log in fresh on this portal instead of guessing.
+          if (!cancelled) setSessionChecking(false);
+          return;
+        }
+
+        await saveTokens(newAccess, newRefresh);
+        await saveUser(sessionUser);
+
+        const dest =
+          sessionUser.role === 'citizen' ? '/(citizen)/CitizenHome' :
+          sessionUser.role === 'lawyer'  ? '/(lawyer)/LawyerHome' :
+          sessionUser.role === 'admin'   ? '/(Admin)/AdminDashboard' :
+          sessionUser.role === 'ngo'     ? '/(ngo)/NGOHome' : null;
+
+        if (dest) {
+          router.replace(dest);
+          return; // keep showing the loader — we're navigating away
+        }
+        if (!cancelled) setSessionChecking(false);
+      } catch {
+        // Refresh failed (expired/invalid) — clear stale tokens, show the form
+        await clearTokens();
+        if (!cancelled) setSessionChecking(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [role]);
 
   // -- LOGIN -----------------------------------------------------------------
   const handleLogin = async () => {
@@ -234,7 +283,7 @@ export default function LoginScreen() {
 
     try {
       setLoading(true);
-      const res  = await api.post('/auth/login', { email: cleanEmail, password: cleanPw });
+      const res  = await api.post('/auth/login', { email: cleanEmail, password: cleanPw, role });
       const user = res.data;
 
       // ── Save tokens for persistent session ─────────────────────────────
@@ -372,7 +421,18 @@ export default function LoginScreen() {
 
         {/* TOP SECTION */}
         <View style={styles.topSection}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => {
+              if (router.canGoBack && router.canGoBack()) {
+                router.back();
+              } else if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                window.location.href = '/RoleSelectScreen';
+              } else {
+                router.replace('/RoleSelectScreen');
+              }
+            }}
+          >
             <Text style={styles.backText}>← Back</Text>
           </TouchableOpacity>
 
@@ -607,7 +667,7 @@ export default function LoginScreen() {
         </ScrollView>
       </View>
 
-      <LoadingOverlay visible={loading} />
+      <LoadingOverlay visible={loading || sessionChecking} />
     </KeyboardAvoidingView>
   );
 }
