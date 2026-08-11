@@ -60,7 +60,14 @@ export default function RoleSelectScreen() {
   const [fontsLoaded] = useFonts({ RacingSansOne_400Regular });
 
   const handleSelect = (roleId) => {
-    router.push(`/LoginScreen?role=${roleId}`);
+    // On web (Vercel static): use hard navigation so the correct
+    // static HTML file is served and the app boots at the right URL.
+    // router.push() client-side SPA nav breaks on Vercel static export.
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.location.href = `/LoginScreen?role=${roleId}`;
+    } else {
+      router.push({ pathname: '/LoginScreen', params: { role: roleId } });
+    }
   };
 
   return (

@@ -10,6 +10,7 @@ import {
   Animated,
   Easing,
   Image,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -283,7 +284,13 @@ export default function StartScreen() {
             <TouchableOpacity
               style={styles.btnFull}
               activeOpacity={0.86}
-              onPress={() => router.push('/RoleSelectScreen')}
+              onPress={() => {
+                if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                  window.location.href = '/RoleSelectScreen';
+                } else {
+                  router.push('/RoleSelectScreen');
+                }
+              }}
             >
               <LinearGradient
                 colors={['#0232b6', '#2563eb', '#5694f8']}
@@ -302,7 +309,13 @@ export default function StartScreen() {
           <TouchableOpacity
             style={styles.secondaryBtn}
             activeOpacity={0.8}
-            onPress={() => router.push('/LandingScreen')}
+            onPress={() => {
+              if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                window.location.href = '/LandingScreen';
+              } else {
+                router.push('/LandingScreen');
+              }
+            }}
           >
             <Text style={styles.secondaryBtnText}>EXPLORE PROJECT</Text>
           </TouchableOpacity>

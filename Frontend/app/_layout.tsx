@@ -10,9 +10,10 @@ import AIChatFloatingButton from '../components/AIChatFloatingButton';
 import { getTokens, getUser, clearTokens } from '../services/authStorage';
 import api from '../services/api';
 
-export const unstable_settings = {
-  initialRouteName: '(tabs)',
-};
+// NOTE: Do NOT set initialRouteName here — it breaks
+// Vercel static export by forcing the stack to start at
+// (tabs) instead of following the current browser URL.
+export const unstable_settings = {};
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -25,7 +26,7 @@ export default function RootLayout() {
       try {
         const { refreshToken, accessToken } = await getTokens();
 
-        // No token at all → show login
+        // No token at all → just show the stack at current URL immediately
         if (!refreshToken && !accessToken) {
           setChecking(false);
           return;
@@ -51,15 +52,15 @@ export default function RootLayout() {
             null;
 
           if (dest) {
-            router.replace(dest);
-            return; // don't setChecking(false) — we're navigating away
+            router.replace(dest as any);
+            return;
           }
         } catch {
-          // Refresh failed (expired/invalid) → clear tokens → show login
+          // Refresh failed → clear tokens → show the stack at current URL
           await clearTokens();
         }
       } catch {
-        // Any unexpected error → safe fallback to login
+        // Any unexpected error → safe fallback: show stack at current URL
       } finally {
         setChecking(false);
       }
