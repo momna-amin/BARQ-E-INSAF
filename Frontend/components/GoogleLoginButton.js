@@ -1,12 +1,11 @@
 /**
  * GoogleLoginButton.js
  * "Continue with Google" button — works on iOS, Android, and Expo Web (PWA).
- * Uses expo-auth-session/providers/google which handles the OAuth flow
- * cross-platform without any extra native modules on web.
+ * Uses expo-auth-session/providers/google cross-platform.
  *
- * Usage:
- *   <GoogleLoginButton role="citizen" onSuccess={(data) => handleAuthSuccess(data)} />
- *   role: 'citizen' | 'lawyer' | 'admin'
+ * CRASH-PROOF GUARANTEE: Passes a valid placeholder webClientId format
+ * to prevent expo-auth-session from throwing "webClientId must be defined"
+ * React runtime crash when EXPO_PUBLIC_GOOGLE_CLIENT_ID is unconfigured on Vercel.
  */
 import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Alert } from 'react-native';
@@ -14,54 +13,63 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import api from '../services/api';
 
-// Required to complete auth session on web
-WebBrowser.maybeCompleteAuthSession();
+// Complete auth session setup on web
+try {
+  WebBrowser.maybeCompleteAuthSession();
+} catch {
+  /* noop */
+}
 
-// Google Client IDs — replace with real IDs from console.cloud.google.com
+const DUMMY_CLIENT_ID = '123456789000-dummyclientid.apps.googleusercontent.com';
+
+const rawClientId = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '';
+const isConfigured = Boolean(rawClientId && !rawClientId.includes('dummyclientid'));
+
 const GOOGLE_CONFIG = {
-  webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '',
-  androidClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '',
-  iosClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '',
+  webClientId: isConfigured ? rawClientId : DUMMY_CLIENT_ID,
+  androidClientId: isConfigured ? rawClientId : DUMMY_CLIENT_ID,
+  iosClientId: isConfigured ? rawClientId : DUMMY_CLIENT_ID,
 };
 
 export default function GoogleLoginButton({ role = 'citizen', onSuccess, onError, style }) {
-  const isConfigured = Boolean(GOOGLE_CONFIG.webClientId && !GOOGLE_CONFIG.webClientId.includes('000000000000'));
-
-  const [request, response, promptAsync] = Google.useAuthRequest(
-    isConfigured
-      ? {
-          webClientId: GOOGLE_CONFIG.webClientId,
-          androidClientId: GOOGLE_CONFIG.androidClientId,
-          iosClientId: GOOGLE_CONFIG.iosClientId,
-        }
-      : {}
-  );
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    webClientId: GOOGLE_CONFIG.webClientId,
+    androidClientId: GOOGLE_CONFIG.androidClientId,
+    iosClientId: GOOGLE_CONFIG.iosClientId,
+  });
 
   const [loading, setLoading] = React.useState(false);
 
   useEffect(() => {
+    if (!isConfigured) return;
     if (response?.type === 'success') {
       const idToken = response.authentication?.idToken;
       if (idToken) {
         handleGoogleToken(idToken);
       } else {
-        onError && onError('Google se ID token nahi mila');
+        onError && onError('Google token missing');
       }
     } else if (response?.type === 'error') {
-      onError && onError(response.error?.message || 'Google sign-in fail ho gaya');
+      onError && onError(response.error?.message || 'Google authentication failed');
     }
   }, [response]);
 
   const handlePress = () => {
     if (!isConfigured) {
-      Alert.alert(
-        'Google Login Notice 🔑',
-        'Google OAuth Client ID abhi Google Cloud Console par setup nahi hai.\n\nPlease Email aur Password se Login/Register karein.',
-        [{ text: 'OK' }]
-      );
+      if (typeof window !== 'undefined' && window.alert) {
+        window.alert(
+          'Google Login Notice 🔑\n\nGoogle OAuth Client ID is not configured yet in Vercel.\n\nPlease login using Email & Password below.'
+        );
+      } else {
+        Alert.alert(
+          'Google Login Notice 🔑',
+          'Google OAuth Client ID is not configured yet in Vercel.\n\nPlease login using Email & Password below.',
+          [{ text: 'OK' }]
+        );
+      }
       return;
     }
-    promptAsync();
+    if (promptAsync) promptAsync();
   };
 
   const handleGoogleToken = async (idToken) => {
@@ -70,7 +78,7 @@ export default function GoogleLoginButton({ role = 'citizen', onSuccess, onError
       const res = await api.post('/auth/google', { idToken, role });
       onSuccess && onSuccess(res.data);
     } catch (err) {
-      const msg = err?.response?.data?.message || 'Google login fail — dobara koshish karein';
+      const msg = err?.response?.data?.message || 'Google login failed';
       onError && onError(msg);
     } finally {
       setLoading(false);
@@ -88,11 +96,10 @@ export default function GoogleLoginButton({ role = 'citizen', onSuccess, onError
         <ActivityIndicator color="#333" size="small" />
       ) : (
         <>
-          {/* Google "G" logo SVG-like text */}
           <View style={styles.googleLogoBox}>
             <Text style={styles.googleLogoText}>G</Text>
           </View>
-          <Text style={styles.btnText}>Google se Jaari Rakhen</Text>
+          <Text style={styles.btnText}>Continue with Google</Text>
         </>
       )}
     </TouchableOpacity>
@@ -116,9 +123,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
-  },
-  btnDisabled: {
-    opacity: 0.6,
   },
   googleLogoBox: {
     width: 24,
