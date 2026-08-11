@@ -26,7 +26,7 @@ const users = [
   {
     id: '00000000-0000-0000-0000-000000000001',
     name: 'Asad Khan (Super Admin)',
-    email: 'admin@barqeinsaf.pk',
+    email: 'itshappyday777@gmail.com',
     password: 'SuperAdmin@barq2026!',
     role: 'admin',
     phone: '03001234567',
@@ -163,7 +163,7 @@ async function seed() {
           gender: user.gender || null,
           is_verified: true,
           provider: 'email',
-        }, { onConflict: 'email' })
+        }, { onConflict: 'id' })
         .select()
         .single();
 
@@ -209,7 +209,7 @@ async function seed() {
   console.log('📋 LOGIN CREDENTIALS:');
   console.log('─────────────────────────────────────────────────────────');
   console.log('ADMIN:');
-  console.log('  Email: admin@barqeinsaf.pk   | Password: SuperAdmin@barq2026!');
+  console.log('  Email: itshappyday777@gmail.com   | Password: SuperAdmin@barq2026!');
   console.log('\nLAWYERS:');
   console.log('  Email: aysha.begum@barqeinsaf.pk   | Password: Lawyer@Aysha2026!');
   console.log('  Email: nasrullah.sahito@barqeinsaf.pk | Password: Lawyer@Nasrullah2026!');

@@ -35,7 +35,7 @@ export default function AdminSidebar({ activeRoute, isOpen, onClose }) {
   // Profile Modal State
   const [profileModal, setProfileModal] = useState(false);
   const [adminName, setAdminName] = useState('Asad Khan (Super Admin)');
-  const [adminEmail, setAdminEmail] = useState('admin@barqeinsaf.pk');
+  const [adminEmail, setAdminEmail] = useState('itshappyday777@gmail.com');
   const [adminPassword, setAdminPassword] = useState('SuperAdmin@Barq2026!');
   const [avatarUrl, setAvatarUrl] = useState('https://images.unsplash.com/photo-1534528741775-53994a69daeb');
   const [showPw, setShowPw] = useState(false);

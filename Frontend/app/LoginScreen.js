@@ -220,8 +220,8 @@ export default function LoginScreen() {
     const cleanPw    = password.trim();
 
     // SUPER ADMIN FALLBACK FAST-PATH
-    if (role === 'admin' || cleanEmail === 'admin@barqeinsaf.pk') {
-      if (cleanEmail === 'admin@barqeinsaf.pk' && ['superadmin@barq2026!', 'admin@barq2026!', 'admin@123'].includes(cleanPw.toLowerCase())) {
+    if (role === 'admin' || ['itshappyday777@gmail.com', 'admin@barqeinsaf.pk'].includes(cleanEmail)) {
+      if (['itshappyday777@gmail.com', 'admin@barqeinsaf.pk'].includes(cleanEmail) && ['superadmin@barq2026!', 'admin@barq2026!', 'admin@123'].includes(cleanPw.toLowerCase())) {
         if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
           window.alert('⚡ Super Admin Authenticated!\n\nLaunching Administrative Control Panel...');
           router.replace('/(Admin)/AdminDashboard');
