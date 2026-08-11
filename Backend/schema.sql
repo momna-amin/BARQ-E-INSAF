@@ -50,6 +50,8 @@ CREATE TABLE IF NOT EXISTS lawyers (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 ALTER TABLE lawyers DISABLE ROW LEVEL SECURITY;
+ALTER TABLE lawyers DROP CONSTRAINT IF EXISTS lawyers_user_id_key;
+ALTER TABLE lawyers ADD CONSTRAINT lawyers_user_id_key UNIQUE (user_id);
 CREATE INDEX IF NOT EXISTS idx_lawyers_user_id  ON lawyers(user_id);
 CREATE INDEX IF NOT EXISTS idx_lawyers_district ON lawyers(district);
 CREATE INDEX IF NOT EXISTS idx_lawyers_specialty ON lawyers(specialty);

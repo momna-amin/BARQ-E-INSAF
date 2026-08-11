@@ -1,0 +1,42 @@
+{
+  "name": "Barq-e-Insaf",
+  "short_name": "BarqInsaf",
+  "description": "Pakistan Legal Rights Platform — Sindh Family & Property Law",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0b5d3b",
+  "background_color": "#0b5d3b",
+  "lang": "ur",
+  "scope": "/",
+  "categories": ["law", "government", "productivity"],
+  "icons": [
+    {
+      "src": "/assets/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/images/start.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Login",
+      "url": "/RoleSelectScreen",
+      "icons": [{ "src": "/assets/images/logo.png", "sizes": "96x96" }]
+    }
+  ]
+}

@@ -1,5 +1,4 @@
 import React from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -8,11 +7,11 @@ import {
   StatusBar,
   Image,
   Dimensions,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts, RacingSansOne_400Regular } from '@expo-google-fonts/racing-sans-one';
-
 import InstallAppButton from '../components/InstallAppButton';
 
 const { width, height } = Dimensions.get('window');
@@ -61,22 +60,22 @@ export default function RoleSelectScreen() {
   const [fontsLoaded] = useFonts({ RacingSansOne_400Regular });
 
   const handleSelect = (roleId) => {
-    router.push(`/LoginScreen?role=${roleId}`);
+    router.push({ pathname: '/LoginScreen', params: { role: roleId } });
   };
 
   return (
-    <SafeAreaProvider style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#07152e" />
 
-      {/* Background — matches StartScreen exactly */}
+      {/* Full-screen background gradient */}
       <LinearGradient
         colors={['#14557a', '#040808', '#141363', '#180669']}
-        style={styles.backgroundGradient}
+        style={StyleSheet.absoluteFill}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       />
 
-      {/* Ambient blobs — same as StartScreen */}
+      {/* Ambient blobs */}
       <View style={[styles.ambientBlob, {
         top: height * 0.02, left: -width * 0.2,
         width: width * 0.65, height: width * 0.65,
@@ -113,7 +112,7 @@ export default function RoleSelectScreen() {
             Barq-e-Insaf
           </Text>
           <View style={{ flex: 1 }} />
-          <InstallAppButton style={{ marginTop: 0 }} />
+          <InstallAppButton />
         </View>
         <Text style={styles.headerSub}>Select your role to continue</Text>
       </View>
@@ -169,23 +168,14 @@ export default function RoleSelectScreen() {
         </Text>
       </View>
 
-    </SafeAreaProvider>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#092d70',
-    width: '100%',
-    maxWidth: 480,
-    alignSelf: 'center',
-    overflow: 'hidden',
-  },
-  backgroundGradient: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
+    backgroundColor: '#07152e',
   },
   ambientBlob: {
     position: 'absolute',
@@ -194,10 +184,10 @@ const styles = StyleSheet.create({
 
   // Header
   header: {
-    paddingHorizontal: 24,
-    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 54 : 40,
     paddingBottom: 16,
-    zIndex: 1,
+    zIndex: 2,
   },
   brandRow: {
     flexDirection: 'row',
@@ -211,7 +201,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   headerTitle: {
-    fontSize: 26,
+    fontSize: 24,
     color: '#fff',
     letterSpacing: -0.3,
   },
@@ -228,7 +218,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     gap: 11,
     justifyContent: 'center',
-    zIndex: 1,
+    zIndex: 2,
   },
   cardTouch: {
     borderRadius: 18,
@@ -290,7 +280,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // Arrow — blue gradient pill matching GET STARTED button
+  // Arrow
   arrowBox: {
     width: 38,
     height: 38,
@@ -307,9 +297,9 @@ const styles = StyleSheet.create({
   // Footer
   footer: {
     paddingHorizontal: 24,
-    paddingBottom: 28,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 24,
     alignItems: 'center',
-    zIndex: 1,
+    zIndex: 2,
   },
   footerText: {
     fontSize: 10,

@@ -307,9 +307,6 @@ export default function StartScreen() {
             <Text style={styles.secondaryBtnText}>EXPLORE PROJECT</Text>
           </TouchableOpacity>
 
-          {/* PWA Install Button — only shows on web when installable */}
-          <InstallAppButton style={{ marginTop: 4 }} />
-
         </View>
 
         <Text style={styles.bottomHint}>Legal assistance for Sindh · English · Urdu · Sindhi</Text>
