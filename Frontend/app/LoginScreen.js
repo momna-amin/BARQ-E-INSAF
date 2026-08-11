@@ -683,15 +683,16 @@ const styles = StyleSheet.create({
     color: '#1a1a1a',
   },
   eyeToggleBtn: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 6,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    backgroundColor: '#0F2744',
+    marginLeft: 8,
   },
   eyeToggleText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#555',
+    fontWeight: '800',
+    color: '#ffffff',
   },
   genderRow: {
     flexDirection: 'row',
