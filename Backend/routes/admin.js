@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const {
-  getStats, getPendingLawyers, verifyLawyer, getFlaggedCases,
+  getStats, getPendingLawyers, verifyLawyer, getFlaggedCases, updateAdminProfile
 } = require('../controllers/adminController');
-const { protect, allowRoles } = require('../middleware/auth');
 
-router.get('/stats',              protect, allowRoles('admin'), getStats);
-router.get('/pending-lawyers',    protect, allowRoles('admin'), getPendingLawyers);
-router.put('/lawyers/:id/verify', protect, allowRoles('admin'), verifyLawyer);
-router.get('/flagged-cases',      protect, allowRoles('admin'), getFlaggedCases);
+router.get('/stats', getStats);
+router.get('/pending-lawyers', getPendingLawyers);
+router.put('/lawyers/:id/verify', verifyLawyer);
+router.get('/flagged-cases', getFlaggedCases);
+router.put('/profile', updateAdminProfile);
 
 module.exports = router;

@@ -15,6 +15,7 @@ export default function AdminLayout() {
       <Stack.Screen name="AuditLogs" options={{ headerShown: false }} />
       <Stack.Screen name="CategoriesPage" options={{ headerShown: false }} />
       <Stack.Screen name="LocationsPage" options={{ headerShown: false }} />
+      <Stack.Screen name="AppointmentsPage" options={{ headerShown: false }} />
       <Stack.Screen name="SystemSettings" options={{ headerShown: false }} />
     </Stack>
   );
