@@ -60,7 +60,7 @@ export default function RoleSelectScreen() {
   const [fontsLoaded] = useFonts({ RacingSansOne_400Regular });
 
   const handleSelect = (roleId) => {
-    router.push({ pathname: '/LoginScreen', params: { role: roleId } });
+    router.push(`/LoginScreen?role=${roleId}`);
   };
 
   return (

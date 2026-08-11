@@ -188,7 +188,9 @@ const DistrictPicker = ({ value, onSelect, color }) => {
 // -- MAIN COMPONENT ---------------------------------------------------------
 
 export default function LoginScreen() {
-  const { role } = useLocalSearchParams();
+  const params = useLocalSearchParams();
+  const rawRole = params?.role;
+  const role = (typeof rawRole === 'string' ? rawRole : (Array.isArray(rawRole) ? rawRole[0] : 'citizen')) || 'citizen';
   const router   = useRouter();
   const config   = roleConfig[role] || roleConfig.citizen;
 
