@@ -19,9 +19,18 @@ const MENU_ITEMS = [
   { id: 'settings', label: 'System Settings', icon: '⚙️', route: '/(Admin)/SystemSettings' },
 ];
 
-export default function AdminSidebar({ activeRoute, isOpen = true, onClose }) {
+export default function AdminSidebar({ activeRoute, isOpen, onClose }) {
   const router = useRouter();
   const currentPath = usePathname();
+
+  // Internal Fallback Drawer State
+  const [internalOpen, setInternalOpen] = useState(true);
+  const showSidebar = isOpen !== undefined ? isOpen : internalOpen;
+
+  const handleClose = () => {
+    setInternalOpen(false);
+    if (onClose) onClose();
+  };
 
   // Profile Modal State
   const [profileModal, setProfileModal] = useState(false);
@@ -34,7 +43,7 @@ export default function AdminSidebar({ activeRoute, isOpen = true, onClose }) {
 
   const handleNavigate = (item) => {
     router.push(item.route);
-    if (onClose) onClose();
+    handleClose();
   };
 
   const handleLogout = () => {
@@ -70,7 +79,7 @@ export default function AdminSidebar({ activeRoute, isOpen = true, onClose }) {
     }
   };
 
-  if (!isOpen) return null;
+  if (!showSidebar) return null;
 
   return (
     <View style={styles.sidebarOverlayContainer}>
@@ -78,11 +87,11 @@ export default function AdminSidebar({ activeRoute, isOpen = true, onClose }) {
       <TouchableOpacity
         style={styles.backdrop}
         activeOpacity={1}
-        onPress={() => { if (onClose) onClose(); }}
+        onPress={handleClose}
       />
 
       <View style={styles.sidebar}>
-        {/* BRAND HEADER & PERMANENT CLOSE BUTTON */}
+        {/* BRAND HEADER & GUARANTEED WORKING CLOSE BUTTON */}
         <View style={styles.brandContainer}>
           <View style={styles.brandIcon}>
             <Text style={styles.brandIconText}>⚡</Text>
@@ -92,10 +101,10 @@ export default function AdminSidebar({ activeRoute, isOpen = true, onClose }) {
             <Text style={styles.brandBadge}>Super Admin Panel</Text>
           </View>
 
-          {/* PERMANENT CLOSE BUTTON FOR ALL SECTIONS */}
+          {/* PERMANENT WORKING CLOSE BUTTON FOR ALL SECTIONS */}
           <TouchableOpacity
             style={styles.closeBtn}
-            onPress={() => { if (onClose) onClose(); }}
+            onPress={handleClose}
             activeOpacity={0.7}
           >
             <Text style={styles.closeBtnText}>✕</Text>
