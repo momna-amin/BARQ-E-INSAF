@@ -15,7 +15,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMockStore, lawyerProfile, updateLawyerProfile } from './MockStore';
-import api from '../../constants/api';
+import api from '../../services/api';
+import { clearTokens } from '../../services/authStorage';
 
 export default function LawyerProfile() {
   useMockStore();
@@ -103,10 +104,15 @@ export default function LawyerProfile() {
     }
   };
 
+  const doLogout = async () => {
+    await clearTokens();
+    router.replace('/RoleSelectScreen');
+  };
+
   const handleLogout = () => {
     if (Platform.OS === 'web' && typeof window !== 'undefined' && window.confirm) {
       if (window.confirm('Are you sure you want to log out of Barq-e-Insaf Advocate Portal?')) {
-        router.replace('/RoleSelectScreen');
+        doLogout();
       }
     } else {
       Alert.alert(
@@ -114,7 +120,7 @@ export default function LawyerProfile() {
         'Are you sure you want to log out of Barq-e-Insaf Advocate Portal?',
         [
           { text: 'Cancel', style: 'cancel' },
-          { text: 'Logout', style: 'destructive', onPress: () => router.replace('/RoleSelectScreen') },
+          { text: 'Logout', style: 'destructive', onPress: doLogout },
         ]
       );
     }
@@ -298,7 +304,25 @@ export default function LawyerProfile() {
           <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
             <Text style={styles.saveText}>SAVE CHANGES</Text>
           </TouchableOpacity>
-        )}
+        {/* Logout Button */}
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#fee2e2',
+            borderWidth: 1.5,
+            borderColor: '#fca5a5',
+            borderRadius: 12,
+            paddingVertical: 14,
+            alignItems: 'center',
+            marginTop: 16,
+            marginBottom: 30,
+          }}
+          onPress={handleLogout}
+          activeOpacity={0.85}
+        >
+          <Text style={{ color: '#dc2626', fontSize: 14, fontWeight: '800', letterSpacing: 0.5 }}>
+            🚪 LOGOUT ADVOCATE ACCOUNT
+          </Text>
+        </TouchableOpacity>
 
       </ScrollView>
 

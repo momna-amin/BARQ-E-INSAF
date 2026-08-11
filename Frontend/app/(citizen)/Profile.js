@@ -14,7 +14,8 @@ import {
 import { useRouter } from 'expo-router';
 import styles from './Profile.styles';
 import { useMockStore, userData, updateProfile } from './MockStore';
-import api from '../../constants/api';
+import api from '../../services/api';
+import { clearTokens } from '../../services/authStorage';
 
 const mockAvatars = ['AK', 'ZK', 'BK', 'MK', 'SK'];
 
@@ -93,10 +94,15 @@ export default function Profile() {
     }
   };
 
+  const doLogout = async () => {
+    await clearTokens();
+    router.replace('/RoleSelectScreen');
+  };
+
   const handleLogout = () => {
     if (Platform.OS === 'web' && typeof window !== 'undefined' && window.confirm) {
       if (window.confirm('Are you sure you want to log out of Barq-e-Insaf?')) {
-        router.replace('/RoleSelectScreen');
+        doLogout();
       }
     } else {
       Alert.alert(
@@ -104,7 +110,7 @@ export default function Profile() {
         'Are you sure you want to log out of Barq-e-Insaf?',
         [
           { text: 'Cancel', style: 'cancel' },
-          { text: 'Logout', style: 'destructive', onPress: () => router.replace('/RoleSelectScreen') },
+          { text: 'Logout', style: 'destructive', onPress: doLogout },
         ]
       );
     }
