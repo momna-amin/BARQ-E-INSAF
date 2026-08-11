@@ -67,11 +67,11 @@ export default function RootLayout() {
     })();
   }, []);
 
-  // Show a minimal splash while session check runs
+  // Show a minimal theme-matched splash while session check runs
   if (checking) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#0b5d3b', alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="large" color="#ffffff" />
+      <View style={{ flex: 1, backgroundColor: '#07152e', alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" color="#60a5fa" />
       </View>
     );
   }
