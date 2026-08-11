@@ -1,11 +1,14 @@
 /**
  * InstallAppButton.js
- * 1-Step PWA Install Button for Chrome on Expo Web (Vercel & Local).
- * ALWAYS VISIBLE on web landing, role selection, & login screens.
- * Pressing it triggers Chrome's native prompt or instant installation guide.
+ * Shows Chrome's NATIVE install prompt directly — no manual instructions ever shown.
+ * Button is hidden if:
+ *   - Not on web
+ *   - Already running as installed PWA (standalone)
+ *   - Chrome hasn't fired beforeinstallprompt yet (not installable)
+ * When pressed: triggers Chrome's own "Install / Cancel" dialog directly.
  */
 import React, { useEffect, useState } from 'react';
-import { Platform, TouchableOpacity, Text, StyleSheet, View, Animated, Alert } from 'react-native';
+import { Platform, TouchableOpacity, Text, StyleSheet, View, Animated } from 'react-native';
 
 export default function InstallAppButton({ style }) {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -14,10 +17,9 @@ export default function InstallAppButton({ style }) {
   const pulseAnim = React.useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Only run on web
     if (Platform.OS !== 'web' || typeof window === 'undefined') return;
 
-    // Check if running as installed PWA standalone
+    // Already running as installed PWA → never show
     if (
       window.matchMedia('(display-mode: standalone)').matches ||
       window.navigator.standalone === true
@@ -27,8 +29,8 @@ export default function InstallAppButton({ style }) {
     }
 
     const handleBeforeInstall = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
+      e.preventDefault();        // capture the event
+      setDeferredPrompt(e);      // store it — now button becomes visible
     };
 
     const handleInstalled = () => {
@@ -45,52 +47,35 @@ export default function InstallAppButton({ style }) {
     };
   }, []);
 
-  // Continuous subtle pulse animation
+  // Subtle pulse animation
   useEffect(() => {
-    if (installed) return;
+    if (installed || !deferredPrompt) return;
     const pulse = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 1.05, duration: 900, useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 1, duration: 900, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1.06, duration: 900, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1,    duration: 900, useNativeDriver: true }),
       ])
     );
     pulse.start();
     return () => pulse.stop();
-  }, [installed]);
+  }, [installed, deferredPrompt]);
 
-  // Don't show if on native platforms or if already running as installed PWA
-  if (Platform.OS !== 'web' || installed) return null;
+  // ── HIDE if: native app, already installed, OR prompt not available yet ──
+  if (Platform.OS !== 'web' || installed || !deferredPrompt) return null;
 
   const handleInstall = async () => {
-    if (installing) return;
-
-    if (deferredPrompt) {
-      setInstalling(true);
-      try {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') setInstalled(true);
-      } catch (err) {
-        console.warn('Install prompt error:', err);
-      } finally {
-        setInstalling(false);
-        setDeferredPrompt(null);
-      }
-    } else {
-      // Fallback instruction if Chrome prompt hasn't fired yet
-      if (typeof window !== 'undefined' && window.alert) {
-        window.alert(
-          '📱 Install Barq-e-Insaf App:\n\n' +
-          '1. Chrome Browser menu (3 dots ⋮ at top right) dabayein.\n' +
-          '2. "Install App" ya "Add to Home Screen" select karein.\n\n' +
-          'App aap ki Home Screen aur App Drawer mein add ho jayegi!'
-        );
-      } else {
-        Alert.alert(
-          'Install App 📱',
-          'Chrome menu (3 dots ⋮) -> "Install App" / "Add to Home Screen" dabayein app install karne ke liye.'
-        );
-      }
+    if (installing || !deferredPrompt) return;
+    setInstalling(true);
+    try {
+      // Triggers Chrome's own NATIVE "Install / Cancel" dialog — no custom UI
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') setInstalled(true);
+    } catch (err) {
+      console.warn('Install prompt error:', err);
+    } finally {
+      setInstalling(false);
+      setDeferredPrompt(null);
     }
   };
 
@@ -103,7 +88,7 @@ export default function InstallAppButton({ style }) {
         activeOpacity={0.85}
       >
         <View style={styles.badgeBox}>
-          <Text style={styles.badgeIcon}>📲</Text>
+          <Text style={styles.badgeIcon}>{installing ? '⏳' : '📲'}</Text>
         </View>
         <View style={styles.textColumn}>
           <Text style={styles.btnTitle}>{installing ? 'Installing...' : 'Install App'}</Text>
@@ -140,9 +125,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   badgeIcon: { fontSize: 13 },
-  textColumn: {
-    justifyContent: 'center',
-  },
+  textColumn: { justifyContent: 'center' },
   btnTitle: {
     color: '#ffffff',
     fontSize: 12,
