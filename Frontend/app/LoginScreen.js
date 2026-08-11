@@ -11,6 +11,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -207,6 +208,11 @@ export default function LoginScreen() {
   const [loading,     setLoading]     = useState(false);
   const [errors,      setErrors]      = useState({});
 
+  // OTP Verification Modal State
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpCode,      setOtpCode]      = useState('');
+  const [otpLoading,   setOtpLoading]   = useState(false);
+
   const strength = getPasswordStrength(password);
 
   const clearErrors = () => setErrors({});
@@ -345,33 +351,83 @@ export default function LoginScreen() {
         body.sbcNumber = sbcNumber;
         body.specialty = specialty;
       }
-      const res  = await api.post('/auth/register', body);
-      const user = res.data;
 
-      // Save tokens upon registration
-      if (user.accessToken && user.refreshToken) {
-        await saveTokens(user.accessToken, user.refreshToken);
-      } else if (user.token) {
-        await saveTokens(user.token, user.token);
+      // Step 1: Send OTP to user's Email
+      await api.post('/auth/send-register-otp', body);
+
+      // Step 2: Show OTP Modal
+      setShowOtpModal(true);
+      if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
+        window.alert(`📩 Verification OTP sent to: ${email}\n\nPlease check your email inbox/spam folder and enter the 6-digit code to complete registration.`);
+      } else {
+        Alert.alert(
+          '📩 Verification Code Sent',
+          `An OTP code has been sent to ${email}.\n\nPlease check your inbox/spam and enter the code to complete registration.`
+        );
       }
-      await saveUser({ id: user.id, name: user.name, email: user.email, role: user.role });
-
-      const userRole = user.role || role;
-
-      Alert.alert('Registration Successful 🎉', `Welcome to Barq-e-Insaf ${userRole.toUpperCase()} Portal!`, [{
-        text: 'Open Portal',
-        onPress: () => {
-          if (userRole === 'citizen') router.replace('/(citizen)/CitizenHome');
-          if (userRole === 'lawyer')  router.replace('/(lawyer)/LawyerHome');
-          if (userRole === 'admin')   router.replace('/(Admin)/AdminDashboard');
-          if (userRole === 'ngo')     router.replace('/(ngo)/NGOHome');
-        },
-      }]);
     } catch (error) {
-      const errorMsg = error?.response?.data?.message || 'Registration failed. Please check details and try again.';
+      const errorMsg = error?.response?.data?.message || 'Failed to send OTP. Please check details and try again.';
       Alert.alert('Registration Error ⚠️', errorMsg);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ── OTP VERIFY & ACCOUNT CREATION ─────────────────────────────────────────
+  const handleVerifyOtpAndCreate = async () => {
+    if (!otpCode || otpCode.trim().length !== 6) {
+      Alert.alert('Invalid OTP ⚠️', 'Please enter the 6-digit OTP code sent to your email.');
+      return;
+    }
+
+    try {
+      setOtpLoading(true);
+      const body = { name, email, password, role, phone, district, cnic, otp: otpCode.trim() };
+      if (role === 'lawyer') {
+        body.sbcNumber = sbcNumber;
+        body.specialty = specialty;
+      }
+
+      await api.post('/auth/verify-register-otp', body);
+
+      setShowOtpModal(false);
+      setOtpCode('');
+
+      if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
+        window.alert('🎉 Account Created Successfully!\n\nYour account has been verified and created. Please Login using your email and password.');
+      } else {
+        Alert.alert(
+          '🎉 Account Created Successfully!',
+          'Your account has been verified and created. Please Login using your email and password.'
+        );
+      }
+
+      // Switch to Login tab and retain email
+      setActiveTab('login');
+      setPassword('');
+      setRetypePass('');
+    } catch (error) {
+      const errorMsg = error?.response?.data?.message || 'OTP verification failed. Please try again.';
+      Alert.alert('OTP Verification Failed ⚠️', errorMsg);
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      setOtpLoading(true);
+      const body = { name, email, role, phone, district, cnic };
+      if (role === 'lawyer') {
+        body.sbcNumber = sbcNumber;
+        body.specialty = specialty;
+      }
+      await api.post('/auth/send-register-otp', body);
+      Alert.alert('OTP Resent 📩', `A new verification OTP has been sent to ${email}`);
+    } catch (error) {
+      Alert.alert('Error ⚠️', error?.response?.data?.message || 'Failed to resend OTP');
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -625,6 +681,67 @@ export default function LoginScreen() {
 
         </ScrollView>
       </View>
+
+      {/* OTP VERIFICATION MODAL */}
+      <Modal
+        visible={showOtpModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowOtpModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeaderIcon}>
+              <Text style={{ fontSize: 32 }}>📩</Text>
+            </View>
+
+            <Text style={styles.modalTitle}>Verify Email OTP</Text>
+            <Text style={styles.modalSub}>
+              Enter the 6-digit OTP code sent to your Gmail:{'\n'}
+              <Text style={{ fontWeight: '700', color: '#0b5d3b' }}>{email}</Text>
+            </Text>
+
+            <TextInput
+              style={styles.otpInput}
+              placeholder="123456"
+              placeholderTextColor="#999"
+              keyboardType="number-pad"
+              maxLength={6}
+              value={otpCode}
+              onChangeText={setOtpCode}
+            />
+
+            <TouchableOpacity
+              style={[styles.modalSubmitBtn, { backgroundColor: config.color }]}
+              onPress={handleVerifyOtpAndCreate}
+              disabled={otpLoading}
+              activeOpacity={0.85}
+            >
+              {otpLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.modalSubmitBtnText}>VERIFY & CREATE ACCOUNT</Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.resendBtn}
+              onPress={handleResendOtp}
+              disabled={otpLoading}
+            >
+              <Text style={styles.resendBtnText}>Resend OTP Code</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.cancelBtn}
+              onPress={() => setShowOtpModal(false)}
+              disabled={otpLoading}
+            >
+              <Text style={styles.cancelBtnText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -874,5 +991,92 @@ const styles = StyleSheet.create({
   },
   dropdownItemText: {
     fontSize: 13, color: '#333', fontWeight: '500',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalHeaderIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#e6f7ef',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#1a1a2e',
+    marginBottom: 8,
+  },
+  modalSub: {
+    fontSize: 13,
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: 20,
+  },
+  otpInput: {
+    width: '100%',
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: 8,
+    textAlign: 'center',
+    backgroundColor: '#f8fafc',
+    borderWidth: 2,
+    borderColor: '#cbd5e1',
+    borderRadius: 14,
+    paddingVertical: 14,
+    color: '#0f172a',
+    marginBottom: 20,
+  },
+  modalSubmitBtn: {
+    width: '100%',
+    paddingVertical: 16,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  modalSubmitBtnText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  resendBtn: {
+    paddingVertical: 8,
+    marginBottom: 8,
+  },
+  resendBtnText: {
+    color: '#2563eb',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  cancelBtn: {
+    paddingVertical: 8,
+  },
+  cancelBtnText: {
+    color: '#64748b',
+    fontSize: 13,
+    fontWeight: '500',
   },
 });

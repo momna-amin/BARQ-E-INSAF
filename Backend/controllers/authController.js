@@ -98,26 +98,12 @@ const register = async (req, res) => {
           user_id: user.id,
           sbc_number: sbcNumber,
           specialty,
-          district: district || null,
-          is_verified: false,         // Admin approval needed
+          bar_council: 'Sindh Bar Council',
+          experience_years: 1,
           verification_status: 'pending',
         });
 
       if (lawyerError) {
-        console.error('Lawyer profile error:', lawyerError.message);
-        // Don't fail — user is created, lawyer profile can be added later
-      }
-    }
-
-    // ── Send welcome OTP email (fire-and-forget)
-    try {
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      otpStore.set(cleanEmail, { otp, expires: Date.now() + 10 * 60 * 1000, attempts: 0 });
-      const mailData = welcomeOtpEmail(user.name, otp);
-      sendMail({ to: cleanEmail, subject: mailData.subject, html: mailData.html })
-        .then(() => console.log(`✅ Welcome email sent to ${cleanEmail}`))
-        .catch(err => console.error('Welcome email failed:', err.message));
-    } catch (mailErr) {
       console.error('Mail setup error:', mailErr.message);
     }
 
@@ -391,4 +377,15 @@ const googleAuth = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getMe, refreshToken, forgotPassword, verifyOtp, resetPassword, googleAuth };
+module.exports = {
+  register,
+  sendRegisterOtp,
+  verifyRegisterOtpAndCreate,
+  login,
+  getMe,
+  refreshToken,
+  forgotPassword,
+  verifyOtp,
+  resetPassword,
+  googleAuth,
+};

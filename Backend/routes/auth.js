@@ -2,15 +2,17 @@
 const express = require('express');
 const router = express.Router();
 const {
-  register, login, getMe,
+  register, sendRegisterOtp, verifyRegisterOtpAndCreate, login, getMe,
   refreshToken, forgotPassword, verifyOtp, resetPassword, googleAuth,
 } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 
 // Existing
-router.post('/register',  register);
-router.post('/login',     login);
-router.get('/me',         protect, getMe);
+router.post('/register',             register);
+router.post('/send-register-otp',    sendRegisterOtp);
+router.post('/verify-register-otp',  verifyRegisterOtpAndCreate);
+router.post('/login',                login);
+router.get('/me',                    protect, getMe);
 
 // Persistent Session — Refresh Token
 router.post('/refresh',         refreshToken);
