@@ -342,8 +342,12 @@ export default function LoginScreen() {
         body.specialty = specialty;
       }
 
+      // Step 1: Send OTP to user's Email (backend stores the full pending
+      // registration payload server-side, keyed by email)
       await api.post('/auth/send-register-otp', body);
 
+      // Step 2: Navigate to the dedicated OTP verification page (new page,
+      // not a modal) — it only needs the email from here on.
       router.push({
         pathname: '/RegisterVerifyOtp',
         params: { email: email.trim().toLowerCase(), role },
@@ -607,11 +611,14 @@ export default function LoginScreen() {
         </ScrollView>
       </View>
 
+      {/* Premium overlay spinner — sits over this page during login/signup
+          submits, instead of a blank/solid loading screen. */}
       <LoadingOverlay visible={loading} />
     </KeyboardAvoidingView>
   );
 }
 
+// -- STYLES -----------------------------------------------------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -856,5 +863,92 @@ const styles = StyleSheet.create({
   },
   dropdownItemText: {
     fontSize: 13, color: '#333', fontWeight: '500',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalHeaderIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#e6f7ef',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#1a1a2e',
+    marginBottom: 8,
+  },
+  modalSub: {
+    fontSize: 13,
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: 20,
+  },
+  otpInput: {
+    width: '100%',
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: 8,
+    textAlign: 'center',
+    backgroundColor: '#f8fafc',
+    borderWidth: 2,
+    borderColor: '#cbd5e1',
+    borderRadius: 14,
+    paddingVertical: 14,
+    color: '#0f172a',
+    marginBottom: 20,
+  },
+  modalSubmitBtn: {
+    width: '100%',
+    paddingVertical: 16,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  modalSubmitBtnText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  resendBtn: {
+    paddingVertical: 8,
+    marginBottom: 8,
+  },
+  resendBtnText: {
+    color: '#2563eb',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  cancelBtn: {
+    paddingVertical: 8,
+  },
+  cancelBtnText: {
+    color: '#64748b',
+    fontSize: 13,
+    fontWeight: '500',
   },
 });

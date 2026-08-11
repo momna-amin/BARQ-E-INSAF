@@ -46,10 +46,10 @@ export default function RootLayout() {
           const role = user?.role || (await getUser())?.role;
           const dest =
             role === 'citizen' ? '/(citizen)/CitizenHome' :
-            role === 'lawyer'  ? '/(lawyer)/LawyerHome'  :
-            role === 'admin'   ? '/(Admin)/AdminDashboard' :
-            role === 'ngo'     ? '/(ngo)/NGOHome'         :
-            null;
+              role === 'lawyer' ? '/(lawyer)/LawyerHome' :
+                role === 'admin' ? '/(Admin)/AdminDashboard' :
+                  role === 'ngo' ? '/(ngo)/NGOHome' :
+                    null;
 
           if (dest) {
             router.replace(dest as any);
@@ -67,11 +67,11 @@ export default function RootLayout() {
     })();
   }, []);
 
-  // Show a minimal theme-matched splash while session check runs
+  // Show a minimal splash while session check runs
   if (checking) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#07152e', alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="large" color="#60a5fa" />
+      <View style={{ flex: 1, backgroundColor: '#0b5d3b', alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" color="#ffffff" />
       </View>
     );
   }

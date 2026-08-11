@@ -105,6 +105,7 @@ const register = async (req, res) => {
         });
 
       if (lawyerError) {
+        // Non-fatal — account already exists, just log it
         console.error('Lawyer profile creation error:', lawyerError.message);
       }
     }
@@ -135,6 +136,8 @@ const sendRegisterOtp = async (req, res) => {
     if (!email) return res.status(400).json({ message: 'Email zaroori hai' });
     const cleanEmail = email.trim().toLowerCase();
 
+    // ── Resend path: called from the OTP page, which only has the email.
+    // Reuse the pending-registration payload already stored from the first request.
     if (resend) {
       const existingRecord = await otpStore.getOtp(cleanEmail, 'register');
       if (!existingRecord) {
@@ -157,6 +160,7 @@ const sendRegisterOtp = async (req, res) => {
       return res.status(400).json({ message: 'Lawyer registration ke liye SBC Number aur Specialty zaroori hai' });
     }
 
+    // Don't let someone re-request an OTP for an email that's already a full account
     const { data: existing } = await supabase
       .from('users').select('id').eq('email', cleanEmail).single();
     if (existing) {
@@ -168,6 +172,8 @@ const sendRegisterOtp = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = generateOtp();
 
+    // Store OTP + the full pending-registration payload together, so
+    // verify-register-otp doesn't need the client to resend the password.
     await otpStore.setOtp(cleanEmail, 'register', otp, 10 * 60 * 1000, {
       name: name.trim(),
       email: cleanEmail,
@@ -218,6 +224,7 @@ const verifyRegisterOtpAndCreate = async (req, res) => {
       return res.status(400).json({ message: `Galat OTP (${Math.max(0, 5 - attempts)} koshishein baqi)` });
     }
 
+    // OTP correct → create the account from the stored payload
     const p = record.payload;
 
     const { data: existing } = await supabase
@@ -406,6 +413,10 @@ const forgotPassword = async (req, res) => {
     const { data: user } = await supabase
       .from('users').select('id, name').eq('email', cleanEmail).single();
 
+    // Don't reveal if email exists (security) — but ALWAYS return a clear
+    // success message so the frontend can move to the OTP screen / show a
+    // toast. (Silently doing nothing here, combined with Alert.alert being
+    // a no-op on web, is what made "Send OTP" look broken.)
     if (!user) {
       return res.json({ message: 'Agar account hai toh OTP email pe aa jayega' });
     }

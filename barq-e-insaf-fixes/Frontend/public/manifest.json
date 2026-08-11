@@ -7,8 +7,8 @@
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
-  "theme_color": "#07152e",
-  "background_color": "#07152e",
+  "theme_color": "#0b5d3b",
+  "background_color": "#0b5d3b",
   "lang": "ur",
   "scope": "/",
   "categories": ["law", "government", "productivity"],
@@ -36,6 +36,14 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/images/start.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
   ],
   "shortcuts": [

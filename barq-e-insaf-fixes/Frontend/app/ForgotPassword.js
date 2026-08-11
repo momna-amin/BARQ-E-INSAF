@@ -1,8 +1,17 @@
+/**
+ * ForgotPassword.js
+ * 3-step forgot password flow:
+ *   Step 1 → Email entry
+ *   Step 2 → 6-box OTP (retry until correct, 5-attempt limit, 10min expiry)
+ *   Step 3 → New password + confirm
+ *
+ * Design: Barq-e-Insaf dark green theme, matching existing LoginScreen style
+ */
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator,
-  Dimensions, Animated,
+  Alert, Dimensions, Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -12,11 +21,11 @@ import LoadingOverlay from '../components/LoadingOverlay';
 import showAlert from '../utils/showAlert';
 
 const { width, height } = Dimensions.get('window');
-const RESEND_DELAY = 60;
+const RESEND_DELAY = 60; // seconds
 
 export default function ForgotPassword() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1); // 1 | 2 | 3
   const [email, setEmail] = useState('');
   const [resetToken, setResetToken] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -26,6 +35,7 @@ export default function ForgotPassword() {
   const [otpError, setOtpError] = useState('');
   const [cooldown, setCooldown] = useState(0);
 
+  // Step indicator slide animation
   const slideX = useRef(new Animated.Value(0)).current;
 
   const slideToStep = (s) => {
@@ -37,12 +47,14 @@ export default function ForgotPassword() {
     setStep(s);
   };
 
+  // Countdown timer for OTP resend
   useEffect(() => {
     if (cooldown <= 0) return;
     const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
     return () => clearTimeout(t);
   }, [cooldown]);
 
+  // ── Step 1: Send OTP ──────────────────────────────────────────────────────
   const handleSendOtp = async () => {
     const cleanEmail = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
@@ -63,6 +75,7 @@ export default function ForgotPassword() {
     }
   };
 
+  // ── Step 2: Verify OTP ────────────────────────────────────────────────────
   const handleVerifyOtp = async (otp) => {
     setOtpError('');
     try {
@@ -93,6 +106,7 @@ export default function ForgotPassword() {
     }
   };
 
+  // ── Step 3: Reset Password ────────────────────────────────────────────────
   const handleResetPassword = async () => {
     if (newPassword.length < 8) {
       showAlert('⚠️ Error', 'Password kam az kam 8 characters ka hona chahiye');
@@ -126,6 +140,7 @@ export default function ForgotPassword() {
         style={styles.kav}
       >
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+          {/* Header */}
           <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
             <Text style={styles.backText}>← Wapis</Text>
           </TouchableOpacity>
@@ -136,6 +151,7 @@ export default function ForgotPassword() {
             <Text style={styles.logoSub}>Password Reset</Text>
           </View>
 
+          {/* Step indicator */}
           <View style={styles.stepRow}>
             {stepLabels.map((label, i) => {
               const num = i + 1;
@@ -157,7 +173,10 @@ export default function ForgotPassword() {
             })}
           </View>
 
+          {/* Steps Card */}
           <View style={styles.card}>
+
+            {/* ── STEP 1: Email ──────────────────────────────────────── */}
             {step === 1 && (
               <>
                 <Text style={styles.cardTitle}>Email Darj Karein</Text>
@@ -189,6 +208,7 @@ export default function ForgotPassword() {
               </>
             )}
 
+            {/* ── STEP 2: OTP ────────────────────────────────────────── */}
             {step === 2 && (
               <>
                 <Text style={styles.cardTitle}>Code Darj Karein</Text>
@@ -220,6 +240,7 @@ export default function ForgotPassword() {
               </>
             )}
 
+            {/* ── STEP 3: New Password ────────────────────────────────── */}
             {step === 3 && (
               <>
                 <Text style={styles.cardTitle}>Naya Password</Text>
@@ -291,6 +312,7 @@ const styles = StyleSheet.create({
   logoTitle: { color: '#fff', fontSize: 22, fontWeight: '800', letterSpacing: 1 },
   logoSub: { color: 'rgba(255,255,255,0.7)', fontSize: 13, marginTop: 2 },
 
+  // Step Indicator
   stepRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 24 },
   stepItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   stepCircle: {
