@@ -15,7 +15,7 @@ export default function NotificationsCenterScreen() {
       </View>
       {notifications.map(n => (
         <TouchableOpacity key={n.id} onPress={() => markNotificationRead(n.id)} activeOpacity={0.7}>
-          <GlassCard style={[s.card, !n.read && s.unread]}>
+          <GlassCard style={n.read ? s.card : { ...s.card, ...s.unread }}>
             <View style={s.row}>
               {!n.read && <View style={s.dot} />}
               <View style={{ flex: 1 }}>

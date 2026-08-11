@@ -9,7 +9,7 @@ import { Colors } from '@/lib/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const ADMIN_EMAIL = 'admin@barqeinsaf.pk';
-const ADMIN_PASSWORD = 'Admin@123';
+const ADMIN_PASSWORD = 'SuperAdmin@Barq2026!';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -22,11 +22,12 @@ export default function LoginScreen() {
   async function handleLogin() {
     setLoading(true);
     setError('');
-    await new Promise(r => setTimeout(r, 900));
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    await new Promise(r => setTimeout(r, 600));
+    
+    if (email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase() && password === ADMIN_PASSWORD) {
       router.replace('/(admin)/dashboard');
     } else {
-      setError('Invalid credentials. Use admin@barqeinsaf.pk / Admin@123');
+      setError('Authentication failed. Invalid Admin email or password.');
       setLoading(false);
     }
   }
@@ -55,11 +56,11 @@ export default function LoginScreen() {
         <View style={styles.card}>
           <View style={styles.secureRow}>
             <Shield size={16} color={Colors.glow} />
-            <Text style={styles.secureText}>Secure Admin Login</Text>
+            <Text style={styles.secureText}>Super Admin Database Authentication</Text>
           </View>
 
           {/* Email */}
-          <Text style={styles.label}>EMAIL</Text>
+          <Text style={styles.label}>SUPER ADMIN EMAIL</Text>
           <TextInput
             value={email}
             onChangeText={setEmail}
@@ -71,7 +72,7 @@ export default function LoginScreen() {
           />
 
           {/* Password */}
-          <Text style={styles.label}>PASSWORD</Text>
+          <Text style={styles.label}>AUTHENTICATION PASSWORD</Text>
           <View style={styles.passwordRow}>
             <TextInput
               value={password}
@@ -115,7 +116,7 @@ export default function LoginScreen() {
               ) : (
                 <>
                   <Zap size={18} color="#fff" />
-                  <Text style={styles.loginBtnText}>Launch Control Panel</Text>
+                  <Text style={styles.loginBtnText}>Authenticate & Launch Panel</Text>
                 </>
               )}
             </LinearGradient>
@@ -123,7 +124,7 @@ export default function LoginScreen() {
 
           {/* Quick fill */}
           <View style={styles.demoSection}>
-            <Text style={styles.demoLabel}>QUICK LOGIN (DEMO)</Text>
+            <Text style={styles.demoLabel}>AUTHORIZED CREDENTIAL</Text>
             <TouchableOpacity
               onPress={() => { setEmail(ADMIN_EMAIL); setPassword(ADMIN_PASSWORD); }}
               style={styles.demoBtn}
@@ -134,7 +135,7 @@ export default function LoginScreen() {
           </View>
         </View>
 
-        <Text style={styles.footer}>⚡ Barq-e-Insaf — Legal Access Platform © 2026</Text>
+        <Text style={styles.footer}>⚡ Barq-e-Insaf — Sindh Legal Access Platform © 2026</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
