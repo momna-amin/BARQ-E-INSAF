@@ -12,7 +12,7 @@ import { getTokens, saveTokens, clearTokens } from '../services/authStorage';
 // ── Base URL detection ────────────────────────────────────────────────────────
 // On Expo dev, hostUri gives you your laptop's local IP automatically.
 // On Vercel (production web), use the deployed backend URL.
-const PROD_BACKEND = 'https://barq-e-insaf-backend.vercel.app/api';
+const PROD_BACKEND = 'https://barq-e-insaf.vercel.app/api';
 
 function getBaseUrl() {
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
