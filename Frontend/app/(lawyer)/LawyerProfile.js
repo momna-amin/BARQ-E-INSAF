@@ -304,6 +304,8 @@ export default function LawyerProfile() {
           <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
             <Text style={styles.saveText}>SAVE CHANGES</Text>
           </TouchableOpacity>
+        )}
+
         {/* Logout Button */}
         <TouchableOpacity
           style={{
