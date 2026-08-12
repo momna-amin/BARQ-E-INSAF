@@ -136,7 +136,7 @@ export default function LandingScreen() {
             {/* Image 2 */}
             <View style={styles.imageCard}>
               <Image
-                source={require('../assets/images/pak falg.jpg')}
+                source={require('../assets/images/pak-flag.jpg')}
                 style={styles.cardPhoto}
                 resizeMode="cover"
               />

@@ -16,7 +16,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import api from '../services/api';
 import { saveTokens, saveUser, getTokens, getUser, clearTokens } from '../services/authStorage';
 import GoogleLoginButton from '../components/GoogleLoginButton';
-import InstallAppButton from '../components/InstallAppButton';
 import LoadingOverlay from '../components/LoadingOverlay';
 import showAlert from '../utils/showAlert';
 
@@ -435,10 +434,6 @@ export default function LoginScreen() {
           >
             <Text style={styles.backText}>← Back</Text>
           </TouchableOpacity>
-
-          <View style={{ position: 'absolute', top: 48, right: 20, zIndex: 10 }}>
-            <InstallAppButton style={{ marginTop: 0 }} />
-          </View>
 
           <View style={styles.logoCircle}>
             <Text style={styles.logoEmoji}>⚡</Text>

@@ -60,12 +60,6 @@ export default function AIChatFloatingButton() {
     })
   ).current;
 
-  // 🛑 HIDE FLOATING BUTTON ON SPLASH & STARTUP SCREENS
-  const hiddenRoutes = ['/', '/SplashScreen', '/StartScreen', '/OnboardingScreen'];
-  if (hiddenRoutes.includes(pathname)) {
-    return null;
-  }
-
   const sendMessage = async () => {
     if (inputText.trim() === '' || loading) return;
 
@@ -108,8 +102,9 @@ export default function AIChatFloatingButton() {
 
   // Chatbot only allowed on the entry screens (Start + Role Select).
   // Everywhere else — login, signup, dashboards, admin, etc. — it stays hidden.
+  const normalizedPath = (pathname || '/').replace(/\/+$/, '') || '/';
   const ALLOWED_PATHS = ['/', '/StartScreen', '/RoleSelectScreen'];
-  const isAllowed = ALLOWED_PATHS.includes(pathname);
+  const isAllowed = ALLOWED_PATHS.includes(normalizedPath);
   if (!isAllowed) return null;
 
   return (

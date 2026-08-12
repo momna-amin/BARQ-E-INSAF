@@ -61,6 +61,62 @@ const verifyLawyer = async (req, res) => {
   }
 };
 
+// GET /api/admin/recent-activity
+// Live feed: newest signups + newest consultation requests (any status)
+const getRecentActivity = async (req, res) => {
+  try {
+    const limit = Number(req.query.limit) || 15;
+
+    const [recentUsers, recentRequests] = await Promise.all([
+      supabase
+        .from('users')
+        .select('id, name, email, role, created_at')
+        .order('created_at', { ascending: false })
+        .limit(limit),
+      supabase
+        .from('lawyer_requests')
+        .select(`
+          id, status, reason, created_at, updated_at,
+          users:user_id ( id, name, email ),
+          lawyers:lawyer_id ( id, lawyer_users:user_id ( name, email ) )
+        `)
+        .order('created_at', { ascending: false })
+        .limit(limit),
+    ]);
+
+    const signupEvents = (recentUsers.data || []).map((u) => ({
+      type: 'signup',
+      id: `signup-${u.id}`,
+      title: `${u.role === 'lawyer' ? 'Lawyer' : 'Citizen'} signed up`,
+      detail: `${u.name} (${u.email})`,
+      status: null,
+      timestamp: u.created_at,
+    }));
+
+    const requestEvents = (recentRequests.data || []).map((r) => ({
+      type: 'consultation_request',
+      id: `req-${r.id}`,
+      title:
+        r.status === 'pending'
+          ? 'New consultation request'
+          : `Consultation request ${r.status}`,
+      detail: `${r.users?.name || 'User'} → ${r.lawyers?.lawyer_users?.name || 'Advocate'}${r.reason ? ` (${r.reason})` : ''}`,
+      status: r.status,
+      userId: r.users?.id,
+      lawyerId: r.lawyers?.id,
+      timestamp: r.updated_at || r.created_at,
+    }));
+
+    const feed = [...signupEvents, ...requestEvents]
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, limit);
+
+    res.json({ activity: feed });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // GET /api/admin/flagged-cases
 const getFlaggedCases = async (req, res) => {
   try {
@@ -113,5 +169,5 @@ const updateAdminProfile = async (req, res) => {
 };
 
 module.exports = {
-  getStats, getPendingLawyers, verifyLawyer, getFlaggedCases, updateAdminProfile
+  getStats, getPendingLawyers, verifyLawyer, getFlaggedCases, updateAdminProfile, getRecentActivity
 };
