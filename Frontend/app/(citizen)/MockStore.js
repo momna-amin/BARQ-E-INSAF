@@ -196,3 +196,70 @@ export const removeEvidenceFromCase = (caseId, index) => {
     notify();
   }
 };
+
+export const consultationRequests = [
+  {
+    id: 'req-1',
+    lawyerId: '1',
+    lawyerName: 'Sara Raza',
+    lawyerSpec: 'Property Law',
+    lawyerSbc: 'SBC-4421',
+    citizenName: 'Ahmed Khan',
+    citizenEmail: 'ahmed.khan@email.com',
+    citizenPhone: '03123456789',
+    caseCategory: 'Property Dispute',
+    reason: 'Commercial land boundary line encroachment by neighbor in Karachi.',
+    urgency: 'High',
+    status: 'Pending',
+    createdAt: '10 mins ago',
+  },
+  {
+    id: 'req-2',
+    lawyerId: '2',
+    lawyerName: 'M. Karim',
+    lawyerSpec: 'Family Law',
+    lawyerSbc: 'SBC-2389',
+    citizenName: 'Ahmed Khan',
+    citizenEmail: 'ahmed.khan@email.com',
+    citizenPhone: '03123456789',
+    caseCategory: 'Inheritance Partition',
+    reason: 'Contested ancestral property division in Hyderabad district.',
+    urgency: 'Medium',
+    status: 'Accepted',
+    createdAt: 'Yesterday',
+  }
+];
+
+export const addConsultationRequest = (newReq) => {
+  const req = {
+    id: 'req-' + Date.now(),
+    status: 'Pending',
+    createdAt: 'Just now',
+    ...newReq
+  };
+  consultationRequests.unshift(req);
+  notify();
+  return req;
+};
+
+export const updateConsultationRequestStatus = (id, newStatus) => {
+  const req = consultationRequests.find(r => r.id === id);
+  if (req) {
+    req.status = newStatus;
+    if (newStatus === 'Accepted') {
+      activeCases.unshift({
+        id: 'case-' + Date.now(),
+        title: `${req.caseCategory || 'Legal Matter'} - ${req.lawyerName}`,
+        type: req.caseCategory || 'Legal Matter',
+        filingDate: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }),
+        lastUpdated: 'Just now',
+        status: 'Active',
+        lawyerName: req.lawyerName,
+        nextHearing: 'Hearing date pending assignment',
+        description: req.reason,
+        evidence: [],
+      });
+    }
+    notify();
+  }
+};

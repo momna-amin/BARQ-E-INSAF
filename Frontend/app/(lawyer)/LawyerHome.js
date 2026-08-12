@@ -13,13 +13,31 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import styles from './LawyerHome.styles';
-import { useMockStore, lawyerProfile, caseRequests, activeCases, updateLawyerProfile } from './MockStore';
+import {
+  useMockStore,
+  lawyerProfile,
+  caseRequests,
+  activeCases,
+  updateLawyerProfile,
+  acceptRequest,
+  declineRequest,
+} from './MockStore';
 import api from '../../services/api';
 import { clearTokens, getUser } from '../../services/authStorage';
+import showAlert from '../../utils/showAlert';
+
+const navItems = [
+  { id: 'home', label: 'Home' },
+  { id: 'requests', label: 'Requests' },
+  { id: 'cases', label: 'Cases' },
+  { id: 'schedule', label: 'Schedule' },
+  { id: 'profile', label: 'Profile' },
+];
 
 export default function LawyerHome() {
   useMockStore();
   const router = useRouter();
+  const [activeNav, setActiveNav] = useState('home');
 
   // Profile & Logout Modal State
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -30,7 +48,10 @@ export default function LawyerHome() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // ── Load the REAL logged-in lawyer's data (was hardcoded dummy data before)
+  // Success toast for actions
+  const [toastMessage, setToastMessage] = useState('');
+
+  // ── Load the REAL logged-in lawyer's data
   useEffect(() => {
     (async () => {
       try {
@@ -46,17 +67,33 @@ export default function LawyerHome() {
           });
         }
       } catch {
-        // Backend fetch failed — keep whatever was saved locally at login
+        // Backend fetch failed — keep local saved values
       }
     })();
   }, []);
 
+  const triggerToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(''), 3500);
+  };
+
   const handleNav = (id) => {
-    if (id === 'home')     router.push('/(lawyer)/LawyerHome');
-    if (id === 'requests') router.push('/(lawyer)/IncomingRequests'); // ← new screen
-    if (id === 'cases')    router.push('/(lawyer)/MyCases');
+    setActiveNav(id);
+    if (id === 'home') router.push('/(lawyer)/LawyerHome');
+    if (id === 'requests') router.push('/(lawyer)/IncomingRequests');
+    if (id === 'cases') router.push('/(lawyer)/MyCases');
     if (id === 'schedule') router.push('/(lawyer)/Schedule');
-    if (id === 'profile')  setShowProfileModal(true);
+    if (id === 'profile') setShowProfileModal(true);
+  };
+
+  const handleAcceptClientRequest = (reqId, clientName) => {
+    acceptRequest(reqId);
+    triggerToast(`✅ Consultation Accepted for ${clientName}! Moved to Active Cases.`);
+  };
+
+  const handleDeclineClientRequest = (reqId, clientName) => {
+    declineRequest(reqId);
+    triggerToast(`❌ Consultation Request from ${clientName} declined.`);
   };
 
   const handleChangePassword = async () => {
@@ -83,11 +120,7 @@ export default function LawyerHome() {
       setNewPassword('');
       setConfirmPassword('');
 
-      if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
-        window.alert('🔑 Password Changed Successfully!\n\nYour new advocate password has been saved to Database & Supabase.');
-      } else {
-        Alert.alert('Password Updated 🔑', 'Your advocate password has been updated successfully!');
-      }
+      showAlert('Password Updated 🔑', 'Your advocate password has been updated successfully!');
     } catch (err) {
       setLoading(false);
       const msg = err?.response?.data?.message || 'Password change nahi ho saka. Dobara koshish karein.';
@@ -96,11 +129,10 @@ export default function LawyerHome() {
   };
 
   const doLogout = async () => {
-    await clearTokens(); // must clear BEFORE navigating, or the next screen's
-                          // session check will silently log the user back in
+    await clearTokens();
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      window.location.href = '/RoleSelectScreen'; // hard reload — matches nav
-    } else {                                       // strategy used elsewhere
+      window.location.href = '/RoleSelectScreen';
+    } else {
       router.replace('/RoleSelectScreen');
     }
   };
@@ -132,111 +164,168 @@ export default function LawyerHome() {
             </View>
             <View style={styles.brand}>
               <Text style={styles.brandName}>Barq-e-Insaf</Text>
-              <Text style={styles.brandSub}>Lawyer Portal</Text>
+              <Text style={styles.brandSub}>ADVOCATE PORTAL · SINDH</Text>
             </View>
           </View>
           <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.notifBtn} onPress={() => router.push('/(lawyer)/CaseRequests')}>
-              <Text style={styles.notifText}>Requests {caseRequests.length}</Text>
-            </TouchableOpacity>
-
-            {/* CLICKABLE ADVOCATE AVATAR BUTTON */}
-            <TouchableOpacity style={styles.avatar} onPress={() => setShowProfileModal(true)} activeOpacity={0.7}>
-              <Text style={styles.avatarText}>{lawyerProfile.initials}</Text>
+            <TouchableOpacity style={styles.profileBtn} onPress={() => setShowProfileModal(true)}>
+              <Text style={styles.profileBtnText}>Profile</Text>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{lawyerProfile.initials || 'SR'}</Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
 
-        <View style={styles.nameRow}>
-          <Text style={styles.lawyerName}>{lawyerProfile.name} - Advocate</Text>
-          <Text style={styles.licenseNo}>Licence: {lawyerProfile.sbc}</Text>
-          <View style={styles.verifiedPill}>
-            <Text style={styles.verifiedText}>SBC Verified</Text>
-          </View>
-        </View>
-
-        <View style={styles.statsRow}>
-          <View style={styles.statChip}>
-            <Text style={styles.statNum}>{lawyerProfile.successfulCasesCount}</Text>
-            <Text style={styles.statLabel}>Successful Cases</Text>
-          </View>
-          <View style={styles.statChip}>
-            <Text style={styles.statNum}>{caseRequests.length}</Text>
-            <Text style={styles.statLabel}>New Requests</Text>
-          </View>
-          <View style={styles.statChip}>
-            <Text style={styles.statNum}>{lawyerProfile.rating}</Text>
-            <Text style={styles.statLabel}>Client Rating</Text>
+        <View style={styles.greetingRow}>
+          <Text style={styles.greeting}>Welcome, Adv. {lawyerProfile.name} ⚖️</Text>
+          <View style={styles.sbcBadge}>
+            <Text style={styles.sbcBadgeText}>{lawyerProfile.sbc || 'SBC-4421'}</Text>
           </View>
         </View>
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* NEW CLIENT REQUESTS */}
+        {/* ACTION TOAST */}
+        {toastMessage !== '' && (
+          <View style={{ backgroundColor: 'rgba(16, 185, 129, 0.2)', borderWidth: 1, borderColor: '#10b981', padding: 14, borderRadius: 14, marginBottom: 16 }}>
+            <Text style={{ color: '#10b981', fontSize: 13, fontWeight: '800' }}>{toastMessage}</Text>
+          </View>
+        )}
+
+        {/* QUICK STATS COUNTER */}
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Text style={styles.statNum}>{activeCases.length}</Text>
+            <Text style={styles.statLabel}>Active Cases</Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <Text style={styles.statNum}>{caseRequests.length}</Text>
+            <Text style={styles.statLabel}>New Requests</Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <Text style={styles.statNum}>⭐ {lawyerProfile.rating || '4.9'}</Text>
+            <Text style={styles.statLabel}>Rating ({lawyerProfile.successfulCasesCount || 42})</Text>
+          </View>
+        </View>
+
+        {/* NEW CLIENT REQUESTS SECTION */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionLabel}>New Client Requests</Text>
-          <TouchableOpacity onPress={() => router.push('/(lawyer)/CaseRequests')}>
-            <Text style={styles.seeAllText}>See All</Text>
+          <View style={styles.sectionTitleWrap}>
+            <Text style={styles.sectionTitle}>New Client Requests</Text>
+            {caseRequests.length > 0 && (
+              <View style={styles.badgeCount}>
+                <Text style={styles.badgeCountText}>{caseRequests.length}</Text>
+              </View>
+            )}
+          </View>
+          <TouchableOpacity onPress={() => router.push('/(lawyer)/IncomingRequests')}>
+            <Text style={styles.seeAllText}>View All →</Text>
           </TouchableOpacity>
         </View>
 
-        {caseRequests.slice(0, 2).map((r, i) => (
-          <TouchableOpacity key={i} style={styles.reqCard} onPress={() => router.push('/(lawyer)/CaseRequests')}>
-            <View style={styles.reqTop}>
-              <Text style={styles.reqName}>{r.name} - {r.spec}</Text>
-              <Text style={styles.badgeNew}>New</Text>
-            </View>
-            <Text style={styles.reqDesc}>{r.desc}</Text>
-          </TouchableOpacity>
-        ))}
+        {caseRequests.length === 0 ? (
+          <View style={{ backgroundColor: 'rgba(255,255,255,0.03)', padding: 18, borderRadius: 16, alignItems: 'center', marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
+            <Text style={{ color: '#94a3b8', fontSize: 13 }}>No pending client requests right now.</Text>
+          </View>
+        ) : (
+          caseRequests.map((req) => (
+            <View key={req.id} style={styles.reqCard}>
+              <View style={styles.reqHeader}>
+                <Text style={styles.clientName}>{req.name}</Text>
+                <View style={styles.reqSpecTag}>
+                  <Text style={styles.reqSpecTagText}>{req.spec}</Text>
+                </View>
+              </View>
 
-        {/* ACTIVE ADVOCATE CASES */}
+              <View style={styles.reqMetaRow}>
+                <Text style={styles.reqMetaText}>📍 {req.location || 'Karachi'}</Text>
+                <Text style={styles.reqMetaText}>🕒 {req.time || 'Recently'}</Text>
+                <Text style={styles.reqMetaText}>📞 {req.contact}</Text>
+              </View>
+
+              <Text style={styles.reqDesc}>{req.desc}</Text>
+
+              <View style={styles.reqActions}>
+                <TouchableOpacity
+                  style={styles.acceptBtn}
+                  onPress={() => handleAcceptClientRequest(req.id, req.name)}
+                >
+                  <Text style={styles.acceptBtnText}>✓ Accept Request</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.declineBtn}
+                  onPress={() => handleDeclineClientRequest(req.id, req.name)}
+                >
+                  <Text style={styles.declineBtnText}>✕ Decline</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))
+        )}
+
+        {/* ACTIVE LEGAL CASES SECTION */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionLabel}>My Active Legal Cases</Text>
+          <Text style={styles.sectionTitle}>My Active Legal Cases ({activeCases.length})</Text>
           <TouchableOpacity onPress={() => router.push('/(lawyer)/MyCases')}>
-            <Text style={styles.seeAllText}>View All</Text>
+            <Text style={styles.seeAllText}>Manage All →</Text>
           </TouchableOpacity>
         </View>
 
         {activeCases.map((c) => (
-          <TouchableOpacity key={c.id} style={styles.caseCard} onPress={() => router.push('/(lawyer)/MyCases')}>
-            <Text style={styles.caseTitle}>{c.title}</Text>
-            <Text style={styles.caseClient}>Client: {c.clientName}</Text>
-            <Text style={styles.caseDate}>Hearing: {c.nextHearing}</Text>
+          <TouchableOpacity
+            key={c.id}
+            style={styles.caseCard}
+            onPress={() => router.push({ pathname: '/(lawyer)/CaseDetail', params: { caseId: c.id } })}
+          >
+            <View style={styles.caseHeader}>
+              <Text style={styles.caseTitle}>{c.title}</Text>
+            </View>
+            <Text style={styles.caseCourt}>🏛️ {c.court || 'District Court Sindh'}</Text>
+            <Text style={styles.caseClient}>Client: {c.clientName || 'Assigned Client'}</Text>
+            <Text style={styles.caseDesc}>{c.description}</Text>
+
+            <View style={styles.caseFooterRow}>
+              <Text style={styles.evidenceCount}>📁 {c.evidence?.length || 0} Evidence Files</Text>
+              <Text style={styles.manageBtnText}>View Details →</Text>
+            </View>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
-      {/* ADVOCATE PROFILE & ACCOUNT MODAL */}
+      {/* ADVOCATE PROFILE MODAL */}
       <Modal visible={showProfileModal} animationType="slide" transparent>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <View style={{ width: '100%', maxWidth: 440, backgroundColor: '#ffffff', borderRadius: 20, padding: 24 }}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ width: '100%', maxWidth: 440, backgroundColor: '#0F172A', borderRadius: 20, padding: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <Text style={{ fontSize: 18, fontWeight: '800', color: '#0f172a' }}>⚖️ Advocate Account Details</Text>
-              <TouchableOpacity onPress={() => setShowProfileModal(false)} style={{ padding: 6, backgroundColor: '#f1f5f9', borderRadius: 8 }}>
-                <Text style={{ fontSize: 14, fontWeight: '800', color: '#475569' }}>✕</Text>
+              <Text style={{ fontSize: 18, fontWeight: '800', color: '#ffffff' }}>⚖️ Advocate Profile</Text>
+              <TouchableOpacity onPress={() => setShowProfileModal(false)} style={{ padding: 6, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 8 }}>
+                <Text style={{ fontSize: 14, fontWeight: '800', color: '#ffffff' }}>✕</Text>
               </TouchableOpacity>
             </View>
 
-            <View style={{ backgroundColor: '#f8fafc', borderRadius: 14, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: '#e2e8f0' }}>
-              <Text style={{ fontSize: 16, fontWeight: '800', color: '#0f172a' }}>{lawyerProfile.name}</Text>
-              <Text style={{ fontSize: 12, color: '#2563eb', fontWeight: '700', marginTop: 2 }}>{lawyerProfile.email}</Text>
-              <Text style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>SBC License: {lawyerProfile.sbc} · {lawyerProfile.spec}</Text>
-              <Text style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>Phone: {lawyerProfile.phone} · Experience: {lawyerProfile.experience}</Text>
+            <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 14, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+              <Text style={{ fontSize: 16, fontWeight: '800', color: '#ffffff' }}>Adv. {lawyerProfile.name}</Text>
+              <Text style={{ fontSize: 13, color: '#3b82f6', fontWeight: '700', marginTop: 2 }}>{lawyerProfile.email}</Text>
+              <Text style={{ fontSize: 12, color: '#fbbf24', marginTop: 4 }}>SBC License: {lawyerProfile.sbc || 'SBC-4421'}</Text>
+              <Text style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>Specialty: {lawyerProfile.spec} · District: {lawyerProfile.district || 'Karachi'}</Text>
             </View>
 
             <TouchableOpacity
-              style={{ backgroundColor: '#0F2744', paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginBottom: 10 }}
+              style={{ backgroundColor: '#fbbf24', paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginBottom: 12 }}
               onPress={() => { setShowProfileModal(false); setShowPwModal(true); }}
             >
-              <Text style={{ color: '#ffffff', fontSize: 14, fontWeight: '800' }}>🔑 Change Password</Text>
+              <Text style={{ color: '#07152E', fontSize: 14, fontWeight: '800' }}>🔑 Change Password</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={{ backgroundColor: '#fee2e2', borderLeftWidth: 4, borderLeftColor: '#dc2626', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
+              style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.4)', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
               onPress={handleLogout}
             >
-              <Text style={{ color: '#dc2626', fontSize: 14, fontWeight: '800' }}>🚪 Logout Account</Text>
+              <Text style={{ color: '#ef4444', fontSize: 14, fontWeight: '800' }}>🚪 Logout Advocate Account</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -244,71 +333,71 @@ export default function LawyerHome() {
 
       {/* CHANGE PASSWORD MODAL */}
       <Modal visible={showPwModal} animationType="slide" transparent>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <View style={{ width: '100%', maxWidth: 420, backgroundColor: '#fff', borderRadius: 20, padding: 24 }}>
-            <Text style={{ fontSize: 18, fontWeight: '800', color: '#0f172a', marginBottom: 4 }}>🔑 Change Advocate Password</Text>
-            <Text style={{ fontSize: 12, color: '#64748b', marginBottom: 16 }}>Update Advocate Account Password (Saved to DB)</Text>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ width: '100%', maxWidth: 420, backgroundColor: '#0F172A', borderRadius: 20, padding: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+            <Text style={{ fontSize: 18, fontWeight: '800', color: '#ffffff', marginBottom: 4 }}>🔑 Change Advocate Password</Text>
+            <Text style={{ fontSize: 12, color: '#94a3b8', marginBottom: 16 }}>Update Advocate Account Password (Saved to DB)</Text>
 
-            <Text style={{ fontSize: 11, fontWeight: '700', color: '#475569', marginBottom: 6 }}>CURRENT PASSWORD</Text>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#fbbf24', marginBottom: 6 }}>CURRENT PASSWORD</Text>
             <TextInput
-              style={{ backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10, padding: 12, fontSize: 14, marginBottom: 12 }}
+              style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: 12, fontSize: 14, color: '#ffffff', marginBottom: 12 }}
               value={currPassword}
               onChangeText={setCurrPassword}
               secureTextEntry={!showPw}
               placeholder="••••••••"
+              placeholderTextColor="#64748b"
             />
 
-            <Text style={{ fontSize: 11, fontWeight: '700', color: '#475569', marginBottom: 6 }}>NEW PASSWORD</Text>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#fbbf24', marginBottom: 6 }}>NEW PASSWORD</Text>
             <TextInput
-              style={{ backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10, padding: 12, fontSize: 14, marginBottom: 12 }}
+              style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: 12, fontSize: 14, color: '#ffffff', marginBottom: 12 }}
               value={newPassword}
               onChangeText={setNewPassword}
               secureTextEntry={!showPw}
               placeholder="••••••••"
+              placeholderTextColor="#64748b"
             />
 
-            <Text style={{ fontSize: 11, fontWeight: '700', color: '#475569', marginBottom: 6 }}>CONFIRM NEW PASSWORD</Text>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#fbbf24', marginBottom: 6 }}>CONFIRM NEW PASSWORD</Text>
             <TextInput
-              style={{ backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#e2e8f0', borderRadius: 10, padding: 12, fontSize: 14, marginBottom: 16 }}
+              style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: 12, fontSize: 14, color: '#ffffff', marginBottom: 16 }}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry={!showPw}
               placeholder="••••••••"
+              placeholderTextColor="#64748b"
             />
 
             <TouchableOpacity style={{ marginBottom: 16 }} onPress={() => setShowPw(v => !v)}>
-              <Text style={{ fontSize: 13, color: '#2563eb', fontWeight: '700' }}>{showPw ? '👁️ Hide Passwords' : '👁️‍🗨️ View Passwords'}</Text>
+              <Text style={{ fontSize: 13, color: '#3b82f6', fontWeight: '700' }}>{showPw ? '👁️ Hide Passwords' : '👁️‍🗨️ View Passwords'}</Text>
             </TouchableOpacity>
 
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <TouchableOpacity
-                style={{ flex: 1, backgroundColor: '#0F2744', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
+                style={{ flex: 1, backgroundColor: '#fbbf24', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
                 onPress={handleChangePassword}
                 disabled={loading}
               >
-                <Text style={{ color: '#fff', fontWeight: '800' }}>{loading ? 'Updating...' : '💾 Save Password'}</Text>
+                <Text style={{ color: '#07152E', fontWeight: '800' }}>{loading ? 'Updating...' : '💾 Save Password'}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={{ paddingHorizontal: 16, paddingVertical: 14, borderRadius: 12, backgroundColor: '#f1f5f9' }}
+                style={{ paddingHorizontal: 16, paddingVertical: 14, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.1)' }}
                 onPress={() => setShowPwModal(false)}
               >
-                <Text style={{ color: '#475569', fontWeight: '700' }}>Cancel</Text>
+                <Text style={{ color: '#94a3b8', fontWeight: '700' }}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* FOOTER */}
+      {/* BOTTOM NAV */}
       <View style={styles.bottomNav}>
-        {['Dashboard', 'Requests', 'Cases', 'Schedule', 'Profile'].map((lbl, idx) => {
-          const ids = ['home', 'requests', 'cases', 'schedule', 'profile'];
-          return (
-            <TouchableOpacity key={lbl} style={styles.navItem} onPress={() => handleNav(ids[idx])}>
-              <Text style={[styles.navLabel, ids[idx] === 'profile' && styles.navLabelActive]}>{lbl}</Text>
-            </TouchableOpacity>
-          );
-        })}
+        {navItems.map((item) => (
+          <TouchableOpacity key={item.id} style={styles.navItem} onPress={() => handleNav(item.id)}>
+            <Text style={[styles.navLabel, activeNav === item.id && styles.navLabelActive]}>{item.label}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
     </SafeAreaView>
   );

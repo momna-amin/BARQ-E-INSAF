@@ -183,9 +183,13 @@ export const activeCases = [
   },
 ];
 
+import { updateConsultationRequestStatus } from '../(citizen)/MockStore';
+
 export const declineRequest = (id) => {
   const idx = caseRequests.findIndex(r => r.id === id);
   if (idx !== -1) {
+    const r = caseRequests[idx];
+    if (r.reqId) updateConsultationRequestStatus(r.reqId, 'Declined');
     caseRequests.splice(idx, 1);
     notify();
   }
@@ -194,6 +198,7 @@ export const declineRequest = (id) => {
 export const acceptRequest = (id) => {
   const req = caseRequests.find(r => r.id === id);
   if (req) {
+    if (req.reqId) updateConsultationRequestStatus(req.reqId, 'Accepted');
     activeCases.unshift({
       id: String(activeCases.length + 1),
       title: `${req.name} - ${req.spec}`,
