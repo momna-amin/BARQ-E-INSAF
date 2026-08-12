@@ -227,8 +227,8 @@ export default function LawyerHome() {
         </View>
 
         {caseRequests.length === 0 ? (
-          <View style={{ backgroundColor: 'rgba(255,255,255,0.03)', padding: 18, borderRadius: 16, alignItems: 'center', marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
-            <Text style={{ color: '#94a3b8', fontSize: 13 }}>No pending client requests right now.</Text>
+          <View style={{ backgroundColor: '#ffffff', padding: 18, borderRadius: 16, alignItems: 'center', marginBottom: 16, borderWidth: 1, borderColor: '#ece9e4' }}>
+            <Text style={{ color: '#666666', fontSize: 13 }}>No pending client requests right now.</Text>
           </View>
         ) : (
           caseRequests.map((req) => (
@@ -298,34 +298,34 @@ export default function LawyerHome() {
 
       {/* ADVOCATE PROFILE MODAL */}
       <Modal visible={showProfileModal} animationType="slide" transparent>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <View style={{ width: '100%', maxWidth: 440, backgroundColor: '#0F172A', borderRadius: 20, padding: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ width: '100%', maxWidth: 440, backgroundColor: '#ffffff', borderRadius: 20, padding: 24, borderWidth: 1, borderColor: '#ece9e4' }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <Text style={{ fontSize: 18, fontWeight: '800', color: '#ffffff' }}>⚖️ Advocate Profile</Text>
-              <TouchableOpacity onPress={() => setShowProfileModal(false)} style={{ padding: 6, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 8 }}>
-                <Text style={{ fontSize: 14, fontWeight: '800', color: '#ffffff' }}>✕</Text>
+              <Text style={{ fontSize: 18, fontWeight: '800', color: '#1a1a1a' }}>⚖️ Advocate Profile</Text>
+              <TouchableOpacity onPress={() => setShowProfileModal(false)} style={{ padding: 6, backgroundColor: '#f3f4f6', borderRadius: 8 }}>
+                <Text style={{ fontSize: 14, fontWeight: '800', color: '#666666' }}>✕</Text>
               </TouchableOpacity>
             </View>
 
-            <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 14, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
-              <Text style={{ fontSize: 16, fontWeight: '800', color: '#ffffff' }}>Adv. {lawyerProfile.name}</Text>
-              <Text style={{ fontSize: 13, color: '#3b82f6', fontWeight: '700', marginTop: 2 }}>{lawyerProfile.email}</Text>
-              <Text style={{ fontSize: 12, color: '#fbbf24', marginTop: 4 }}>SBC License: {lawyerProfile.sbc || 'SBC-4421'}</Text>
-              <Text style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>Specialty: {lawyerProfile.spec} · District: {lawyerProfile.district || 'Karachi'}</Text>
+            <View style={{ backgroundColor: '#f8f9fa', borderRadius: 14, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: '#ece9e4' }}>
+              <Text style={{ fontSize: 16, fontWeight: '800', color: '#1a1a1a' }}>Adv. {lawyerProfile.name}</Text>
+              <Text style={{ fontSize: 13, color: '#0F2744', fontWeight: '700', marginTop: 2 }}>{lawyerProfile.email}</Text>
+              <Text style={{ fontSize: 12, color: '#0F2744', marginTop: 4, fontWeight: '600' }}>SBC License: {lawyerProfile.sbc || 'SBC-4421'}</Text>
+              <Text style={{ fontSize: 12, color: '#666666', marginTop: 2 }}>Specialty: {lawyerProfile.spec} · District: {lawyerProfile.district || 'Karachi'}</Text>
             </View>
 
             <TouchableOpacity
-              style={{ backgroundColor: '#fbbf24', paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginBottom: 12 }}
+              style={{ backgroundColor: '#0F2744', paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginBottom: 12 }}
               onPress={() => { setShowProfileModal(false); setShowPwModal(true); }}
             >
-              <Text style={{ color: '#07152E', fontSize: 14, fontWeight: '800' }}>🔑 Change Password</Text>
+              <Text style={{ color: '#ffffff', fontSize: 14, fontWeight: '800' }}>🔑 Change Password</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.4)', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
+              style={{ backgroundColor: '#fee2e2', borderWidth: 1, borderColor: '#fca5a5', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
               onPress={handleLogout}
             >
-              <Text style={{ color: '#ef4444', fontSize: 14, fontWeight: '800' }}>🚪 Logout Advocate Account</Text>
+              <Text style={{ color: '#b91c1c', fontSize: 14, fontWeight: '800' }}>🚪 Logout Advocate Account</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -333,58 +333,58 @@ export default function LawyerHome() {
 
       {/* CHANGE PASSWORD MODAL */}
       <Modal visible={showPwModal} animationType="slide" transparent>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <View style={{ width: '100%', maxWidth: 420, backgroundColor: '#0F172A', borderRadius: 20, padding: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
-            <Text style={{ fontSize: 18, fontWeight: '800', color: '#ffffff', marginBottom: 4 }}>🔑 Change Advocate Password</Text>
-            <Text style={{ fontSize: 12, color: '#94a3b8', marginBottom: 16 }}>Update Advocate Account Password (Saved to DB)</Text>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ width: '100%', maxWidth: 420, backgroundColor: '#ffffff', borderRadius: 20, padding: 24, borderWidth: 1, borderColor: '#ece9e4' }}>
+            <Text style={{ fontSize: 18, fontWeight: '800', color: '#1a1a1a', marginBottom: 4 }}>🔑 Change Advocate Password</Text>
+            <Text style={{ fontSize: 12, color: '#666666', marginBottom: 16 }}>Update Advocate Account Password (Saved to DB)</Text>
 
-            <Text style={{ fontSize: 11, fontWeight: '700', color: '#fbbf24', marginBottom: 6 }}>CURRENT PASSWORD</Text>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#0F2744', marginBottom: 6 }}>CURRENT PASSWORD</Text>
             <TextInput
-              style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: 12, fontSize: 14, color: '#ffffff', marginBottom: 12 }}
+              style={{ backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#ece9e4', borderRadius: 10, padding: 12, fontSize: 14, color: '#1a1a1a', marginBottom: 12 }}
               value={currPassword}
               onChangeText={setCurrPassword}
               secureTextEntry={!showPw}
               placeholder="••••••••"
-              placeholderTextColor="#64748b"
+              placeholderTextColor="#888888"
             />
 
-            <Text style={{ fontSize: 11, fontWeight: '700', color: '#fbbf24', marginBottom: 6 }}>NEW PASSWORD</Text>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#0F2744', marginBottom: 6 }}>NEW PASSWORD</Text>
             <TextInput
-              style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: 12, fontSize: 14, color: '#ffffff', marginBottom: 12 }}
+              style={{ backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#ece9e4', borderRadius: 10, padding: 12, fontSize: 14, color: '#1a1a1a', marginBottom: 12 }}
               value={newPassword}
               onChangeText={setNewPassword}
               secureTextEntry={!showPw}
               placeholder="••••••••"
-              placeholderTextColor="#64748b"
+              placeholderTextColor="#888888"
             />
 
-            <Text style={{ fontSize: 11, fontWeight: '700', color: '#fbbf24', marginBottom: 6 }}>CONFIRM NEW PASSWORD</Text>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#0F2744', marginBottom: 6 }}>CONFIRM NEW PASSWORD</Text>
             <TextInput
-              style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: 12, fontSize: 14, color: '#ffffff', marginBottom: 16 }}
+              style={{ backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#ece9e4', borderRadius: 10, padding: 12, fontSize: 14, color: '#1a1a1a', marginBottom: 16 }}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry={!showPw}
               placeholder="••••••••"
-              placeholderTextColor="#64748b"
+              placeholderTextColor="#888888"
             />
 
             <TouchableOpacity style={{ marginBottom: 16 }} onPress={() => setShowPw(v => !v)}>
-              <Text style={{ fontSize: 13, color: '#3b82f6', fontWeight: '700' }}>{showPw ? '👁️ Hide Passwords' : '👁️‍🗨️ View Passwords'}</Text>
+              <Text style={{ fontSize: 13, color: '#0F2744', fontWeight: '700' }}>{showPw ? '👁️ Hide Passwords' : '👁️‍🗨️ View Passwords'}</Text>
             </TouchableOpacity>
 
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <TouchableOpacity
-                style={{ flex: 1, backgroundColor: '#fbbf24', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
+                style={{ flex: 1, backgroundColor: '#0F2744', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
                 onPress={handleChangePassword}
                 disabled={loading}
               >
-                <Text style={{ color: '#07152E', fontWeight: '800' }}>{loading ? 'Updating...' : '💾 Save Password'}</Text>
+                <Text style={{ color: '#ffffff', fontWeight: '800' }}>{loading ? 'Updating...' : '💾 Save Password'}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={{ paddingHorizontal: 16, paddingVertical: 14, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                style={{ paddingHorizontal: 16, paddingVertical: 14, borderRadius: 12, backgroundColor: '#f3f4f6' }}
                 onPress={() => setShowPwModal(false)}
               >
-                <Text style={{ color: '#94a3b8', fontWeight: '700' }}>Cancel</Text>
+                <Text style={{ color: '#666666', fontWeight: '700' }}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>

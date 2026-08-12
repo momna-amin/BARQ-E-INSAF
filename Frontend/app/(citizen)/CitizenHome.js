@@ -194,7 +194,7 @@ export default function CitizenHome() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor="#0F2744" />
+      <StatusBar barStyle="light-content" backgroundColor="#5C1A1A" />
 
       {/* HEADER */}
       <View style={styles.header}>
@@ -224,9 +224,9 @@ export default function CitizenHome() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* SUCCESS BANNER */}
         {requestSuccessBanner && (
-          <View style={{ backgroundColor: 'rgba(16, 185, 129, 0.2)', borderWidth: 1, borderColor: '#10b981', padding: 14, borderRadius: 14, marginBottom: 16 }}>
-            <Text style={{ color: '#10b981', fontSize: 14, fontWeight: '800' }}>✅ Consultation Request Sent!</Text>
-            <Text style={{ color: '#e2e8f0', fontSize: 12, marginTop: 4 }}>
+          <View style={{ backgroundColor: '#dcfce7', borderWidth: 1, borderColor: '#bbf7d0', padding: 14, borderRadius: 14, marginBottom: 16 }}>
+            <Text style={{ color: '#15803d', fontSize: 14, fontWeight: '800' }}>✅ Consultation Request Sent!</Text>
+            <Text style={{ color: '#166534', fontSize: 12, marginTop: 4 }}>
               Aap ki request advocate ko bhej di gayi hai. Status niche "My Consultation Requests" mein dekhein.
             </Text>
           </View>
@@ -282,7 +282,7 @@ export default function CitizenHome() {
                 </View>
 
                 <Text style={styles.reqReason}>
-                  <Text style={{ fontWeight: '800', color: '#fbbf24' }}>Reason: </Text>
+                  <Text style={{ fontWeight: '800', color: '#5C1A1A' }}>Reason: </Text>
                   {req.reason}
                 </Text>
 
@@ -331,7 +331,7 @@ export default function CitizenHome() {
           <TextInput
             style={styles.searchInput}
             placeholder="search lawyers by name, spec, district..."
-            placeholderTextColor="#64748b"
+            placeholderTextColor="#888888"
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -356,7 +356,7 @@ export default function CitizenHome() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.lawyerScroll}>
           {filteredLawyers.map((l) => (
             <TouchableOpacity key={l.id} style={styles.lawyerCard} onPress={() => handleConsultPress(l)}>
-              <View style={[styles.lawyerAvatar, { backgroundColor: l.color || '#0F2744' }]}>
+              <View style={[styles.lawyerAvatar, { backgroundColor: l.color || '#5C1A1A' }]}>
                 <Text style={styles.lawyerAvatarText}>{l.initials}</Text>
                 <View style={styles.onlineDot} />
               </View>
@@ -365,9 +365,9 @@ export default function CitizenHome() {
               <Text style={styles.lawyerSbc}>{l.sbc || 'SBC Verified'}</Text>
 
               <View style={styles.ratingRow}>
-                <Text style={{ fontSize: 11, color: '#fbbf24' }}>⭐</Text>
+                <Text style={{ fontSize: 11, color: '#5C1A1A' }}>⭐</Text>
                 <Text style={styles.ratingText}>{l.rating || '4.8'}</Text>
-                <Text style={{ fontSize: 10, color: '#94a3b8' }}>({l.cases || 30}+ cases)</Text>
+                <Text style={{ fontSize: 10, color: '#888888' }}>({l.cases || 30}+ cases)</Text>
               </View>
 
               <View style={styles.hireBtn}>
@@ -380,36 +380,36 @@ export default function CitizenHome() {
 
       {/* REQUEST CONSULTATION MODAL */}
       <Modal visible={showConsultModal} animationType="slide" transparent>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <View style={{ width: '100%', maxWidth: 440, backgroundColor: '#0F172A', borderRadius: 20, padding: 24, borderWidth: 1, borderColor: 'rgba(251, 191, 36, 0.3)' }}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ width: '100%', maxWidth: 440, backgroundColor: '#ffffff', borderRadius: 20, padding: 24, borderWidth: 1, borderColor: '#ece9e4' }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <Text style={{ fontSize: 18, fontWeight: '800', color: '#ffffff' }}>
+              <Text style={{ fontSize: 18, fontWeight: '800', color: '#1a1a1a' }}>
                 ⚖️ Request Consultation
               </Text>
-              <TouchableOpacity onPress={() => setShowConsultModal(false)} style={{ padding: 6, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 8 }}>
-                <Text style={{ fontSize: 14, fontWeight: '800', color: '#ffffff' }}>✕</Text>
+              <TouchableOpacity onPress={() => setShowConsultModal(false)} style={{ padding: 6, backgroundColor: '#f3f4f6', borderRadius: 8 }}>
+                <Text style={{ fontSize: 14, fontWeight: '800', color: '#666666' }}>✕</Text>
               </TouchableOpacity>
             </View>
 
             {selectedLawyer && (
-              <View style={{ backgroundColor: 'rgba(15, 39, 68, 0.8)', borderRadius: 12, padding: 12, marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
-                <Text style={{ fontSize: 15, fontWeight: '800', color: '#ffffff' }}>Adv. {selectedLawyer.name}</Text>
-                <Text style={{ fontSize: 12, color: '#3b82f6', fontWeight: '700', marginTop: 2 }}>{selectedLawyer.spec} · {selectedLawyer.sbc}</Text>
-                <Text style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>District: {selectedLawyer.district || 'Sindh'}</Text>
+              <View style={{ backgroundColor: '#f8f9fa', borderRadius: 12, padding: 12, marginBottom: 16, borderWidth: 1, borderColor: '#ece9e4' }}>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: '#1a1a1a' }}>Adv. {selectedLawyer.name}</Text>
+                <Text style={{ fontSize: 12, color: '#5C1A1A', fontWeight: '700', marginTop: 2 }}>{selectedLawyer.spec} · {selectedLawyer.sbc}</Text>
+                <Text style={{ fontSize: 11, color: '#666666', marginTop: 2 }}>District: {selectedLawyer.district || 'Sindh'}</Text>
               </View>
             )}
 
-            <Text style={{ fontSize: 12, fontWeight: '700', color: '#fbbf24', marginBottom: 6 }}>PROBLEM REASON / DESCRIPTION</Text>
+            <Text style={{ fontSize: 12, fontWeight: '700', color: '#5C1A1A', marginBottom: 6 }}>PROBLEM REASON / DESCRIPTION</Text>
             <TextInput
-              style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)', borderRadius: 12, padding: 14, fontSize: 13, color: '#ffffff', height: 100, textAlignVertical: 'top', marginBottom: 16 }}
+              style={{ backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#ece9e4', borderRadius: 12, padding: 14, fontSize: 13, color: '#1a1a1a', height: 100, textAlignVertical: 'top', marginBottom: 16 }}
               placeholder="Describe your legal issue, property dispute, or advice needed..."
-              placeholderTextColor="#64748b"
+              placeholderTextColor="#888888"
               multiline
               value={requestReason}
               onChangeText={setRequestReason}
             />
 
-            <Text style={{ fontSize: 12, fontWeight: '700', color: '#fbbf24', marginBottom: 8 }}>URGENCY LEVEL</Text>
+            <Text style={{ fontSize: 12, fontWeight: '700', color: '#5C1A1A', marginBottom: 8 }}>URGENCY LEVEL</Text>
             <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
               {['Low', 'Medium', 'Urgent'].map((urg) => (
                 <TouchableOpacity
@@ -419,13 +419,13 @@ export default function CitizenHome() {
                     paddingVertical: 10,
                     borderRadius: 10,
                     alignItems: 'center',
-                    backgroundColor: requestUrgency === urg ? '#fbbf24' : 'rgba(255,255,255,0.06)',
+                    backgroundColor: requestUrgency === urg ? '#5C1A1A' : '#f8f9fa',
                     borderWidth: 1,
-                    borderColor: requestUrgency === urg ? '#fbbf24' : 'rgba(255,255,255,0.1)',
+                    borderColor: requestUrgency === urg ? '#5C1A1A' : '#ece9e4',
                   }}
                   onPress={() => setRequestUrgency(urg)}
                 >
-                  <Text style={{ fontSize: 12, fontWeight: '800', color: requestUrgency === urg ? '#07152E' : '#94a3b8' }}>
+                  <Text style={{ fontSize: 12, fontWeight: '800', color: requestUrgency === urg ? '#ffffff' : '#666666' }}>
                     {urg}
                   </Text>
                 </TouchableOpacity>
@@ -433,7 +433,7 @@ export default function CitizenHome() {
             </View>
 
             <TouchableOpacity
-              style={{ backgroundColor: '#10b981', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
+              style={{ backgroundColor: '#5C1A1A', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
               onPress={handleSendConsultationRequest}
             >
               <Text style={{ color: '#ffffff', fontSize: 14, fontWeight: '800' }}>📤 Send Request to Advocate</Text>
@@ -444,34 +444,34 @@ export default function CitizenHome() {
 
       {/* PROFILE MODAL */}
       <Modal visible={showProfileModal} animationType="slide" transparent>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <View style={{ width: '100%', maxWidth: 440, backgroundColor: '#0F172A', borderRadius: 20, padding: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ width: '100%', maxWidth: 440, backgroundColor: '#ffffff', borderRadius: 20, padding: 24, borderWidth: 1, borderColor: '#ece9e4' }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <Text style={{ fontSize: 18, fontWeight: '800', color: '#ffffff' }}>👤 Citizen Account Details</Text>
-              <TouchableOpacity onPress={() => setShowProfileModal(false)} style={{ padding: 6, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 8 }}>
-                <Text style={{ fontSize: 14, fontWeight: '800', color: '#ffffff' }}>✕</Text>
+              <Text style={{ fontSize: 18, fontWeight: '800', color: '#1a1a1a' }}>👤 Citizen Account Details</Text>
+              <TouchableOpacity onPress={() => setShowProfileModal(false)} style={{ padding: 6, backgroundColor: '#f3f4f6', borderRadius: 8 }}>
+                <Text style={{ fontSize: 14, fontWeight: '800', color: '#666666' }}>✕</Text>
               </TouchableOpacity>
             </View>
 
-            <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 14, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
-              <Text style={{ fontSize: 16, fontWeight: '800', color: '#ffffff' }}>{userData.name}</Text>
-              <Text style={{ fontSize: 13, color: '#3b82f6', fontWeight: '700', marginTop: 2 }}>{userData.email}</Text>
-              <Text style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>Phone: {userData.phone} · CNIC: {userData.cnic}</Text>
-              <Text style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>District: {userData.district} · Sindh</Text>
+            <View style={{ backgroundColor: '#f8f9fa', borderRadius: 14, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: '#ece9e4' }}>
+              <Text style={{ fontSize: 16, fontWeight: '800', color: '#1a1a1a' }}>{userData.name}</Text>
+              <Text style={{ fontSize: 13, color: '#5C1A1A', fontWeight: '700', marginTop: 2 }}>{userData.email}</Text>
+              <Text style={{ fontSize: 12, color: '#666666', marginTop: 4 }}>Phone: {userData.phone} · CNIC: {userData.cnic}</Text>
+              <Text style={{ fontSize: 12, color: '#666666', marginTop: 2 }}>District: {userData.district} · Sindh</Text>
             </View>
 
             <TouchableOpacity
-              style={{ backgroundColor: '#fbbf24', paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginBottom: 12 }}
+              style={{ backgroundColor: '#5C1A1A', paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginBottom: 12 }}
               onPress={() => { setShowProfileModal(false); setShowPwModal(true); }}
             >
-              <Text style={{ color: '#07152E', fontSize: 14, fontWeight: '800' }}>🔑 Change Password</Text>
+              <Text style={{ color: '#ffffff', fontSize: 14, fontWeight: '800' }}>🔑 Change Password</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.4)', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
+              style={{ backgroundColor: '#fee2e2', borderWidth: 1, borderColor: '#fca5a5', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
               onPress={handleLogout}
             >
-              <Text style={{ color: '#ef4444', fontSize: 14, fontWeight: '800' }}>🚪 Logout Account</Text>
+              <Text style={{ color: '#b91c1c', fontSize: 14, fontWeight: '800' }}>🚪 Logout Account</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -479,58 +479,58 @@ export default function CitizenHome() {
 
       {/* CHANGE PASSWORD MODAL */}
       <Modal visible={showPwModal} animationType="slide" transparent>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <View style={{ width: '100%', maxWidth: 420, backgroundColor: '#0F172A', borderRadius: 20, padding: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
-            <Text style={{ fontSize: 18, fontWeight: '800', color: '#ffffff', marginBottom: 4 }}>🔑 Change Citizen Password</Text>
-            <Text style={{ fontSize: 12, color: '#94a3b8', marginBottom: 16 }}>Update Citizen Account Password (Saved to DB)</Text>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ width: '100%', maxWidth: 420, backgroundColor: '#ffffff', borderRadius: 20, padding: 24, borderWidth: 1, borderColor: '#ece9e4' }}>
+            <Text style={{ fontSize: 18, fontWeight: '800', color: '#1a1a1a', marginBottom: 4 }}>🔑 Change Citizen Password</Text>
+            <Text style={{ fontSize: 12, color: '#666666', marginBottom: 16 }}>Update Citizen Account Password (Saved to DB)</Text>
 
-            <Text style={{ fontSize: 11, fontWeight: '700', color: '#fbbf24', marginBottom: 6 }}>CURRENT PASSWORD</Text>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#5C1A1A', marginBottom: 6 }}>CURRENT PASSWORD</Text>
             <TextInput
-              style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: 12, fontSize: 14, color: '#ffffff', marginBottom: 12 }}
+              style={{ backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#ece9e4', borderRadius: 10, padding: 12, fontSize: 14, color: '#1a1a1a', marginBottom: 12 }}
               value={currPassword}
               onChangeText={setCurrPassword}
               secureTextEntry={!showPw}
               placeholder="••••••••"
-              placeholderTextColor="#64748b"
+              placeholderTextColor="#888888"
             />
 
-            <Text style={{ fontSize: 11, fontWeight: '700', color: '#fbbf24', marginBottom: 6 }}>NEW PASSWORD</Text>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#5C1A1A', marginBottom: 6 }}>NEW PASSWORD</Text>
             <TextInput
-              style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: 12, fontSize: 14, color: '#ffffff', marginBottom: 12 }}
+              style={{ backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#ece9e4', borderRadius: 10, padding: 12, fontSize: 14, color: '#1a1a1a', marginBottom: 12 }}
               value={newPassword}
               onChangeText={setNewPassword}
               secureTextEntry={!showPw}
               placeholder="••••••••"
-              placeholderTextColor="#64748b"
+              placeholderTextColor="#888888"
             />
 
-            <Text style={{ fontSize: 11, fontWeight: '700', color: '#fbbf24', marginBottom: 6 }}>CONFIRM NEW PASSWORD</Text>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#5C1A1A', marginBottom: 6 }}>CONFIRM NEW PASSWORD</Text>
             <TextInput
-              style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: 12, fontSize: 14, color: '#ffffff', marginBottom: 16 }}
+              style={{ backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#ece9e4', borderRadius: 10, padding: 12, fontSize: 14, color: '#1a1a1a', marginBottom: 16 }}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry={!showPw}
               placeholder="••••••••"
-              placeholderTextColor="#64748b"
+              placeholderTextColor="#888888"
             />
 
             <TouchableOpacity style={{ marginBottom: 16 }} onPress={() => setShowPw(v => !v)}>
-              <Text style={{ fontSize: 13, color: '#3b82f6', fontWeight: '700' }}>{showPw ? '👁️ Hide Passwords' : '👁️‍🗨️ View Passwords'}</Text>
+              <Text style={{ fontSize: 13, color: '#5C1A1A', fontWeight: '700' }}>{showPw ? '👁️ Hide Passwords' : '👁️‍🗨️ View Passwords'}</Text>
             </TouchableOpacity>
 
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <TouchableOpacity
-                style={{ flex: 1, backgroundColor: '#fbbf24', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
+                style={{ flex: 1, backgroundColor: '#5C1A1A', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
                 onPress={handleChangePassword}
                 disabled={loading}
               >
-                <Text style={{ color: '#07152E', fontWeight: '800' }}>{loading ? 'Updating...' : '💾 Save Password'}</Text>
+                <Text style={{ color: '#ffffff', fontWeight: '800' }}>{loading ? 'Updating...' : '💾 Save Password'}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={{ paddingHorizontal: 16, paddingVertical: 14, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                style={{ paddingHorizontal: 16, paddingVertical: 14, borderRadius: 12, backgroundColor: '#f3f4f6' }}
                 onPress={() => setShowPwModal(false)}
               >
-                <Text style={{ color: '#94a3b8', fontWeight: '700' }}>Cancel</Text>
+                <Text style={{ color: '#666666', fontWeight: '700' }}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
