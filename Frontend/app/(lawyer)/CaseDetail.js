@@ -9,6 +9,7 @@ import {
   StatusBar,
   Alert 
 } from 'react-native';
+import showAlert from '../../utils/showAlert';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
@@ -49,17 +50,17 @@ export default function CaseDetail() {
   
   const handleContactClient = () => {
     if (caseData && caseData.contact) {
-      Alert.alert('Contact Client', `Phone/Email: ${caseData.contact}`);
+      showAlert('Contact Client', `Phone/Email: ${caseData.contact}`);
     } else {
-      Alert.alert('Contact Hidden', 'Client contact details are not available.');
+      showAlert('Contact Hidden', 'Client contact details are not available.');
     }
   };
 
   const handleViewEvidence = () => {
     if (caseData && caseData.evidence && caseData.evidence.length > 0) {
-      Alert.alert('Evidence', caseData.evidence.join('\n'));
+      showAlert('Evidence', caseData.evidence.join('\n'));
     } else {
-      Alert.alert('No Evidence', 'No evidence files uploaded for this case.');
+      showAlert('No Evidence', 'No evidence files uploaded for this case.');
     }
   };
 

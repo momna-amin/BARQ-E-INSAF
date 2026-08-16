@@ -10,6 +10,7 @@ import {
   TouchableOpacity, Text, ActivityIndicator,
   StyleSheet, View, Alert, Animated,
 } from 'react-native';
+import showAlert from '../utils/showAlert';
 import api from '../services/api';
 
 export default function SendRequestButton({ lawyerId, lawyerName, style }) {
@@ -28,7 +29,7 @@ export default function SendRequestButton({ lawyerId, lawyerName, style }) {
       await api.post('/requests', { lawyerId });
       setStatus('sent');
       // Success feedback
-      Alert.alert(
+      showAlert(
         '✅ Request Bhej Di Gayi',
         `Advocate ${lawyerName || 'Sahab'} ko email bhi send kar di gayi hai. Jawab ka intezaar karein.`,
         [{ text: 'Theek Hai', style: 'default' }]
@@ -36,7 +37,7 @@ export default function SendRequestButton({ lawyerId, lawyerName, style }) {
     } catch (err) {
       setStatus('error');
       const msg = err?.response?.data?.message || 'Request nahi bheji ja saki — dobara koshish karein';
-      Alert.alert('⚠️ Error', msg, [
+      showAlert('⚠️ Error', msg, [
         { text: 'Theek Hai', onPress: () => setStatus('idle') },
       ]);
     }

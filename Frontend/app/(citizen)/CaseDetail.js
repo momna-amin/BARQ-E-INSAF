@@ -11,19 +11,50 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import styles from './CaseDetail.styles';
-import { useMockStore, activeCases, updateCase } from './MockStore';
+import { useEffect } from 'react';
+import { ActivityIndicator } from 'react-native';
+import api from '../../services/api';
+import showAlert from '../../utils/showAlert';
 
 export default function CaseDetail() {
-  useMockStore();
   const router = useRouter();
   const params = useLocalSearchParams();
-  const caseId = params.caseId || '1';
+  const caseId = params.caseId;
 
-  const caseData = activeCases.find(c => c.id === caseId) || activeCases[0];
-
+  const [caseData, setCaseData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
-  const [editedTitle, setEditedTitle] = useState(caseData.title);
-  const [editedDesc, setEditedDesc] = useState(caseData.description);
+  const [editedTitle, setEditedTitle] = useState('');
+  const [editedDesc, setEditedDesc] = useState('');
+
+  const fetchCaseDetail = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/cases/' + caseId);
+      const c = res.data;
+      setCaseData({
+        id: c.id,
+        title: c.title,
+        status: c.status === 'active' ? 'Active' : c.status === 'pending' ? 'Pending' : 'Closed',
+        type: c.type || 'General',
+        description: c.description,
+        filingDate: new Date(c.created_at).toLocaleDateString(),
+        lastUpdated: c.updated_at ? new Date(c.updated_at).toLocaleDateString() : 'Recently',
+        district: c.district || 'Sindh'
+      });
+      setEditedTitle(c.title);
+      setEditedDesc(c.description);
+    } catch (err) {
+      console.log('Error fetching case detail:', err);
+      showAlert('Error', 'Failed to load case details.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (caseId) fetchCaseDetail();
+  }, [caseId]);
 
   const handleNav = (id) => {
     if (id === 'home')    router.push('/(citizen)/CitizenHome');
@@ -32,18 +63,39 @@ export default function CaseDetail() {
     if (id === 'profile') router.push('/(citizen)/Profile');
   };
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     if (!editedTitle || !editedDesc) {
-      Alert.alert('Error', 'Please fill in all fields.');
+      showAlert('Error', 'Please fill in all fields.');
       return;
     }
-    updateCase(caseData.id, {
-      title: editedTitle,
-      description: editedDesc
-    });
-    setEditMode(false);
-    Alert.alert('Success', 'Case updated successfully!');
+    try {
+      setLoading(true);
+      const res = await api.put('/cases/' + caseId, {
+        title: editedTitle,
+        description: editedDesc
+      });
+      const c = res.data;
+      setCaseData(prev => ({
+        ...prev,
+        title: c.title,
+        description: c.description
+      }));
+      setEditMode(false);
+      showAlert('Success', 'Case updated successfully!');
+    } catch (err) {
+      showAlert('Error', err?.response?.data?.message || 'Failed to update case.');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading || !caseData) {
+    return (
+      <SafeAreaView style={[styles.safe, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#5C1A1A" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safe}>

@@ -109,4 +109,22 @@ const assignLawyer = async (req, res) => {
   }
 };
 
-module.exports = { createCase, getMyCases, getCaseById, updateCaseStatus, assignLawyer };
+// PUT /api/cases/:id
+const updateCase = async (req, res) => {
+  try {
+    const { title, description } = req.body;
+    const { data, error } = await supabase
+      .from('cases')
+      .update({ title, description })
+      .eq('id', req.params.id)
+      .select()
+      .single();
+
+    if (error) return res.status(500).json({ message: error.message });
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createCase, getMyCases, getCaseById, updateCaseStatus, assignLawyer, updateCase };

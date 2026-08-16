@@ -8,9 +8,9 @@ import {
   SafeAreaView, 
   StatusBar,
   TextInput,
-  Modal,
-  Alert 
+  Modal
 } from 'react-native';
+import showAlert from '../../utils/showAlert';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import api from '../../services/api';
@@ -52,7 +52,7 @@ export default function Schedule() {
 
   const handleAddSlot = async () => {
     if (!newTime) {
-      Alert.alert('Error', 'Please enter a time');
+      showAlert('Error', 'Please enter a time');
       return;
     }
     try {
@@ -61,17 +61,17 @@ export default function Schedule() {
       setNewDay('Monday');
       setNewTime('');
       setShowAddModal(false);
-      Alert.alert('Success', 'Time slot added successfully');
+      showAlert('Success', 'Time slot added successfully');
       fetchSchedules();
     } catch (err) {
-      Alert.alert('Error', err?.response?.data?.message || 'Failed to add slot');
+      showAlert('Error', err?.response?.data?.message || 'Failed to add slot');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteSlot = (id) => {
-    Alert.alert(
+    showAlert(
       'Delete Slot',
       'Are you sure you want to delete this time slot?',
       [
@@ -81,10 +81,10 @@ export default function Schedule() {
             try {
               setLoading(true);
               await api.delete(`/schedules/${id}`);
-              Alert.alert('Success', 'Time slot deleted successfully');
+              showAlert('Success', 'Time slot deleted successfully');
               fetchSchedules();
             } catch (err) {
-              Alert.alert('Error', err?.response?.data?.message || 'Failed to delete slot');
+              showAlert('Error', err?.response?.data?.message || 'Failed to delete slot');
             } finally {
               setLoading(false);
             }
@@ -104,7 +104,7 @@ export default function Schedule() {
 
   const handleUpdateSlot = async () => {
     if (!newTime) {
-      Alert.alert('Error', 'Please enter a time');
+      showAlert('Error', 'Please enter a time');
       return;
     }
     try {
@@ -116,10 +116,10 @@ export default function Schedule() {
       setEditingSlot(null);
       setNewDay('Monday');
       setNewTime('');
-      Alert.alert('Success', 'Time slot updated successfully');
+      showAlert('Success', 'Time slot updated successfully');
       fetchSchedules();
     } catch (err) {
-      Alert.alert('Error', err?.response?.data?.message || 'Failed to update slot');
+      showAlert('Error', err?.response?.data?.message || 'Failed to update slot');
     } finally {
       setLoading(false);
     }

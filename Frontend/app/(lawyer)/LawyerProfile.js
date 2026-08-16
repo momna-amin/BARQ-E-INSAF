@@ -13,6 +13,7 @@ import {
   Modal,
   Platform,
 } from 'react-native';
+import showAlert from '../../utils/showAlert';
 import { useRouter } from 'expo-router';
 import api from '../../services/api';
 import { clearTokens, getUser, saveUser } from '../../services/authStorage';
@@ -123,9 +124,9 @@ export default function LawyerProfile() {
       }
 
       setEditMode(false);
-      Alert.alert('Success', 'Lawyer profile details updated!');
+      showAlert('Success', 'Lawyer profile details updated!');
     } catch (err) {
-      Alert.alert('Error ⚠️', err?.response?.data?.message || 'Failed to update profile');
+      showAlert('Error ⚠️', err?.response?.data?.message || 'Failed to update profile');
     } finally {
       setLoading(false);
     }
@@ -133,11 +134,11 @@ export default function LawyerProfile() {
 
   const handleChangePassword = async () => {
     if (!currPassword || !newPassword) {
-      Alert.alert('Error', 'Please enter current and new password');
+      showAlert('Error', 'Please enter current and new password');
       return;
     }
     if (newPassword !== confirmPassword) {
-      Alert.alert('Error', 'New passwords do not match');
+      showAlert('Error', 'New passwords do not match');
       return;
     }
     try {
@@ -154,11 +155,11 @@ export default function LawyerProfile() {
       setNewPassword('');
       setConfirmPassword('');
 
-      Alert.alert('Success', 'Password has been changed successfully!');
+      showAlert('Success', 'Password has been changed successfully!');
     } catch (err) {
       setLoading(false);
       const msg = err?.response?.data?.message || 'Password change nahi ho saka. Dobara koshish karein.';
-      Alert.alert('Password Change Failed ⚠️', msg);
+      showAlert('Password Change Failed ⚠️', msg);
     }
   };
 
@@ -173,7 +174,7 @@ export default function LawyerProfile() {
         doLogout();
       }
     } else {
-      Alert.alert(
+      showAlert(
         'Confirm Logout 🚪',
         'Are you sure you want to log out of Barq-e-Insaf Advocate Portal?',
         [

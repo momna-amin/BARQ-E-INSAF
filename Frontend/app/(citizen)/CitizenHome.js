@@ -181,17 +181,17 @@ export default function CitizenHome() {
 
   const handleChangePassword = async () => {
     if (!currPassword || !newPassword) {
-      Alert.alert('Error', 'Please enter current and new password');
+      showAlert('Error', 'Please enter current and new password');
       return;
     }
     if (newPassword !== confirmPassword) {
-      Alert.alert('Error', 'New passwords do not match');
+      showAlert('Error', 'New passwords do not match');
       return;
     }
     try {
       setLoading(true);
       await api.put('/auth/change-password', {
-        email: userData.email,
+        email: realUser.email,
         oldPassword: currPassword,
         newPassword,
       });
@@ -207,7 +207,7 @@ export default function CitizenHome() {
     } catch (err) {
       setLoading(false);
       const msg = err?.response?.data?.message || 'Password change nahi ho saka. Dobara koshish karein.';
-      Alert.alert('Password Change Failed ⚠️', msg);
+      showAlert('Password Change Failed ⚠️', msg);
     }
   };
 
@@ -227,7 +227,7 @@ export default function CitizenHome() {
         doLogout();
       }
     } else {
-      Alert.alert('Confirm Logout 🚪', 'Are you sure you want to log out of Barq-e-Insaf?', [
+      showAlert('Confirm Logout 🚪', 'Are you sure you want to log out of Barq-e-Insaf?', [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Logout', style: 'destructive', onPress: doLogout },
       ]);

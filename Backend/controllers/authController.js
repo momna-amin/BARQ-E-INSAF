@@ -370,8 +370,41 @@ const login = async (req, res) => {
 // ──────────────────────────────────────────────────────────────────────────────
 // GET /api/auth/me
 // ──────────────────────────────────────────────────────────────────────────────
-const getMe = (req, res) => {
-  res.json(safeUser(req.user));
+const getMe = async (req, res) => {
+  try {
+    const user = safeUser(req.user);
+    if (req.user.role === 'lawyer') {
+      let { data: lawyer, error } = await supabase
+        .from('lawyers')
+        .select('*')
+        .eq('user_id', req.user.id)
+        .single();
+
+      if (error || !lawyer) {
+        // Auto-create lawyer profile if missing in database
+        const { data: newLawyer, error: createError } = await supabase
+          .from('lawyers')
+          .insert({
+            user_id: req.user.id,
+            sbc_number: 'SBC-' + Math.floor(1000 + Math.random() * 9000),
+            specialty: 'General Practice',
+            verification_status: 'approved',
+          })
+          .select()
+          .single();
+
+        if (!createError && newLawyer) {
+          lawyer = newLawyer;
+        } else {
+          console.error('Failed to auto-create lawyer profile:', createError?.message);
+        }
+      }
+      return res.json({ ...user, lawyer_profile: lawyer });
+    }
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 // ──────────────────────────────────────────────────────────────────────────────

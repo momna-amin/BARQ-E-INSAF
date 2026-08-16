@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import styles from './RequestConsultation.styles';
-import { lawyers } from './MockStore';
+
 import SendRequestButton from '../../components/SendRequestButton';
 
 export default function RequestConsultation() {
@@ -19,11 +19,8 @@ export default function RequestConsultation() {
   const [message, setMessage] = useState('');
 
   const lawyerId = params.lawyerId;
-  const lawyer = lawyers.find((l) => String(l.id) === String(lawyerId));
-  const lawyerName = lawyer?.name || params.lawyerName || 'Advocate';
-  const lawyerSpec = lawyer
-    ? `${lawyer.spec} · ${lawyer.location}`
-    : '';
+  const lawyerName = params.lawyerName || 'Advocate';
+  const lawyerSpec = params.lawyerSpec || 'SBC Verified Advocate';
 
   return (
     <SafeAreaView style={styles.safe}>

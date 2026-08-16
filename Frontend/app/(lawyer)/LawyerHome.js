@@ -122,30 +122,30 @@ export default function LawyerHome() {
   const handleAcceptClientRequest = async (reqId, clientName) => {
     try {
       await api.patch(`/requests/${reqId}`, { status: 'accepted' });
-      Alert.alert('✅ Request Accepted', `Consultation with ${clientName} has been accepted.`);
+      showAlert('✅ Request Accepted', `Consultation with ${clientName} has been accepted.`);
       fetchDashboardData();
     } catch (err) {
-      Alert.alert('Error', err?.response?.data?.message || 'Failed to accept request');
+      showAlert('Error', err?.response?.data?.message || 'Failed to accept request');
     }
   };
 
   const handleDeclineClientRequest = async (reqId, clientName) => {
     try {
       await api.patch(`/requests/${reqId}`, { status: 'rejected' });
-      Alert.alert('❌ Request Declined', `Consultation with ${clientName} declined.`);
+      showAlert('❌ Request Declined', `Consultation with ${clientName} declined.`);
       fetchDashboardData();
     } catch (err) {
-      Alert.alert('Error', err?.response?.data?.message || 'Failed to decline request');
+      showAlert('Error', err?.response?.data?.message || 'Failed to decline request');
     }
   };
 
   const handleChangePassword = async () => {
     if (!currPassword || !newPassword) {
-      Alert.alert('Error', 'Please enter current and new password');
+      showAlert('Error', 'Please enter current and new password');
       return;
     }
     if (newPassword !== confirmPassword) {
-      Alert.alert('Error', 'New passwords do not match');
+      showAlert('Error', 'New passwords do not match');
       return;
     }
     try {
@@ -167,7 +167,7 @@ export default function LawyerHome() {
     } catch (err) {
       setLoading(false);
       const msg = err?.response?.data?.message || 'Password change nahi ho saka. Dobara koshish karein.';
-      Alert.alert('Password Change Failed ⚠️', msg);
+      showAlert('Password Change Failed ⚠️', msg);
     }
   };
 
@@ -187,7 +187,7 @@ export default function LawyerHome() {
         doLogout();
       }
     } else {
-      Alert.alert('Confirm Logout 🚪', 'Are you sure you want to log out of Barq-e-Insaf Advocate Portal?', [
+      showAlert('Confirm Logout 🚪', 'Are you sure you want to log out of Barq-e-Insaf Advocate Portal?', [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Logout', style: 'destructive', onPress: doLogout },
       ]);

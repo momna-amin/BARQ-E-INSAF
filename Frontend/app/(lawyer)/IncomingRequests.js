@@ -11,6 +11,7 @@ import {
   StatusBar, Modal, TextInput, ActivityIndicator,
   Alert, RefreshControl, StyleSheet, Animated,
 } from 'react-native';
+import showAlert from '../../utils/showAlert';
 import { useRouter } from 'expo-router';
 import api from '../../services/api';
 
@@ -41,7 +42,7 @@ export default function IncomingRequests() {
       setRequests(res.data || []);
     } catch (err) {
       if (!silent) {
-        Alert.alert('Error', err?.response?.data?.message || 'Requests load nahi ho sake');
+        showAlert('Error', err?.response?.data?.message || 'Requests load nahi ho sake');
       }
     } finally {
       setLoading(false);
@@ -69,13 +70,13 @@ export default function IncomingRequests() {
         reason: reason.trim() || undefined,
       });
       setShowModal(false);
-      Alert.alert(
+      showAlert(
         '✅ Jawab Bhej Diya',
         `Request ${responseAction === 'accepted' ? 'qabool' : 'reject'} kar di — user ko email bhi pohonch gayi.`,
       );
       fetchRequests(true);
     } catch (err) {
-      Alert.alert('Error', err?.response?.data?.message || 'Kuch masla ho gaya');
+      showAlert('Error', err?.response?.data?.message || 'Kuch masla ho gaya');
     } finally {
       setSubmitting(false);
     }

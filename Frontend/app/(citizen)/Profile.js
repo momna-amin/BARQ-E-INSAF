@@ -11,6 +11,7 @@ import {
   Alert,
   Platform,
 } from 'react-native';
+import showAlert from '../../utils/showAlert';
 import { useRouter } from 'expo-router';
 import styles from './Profile.styles';
 import api from '../../services/api';
@@ -103,10 +104,10 @@ export default function Profile() {
       }
 
       setEditMode(false);
-      Alert.alert('Profile Saved', 'Your citizen account details have been updated!');
+      showAlert('Profile Saved', 'Your citizen account details have been updated!');
     } catch (err) {
       const msg = err?.response?.data?.message || 'Failed to update profile';
-      Alert.alert('Error ⚠️', msg);
+      showAlert('Error ⚠️', msg);
     } finally {
       setLoading(false);
     }
@@ -119,11 +120,11 @@ export default function Profile() {
 
   const handleChangePassword = async () => {
     if (!currPassword || !newPassword) {
-      Alert.alert('Error', 'Please enter current and new password');
+      showAlert('Error', 'Please enter current and new password');
       return;
     }
     if (newPassword !== confirmPassword) {
-      Alert.alert('Error', 'New passwords do not match');
+      showAlert('Error', 'New passwords do not match');
       return;
     }
     try {
@@ -140,11 +141,11 @@ export default function Profile() {
       setNewPassword('');
       setConfirmPassword('');
 
-      Alert.alert('Password Updated', 'Your password has been changed successfully!');
+      showAlert('Password Updated', 'Your password has been changed successfully!');
     } catch (err) {
       setLoading(false);
       const msg = err?.response?.data?.message || 'Password change nahi ho saka. Dobara koshish karein.';
-      Alert.alert('Password Change Failed ⚠️', msg);
+      showAlert('Password Change Failed ⚠️', msg);
     }
   };
 
@@ -159,7 +160,7 @@ export default function Profile() {
         doLogout();
       }
     } else {
-      Alert.alert(
+      showAlert(
         'Confirm Logout',
         'Are you sure you want to log out of Barq-e-Insaf?',
         [

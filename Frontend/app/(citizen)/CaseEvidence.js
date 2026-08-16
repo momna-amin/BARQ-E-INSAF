@@ -2,15 +2,40 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import styles from './CaseEvidence.styles';
-import { useMockStore, activeCases } from './MockStore';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator } from 'react-native';
+import api from '../../services/api';
+import showAlert from '../../utils/showAlert';
 
 export default function CaseEvidence() {
-  useMockStore();
   const router = useRouter();
   const params = useLocalSearchParams();
-  const caseId = params.caseId || '1';
+  const caseId = params.caseId;
 
-  const caseData = activeCases.find(c => c.id === caseId) || activeCases[0];
+  const [caseData, setCaseData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchCaseDetail = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/cases/' + caseId);
+      const c = res.data;
+      setCaseData({
+        id: c.id,
+        title: c.title,
+        evidence: []
+      });
+    } catch (err) {
+      console.log('Error fetching case detail for evidence:', err);
+      showAlert('Error', 'Failed to load case details.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (caseId) fetchCaseDetail();
+  }, [caseId]);
 
   const handleNav = (id) => {
     if (id === 'home')    router.push('/(citizen)/CitizenHome');
@@ -18,6 +43,14 @@ export default function CaseEvidence() {
     if (id === 'lawyers') router.push('/(citizen)/FindLawyer');
     if (id === 'profile') router.push('/(citizen)/Profile');
   };
+
+  if (loading || !caseData) {
+    return (
+      <SafeAreaView style={[styles.safe, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#5C1A1A" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safe}>

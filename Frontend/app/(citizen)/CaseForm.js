@@ -9,6 +9,7 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
+import showAlert from '../../utils/showAlert';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import styles from './CaseForm.styles';
 import api from '../../services/api';
@@ -21,7 +22,6 @@ const sindhCities = {
 };
 
 export default function CaseForm() {
-  useMockStore();
   const router = useRouter();
   const params = useLocalSearchParams();
   const caseType = params.caseType || 'property';
@@ -82,7 +82,7 @@ export default function CaseForm() {
 
   const handleSubmit = async () => {
     if (!formData.title || !formData.description || !selectedCity || !selectedDistrict) {
-      Alert.alert('Error', 'Please fill in all required fields');
+      showAlert('Error', 'Please fill in all required fields');
       return;
     }
     
@@ -95,18 +95,18 @@ export default function CaseForm() {
         district: `${selectedCity} - ${selectedDistrict}`,
       });
 
-      Alert.alert('Success', 'Case submitted successfully!');
+      showAlert('Success', 'Case submitted successfully!');
       router.push('/(citizen)/MyCases');
     } catch (err) {
       const msg = err?.response?.data?.message || 'Failed to submit case';
-      Alert.alert('Error ⚠️', msg);
+      showAlert('Error ⚠️', msg);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteEvidence = (id) => {
-    Alert.alert(
+    showAlert(
       'Delete Evidence',
       'Are you sure you want to delete this evidence?',
       [
