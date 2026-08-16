@@ -1,16 +1,38 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import styles from './MyCases.styles';
-import { useMockStore, activeCases } from './MockStore';
+import api from '../../services/api';
 
 export default function MyCases() {
-  useMockStore();
   const router = useRouter();
+  const [activeCases, setActiveCases] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchCases = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get('/cases/my');
+        const formatted = (res.data || []).map(c => ({
+          id: c.id,
+          title: c.title,
+          clientName: c.citizen?.name || 'Client',
+          description: c.description || 'Legal consultation matter.'
+        }));
+        setActiveCases(formatted);
+      } catch (err) {
+        console.log('Error fetching cases:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCases();
+  }, []);
 
   const handleNav = (lbl) => {
     if (lbl === 'home') router.push('/(lawyer)/LawyerHome');
-    if (lbl === 'requests') router.push('/(lawyer)/CaseRequests');
+    if (lbl === 'requests') router.push('/(lawyer)/IncomingRequests');
     if (lbl === 'cases') router.push('/(lawyer)/MyCases');
     if (lbl === 'schedule') router.push('/(lawyer)/Schedule');
     if (lbl === 'profile') router.push('/(lawyer)/LawyerProfile');
@@ -39,30 +61,39 @@ export default function MyCases() {
           <Text style={styles.headerTitle}>My Active Cases</Text>
         </View>
       </View>
-
+ 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {activeCases.map((c, i) => (
-          <TouchableOpacity 
-            key={i} 
-            style={styles.caseCard} 
-            onPress={() => handleCasePress(c.id)}
-          >
-            <View style={styles.caseTop}>
-              <Text style={styles.caseTitle}>{c.title}</Text>
-              <Text style={styles.activeBadge}>Active</Text>
-            </View>
-            <Text style={styles.caseMeta}>Client Name: {c.clientName}</Text>
-            
-            <View style={styles.problemBox}>
-              <Text style={styles.problemLabel}>Problem Statement:</Text>
-              <Text style={styles.caseDescription} numberOfLines={2}>{c.problemStatement || c.description}</Text>
-            </View>
-            
-            <View style={styles.caseFooter}>
-              <Text style={styles.caseFooterText}>Tap to view case details</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+        {loading ? (
+          <ActivityIndicator size="large" color="#0F2744" style={{ marginTop: 40 }} />
+        ) : activeCases.length === 0 ? (
+          <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 30, alignItems: 'center', marginTop: 20, borderWidth: 1, borderColor: '#ece9e4' }}>
+            <Text style={{ fontSize: 15, fontWeight: '700', color: '#666' }}>No active cases found</Text>
+            <Text style={{ fontSize: 12, color: '#999', marginTop: 4 }}>You don't have any cases assigned to you.</Text>
+          </View>
+        ) : (
+          activeCases.map((c, i) => (
+            <TouchableOpacity 
+              key={i} 
+              style={styles.caseCard} 
+              onPress={() => handleCasePress(c.id)}
+            >
+              <View style={styles.caseTop}>
+                <Text style={styles.caseTitle}>{c.title}</Text>
+                <Text style={styles.activeBadge}>Active</Text>
+              </View>
+              <Text style={styles.caseMeta}>Client Name: {c.clientName}</Text>
+              
+              <View style={styles.problemBox}>
+                <Text style={styles.problemLabel}>Problem Statement:</Text>
+                <Text style={styles.caseDescription} numberOfLines={2}>{c.description}</Text>
+              </View>
+              
+              <View style={styles.caseFooter}>
+                <Text style={styles.caseFooterText}>Tap to view case details</Text>
+              </View>
+            </TouchableOpacity>
+          ))
+        )}
       </ScrollView>
 
       {/* FOOTER */}

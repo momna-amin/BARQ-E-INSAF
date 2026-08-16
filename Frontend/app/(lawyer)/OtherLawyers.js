@@ -20,7 +20,7 @@ export default function OtherLawyers() {
 
   const handleNav = (lbl) => {
     if (lbl === 'home') router.push('/(lawyer)/LawyerHome');
-    if (lbl === 'requests') router.push('/(lawyer)/CaseRequests');
+    if (lbl === 'requests') router.push('/(lawyer)/IncomingRequests');
     if (lbl === 'cases') router.push('/(lawyer)/MyCases');
     if (lbl === 'schedule') router.push('/(lawyer)/Schedule');
     if (lbl === 'profile') router.push('/(lawyer)/LawyerProfile');

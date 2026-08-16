@@ -113,6 +113,19 @@ router.patch('/:id', protect, allowRoles('lawyer'), async (req, res) => {
       type: 'request_update',
     });
 
+    // 1b) Auto-create case if accepted
+    if (status === 'accepted') {
+      await supabase.from('cases').insert({
+        citizen_id: request.user_id,
+        lawyer_id: request.lawyer_id,
+        title: `Consultation with Adv. ${lawyerName}`,
+        type: 'Consultation',
+        description: request.reason || 'Consultation request accepted.',
+        status: 'active',
+        district: request.users?.district || null,
+      });
+    }
+
     // 2) Email to user
     if (userEmail) {
       const { subject, html } = responseToUser(userName, lawyerName, status, reason);

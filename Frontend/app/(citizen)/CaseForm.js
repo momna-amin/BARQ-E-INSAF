@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import styles from './CaseForm.styles';
-import { useMockStore, addCase } from './MockStore';
+import api from '../../services/api';
 
 const sindhCities = {
   Karachi: ['Karachi Central', 'Karachi East', 'Karachi South', 'Karachi West', 'Malir', 'Korangi', 'Keamari'],
@@ -37,6 +37,7 @@ export default function CaseForm() {
     title: '',
     description: '',
   });
+  const [loading, setLoading] = useState(false);
 
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
@@ -79,22 +80,29 @@ export default function CaseForm() {
 
   const todayDate = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.title || !formData.description || !selectedCity || !selectedDistrict) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
     
-    addCase({
-      title: formData.title,
-      type: caseType === 'property' ? 'Property' : 'Family',
-      description: formData.description,
-      district: `${selectedCity} - ${selectedDistrict}`,
-      evidence: evidenceList.map(item => item.name),
-    });
+    try {
+      setLoading(true);
+      await api.post('/cases', {
+        title: formData.title,
+        type: caseType === 'property' ? 'Property' : 'Family',
+        description: formData.description,
+        district: `${selectedCity} - ${selectedDistrict}`,
+      });
 
-    Alert.alert('Success', 'Case submitted successfully!');
-    router.push('/(citizen)/MyCases');
+      Alert.alert('Success', 'Case submitted successfully!');
+      router.push('/(citizen)/MyCases');
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Failed to submit case';
+      Alert.alert('Error ⚠️', msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteEvidence = (id) => {
@@ -270,8 +278,8 @@ export default function CaseForm() {
         </View>
 
         {/* Submit Button */}
-        <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-          <Text style={styles.submitBtnText}>Submit Case</Text>
+        <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={loading}>
+          <Text style={styles.submitBtnText}>{loading ? 'Submitting...' : 'Submit Case'}</Text>
         </TouchableOpacity>
       </ScrollView>
 

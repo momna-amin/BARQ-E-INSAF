@@ -588,6 +588,42 @@ const googleAuth = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const { name, phone, district, specialty, office_address, bio, is_available } = req.body;
+
+    const { data: user, error: userErr } = await supabase
+      .from('users')
+      .update({ name, phone, district })
+      .eq('id', req.user.id)
+      .select()
+      .single();
+
+    if (userErr) return res.status(500).json({ message: userErr.message });
+
+    if (req.user.role === 'lawyer') {
+      const updateData = { specialty, office_address, bio, district };
+      if (is_available !== undefined) {
+        updateData.is_available = is_available;
+      }
+
+      const { data: lawyer, error: lawyerErr } = await supabase
+        .from('lawyers')
+        .update(updateData)
+        .eq('user_id', req.user.id)
+        .select()
+        .single();
+
+      if (lawyerErr) return res.status(500).json({ message: lawyerErr.message });
+      return res.json({ ...safeUser(user), lawyer_profile: lawyer });
+    }
+
+    return res.json(safeUser(user));
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   register,
   sendRegisterOtp,
@@ -600,4 +636,5 @@ module.exports = {
   resetPassword,
   googleAuth,
   changePassword,
+  updateProfile,
 };

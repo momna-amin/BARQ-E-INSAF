@@ -13,15 +13,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import styles from './LawyerHome.styles';
-import {
-  useMockStore,
-  lawyerProfile,
-  caseRequests,
-  activeCases,
-  updateLawyerProfile,
-  acceptRequest,
-  declineRequest,
-} from './MockStore';
+
 import api from '../../services/api';
 import { clearTokens, getUser } from '../../services/authStorage';
 import showAlert from '../../utils/showAlert';
@@ -35,11 +27,8 @@ const navItems = [
 ];
 
 export default function LawyerHome() {
-  useMockStore();
   const router = useRouter();
   const [activeNav, setActiveNav] = useState('home');
-
-  // Profile & Logout Modal State
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showPwModal, setShowPwModal] = useState(false);
   const [currPassword, setCurrPassword] = useState('');
@@ -48,52 +37,106 @@ export default function LawyerHome() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Success toast for actions
-  const [toastMessage, setToastMessage] = useState('');
+  // Real data state variables
+  const [realUser, setRealUser] = useState({ name: 'Lawyer', email: '', role: 'lawyer', dp: 'L' });
+  const [incomingRequests, setIncomingRequests] = useState([]);
+  const [activeCases, setActiveCases] = useState([]);
+  const [stats, setStats] = useState({ activeCases: 0, pendingRequests: 0, rating: 5.0 });
 
-  // ── Load the REAL logged-in lawyer's data
-  useEffect(() => {
-    (async () => {
-      try {
-        const stored = await getUser();
-        if (stored) updateLawyerProfile({ name: stored.name, email: stored.email });
-        const res = await api.get('/auth/me');
-        if (res?.data) {
-          updateLawyerProfile({
-            name: res.data.name || lawyerProfile.name,
-            email: res.data.email || lawyerProfile.email,
-            phone: res.data.phone || lawyerProfile.phone,
-            district: res.data.district || lawyerProfile.district,
-          });
-        }
-      } catch {
-        // Backend fetch failed — keep local saved values
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const [profileRes, reqsRes, casesRes] = await Promise.all([
+        api.get('/auth/me'),
+        api.get('/requests/incoming'),
+        api.get('/cases/my'),
+      ]);
+
+      if (profileRes?.data) {
+        setRealUser({
+          ...profileRes.data,
+          dp: (profileRes.data.name || 'L').substring(0, 2).toUpperCase()
+        });
+        setStats(prev => ({
+          ...prev,
+          rating: profileRes.data.lawyer_profile?.rating || 5.0,
+        }));
       }
-    })();
-  }, []);
 
-  const triggerToast = (msg) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(''), 3500);
+      const formattedReqs = (reqsRes.data || []).map(r => ({
+        id: r.id,
+        citizenName: r.users?.name || 'Client',
+        citizenPhone: r.users?.phone || 'N/A',
+        citizenEmail: r.users?.email || 'N/A',
+        caseCategory: r.reason ? r.reason.substring(0, 20) : 'General Consultation',
+        reason: r.reason || 'Legal consultation needed.',
+        status: r.status,
+        createdAt: new Date(r.created_at).toLocaleDateString(),
+      }));
+      setIncomingRequests(formattedReqs.filter(r => r.status === 'pending'));
+
+      const formattedCases = (casesRes.data || []).map(c => ({
+        id: c.id,
+        title: c.title,
+        type: c.type,
+        citizenName: c.citizen?.name || 'Client',
+        nextHearing: c.hearing_date ? new Date(c.hearing_date).toLocaleDateString() : 'TBD',
+        status: c.status,
+      }));
+      setActiveCases(formattedCases);
+
+      setStats({
+        activeCases: formattedCases.length,
+        pendingRequests: formattedReqs.filter(r => r.status === 'pending').length,
+        rating: profileRes?.data?.lawyer_profile?.rating || 5.0
+      });
+    } catch (err) {
+      console.log('Error fetching lawyer dashboard:', err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    getUser().then(u => {
+      if (u) {
+        setRealUser(prev => ({
+          ...prev,
+          ...u,
+          dp: (u.name || 'L').substring(0, 2).toUpperCase()
+        }));
+      }
+    });
+    fetchDashboardData();
+  }, []);
 
   const handleNav = (id) => {
     setActiveNav(id);
-    if (id === 'home') router.push('/(lawyer)/LawyerHome');
+    if (id === 'home')     router.push('/(lawyer)/LawyerHome');
     if (id === 'requests') router.push('/(lawyer)/IncomingRequests');
-    if (id === 'cases') router.push('/(lawyer)/MyCases');
+    if (id === 'cases')    router.push('/(lawyer)/MyCases');
     if (id === 'schedule') router.push('/(lawyer)/Schedule');
-    if (id === 'profile') setShowProfileModal(true);
+    if (id === 'profile')  setShowProfileModal(true);
   };
 
-  const handleAcceptClientRequest = (reqId, clientName) => {
-    acceptRequest(reqId);
-    triggerToast(`✅ Consultation Accepted for ${clientName}! Moved to Active Cases.`);
+  const handleAcceptClientRequest = async (reqId, clientName) => {
+    try {
+      await api.patch(`/requests/${reqId}`, { status: 'accepted' });
+      Alert.alert('✅ Request Accepted', `Consultation with ${clientName} has been accepted.`);
+      fetchDashboardData();
+    } catch (err) {
+      Alert.alert('Error', err?.response?.data?.message || 'Failed to accept request');
+    }
   };
 
-  const handleDeclineClientRequest = (reqId, clientName) => {
-    declineRequest(reqId);
-    triggerToast(`❌ Consultation Request from ${clientName} declined.`);
+  const handleDeclineClientRequest = async (reqId, clientName) => {
+    try {
+      await api.patch(`/requests/${reqId}`, { status: 'rejected' });
+      Alert.alert('❌ Request Declined', `Consultation with ${clientName} declined.`);
+      fetchDashboardData();
+    } catch (err) {
+      Alert.alert('Error', err?.response?.data?.message || 'Failed to decline request');
+    }
   };
 
   const handleChangePassword = async () => {
@@ -108,7 +151,7 @@ export default function LawyerHome() {
     try {
       setLoading(true);
       await api.put('/auth/change-password', {
-        email: lawyerProfile.email,
+        email: realUser.email,
         oldPassword: currPassword,
         newPassword,
       });
@@ -171,43 +214,37 @@ export default function LawyerHome() {
             <TouchableOpacity style={styles.profileBtn} onPress={() => setShowProfileModal(true)}>
               <Text style={styles.profileBtnText}>Profile</Text>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{lawyerProfile.initials || 'SR'}</Text>
+                <Text style={styles.avatarText}>{realUser.dp || 'L'}</Text>
               </View>
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.greetingRow}>
-          <Text style={styles.greeting}>Welcome, Adv. {lawyerProfile.name} ⚖️</Text>
+          <Text style={styles.greeting}>Welcome, Adv. {realUser.name} ⚖️</Text>
           <View style={styles.sbcBadge}>
-            <Text style={styles.sbcBadgeText}>{lawyerProfile.sbc || 'SBC-4421'}</Text>
+            <Text style={styles.sbcBadgeText}>{realUser.lawyer_profile?.sbc_number || 'SBC-Verified'}</Text>
           </View>
         </View>
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* ACTION TOAST */}
-        {toastMessage !== '' && (
-          <View style={{ backgroundColor: 'rgba(16, 185, 129, 0.2)', borderWidth: 1, borderColor: '#10b981', padding: 14, borderRadius: 14, marginBottom: 16 }}>
-            <Text style={{ color: '#10b981', fontSize: 13, fontWeight: '800' }}>{toastMessage}</Text>
-          </View>
-        )}
 
         {/* QUICK STATS COUNTER */}
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
-            <Text style={styles.statNum}>{activeCases.length}</Text>
+            <Text style={styles.statNum}>{stats.activeCases}</Text>
             <Text style={styles.statLabel}>Active Cases</Text>
           </View>
 
           <View style={styles.statCard}>
-            <Text style={styles.statNum}>{caseRequests.length}</Text>
+            <Text style={styles.statNum}>{stats.pendingRequests}</Text>
             <Text style={styles.statLabel}>New Requests</Text>
           </View>
 
           <View style={styles.statCard}>
-            <Text style={styles.statNum}>⭐ {lawyerProfile.rating || '4.9'}</Text>
-            <Text style={styles.statLabel}>Rating ({lawyerProfile.successfulCasesCount || 42})</Text>
+            <Text style={styles.statNum}>⭐ {stats.rating || '5.0'}</Text>
+            <Text style={styles.statLabel}>Rating</Text>
           </View>
         </View>
 
@@ -215,9 +252,9 @@ export default function LawyerHome() {
         <View style={styles.sectionHeaderRow}>
           <View style={styles.sectionTitleWrap}>
             <Text style={styles.sectionTitle}>New Client Requests</Text>
-            {caseRequests.length > 0 && (
+            {incomingRequests.length > 0 && (
               <View style={styles.badgeCount}>
-                <Text style={styles.badgeCountText}>{caseRequests.length}</Text>
+                <Text style={styles.badgeCountText}>{incomingRequests.length}</Text>
               </View>
             )}
           </View>
@@ -226,39 +263,38 @@ export default function LawyerHome() {
           </TouchableOpacity>
         </View>
 
-        {caseRequests.length === 0 ? (
+        {incomingRequests.length === 0 ? (
           <View style={{ backgroundColor: '#ffffff', padding: 18, borderRadius: 16, alignItems: 'center', marginBottom: 16, borderWidth: 1, borderColor: '#ece9e4' }}>
             <Text style={{ color: '#666666', fontSize: 13 }}>No pending client requests right now.</Text>
           </View>
         ) : (
-          caseRequests.map((req) => (
+          incomingRequests.map((req) => (
             <View key={req.id} style={styles.reqCard}>
               <View style={styles.reqHeader}>
-                <Text style={styles.clientName}>{req.name}</Text>
+                <Text style={styles.clientName}>{req.citizenName}</Text>
                 <View style={styles.reqSpecTag}>
-                  <Text style={styles.reqSpecTagText}>{req.spec}</Text>
+                  <Text style={styles.reqSpecTagText}>{req.caseCategory}</Text>
                 </View>
               </View>
 
               <View style={styles.reqMetaRow}>
-                <Text style={styles.reqMetaText}>📍 {req.location || 'Karachi'}</Text>
-                <Text style={styles.reqMetaText}>🕒 {req.time || 'Recently'}</Text>
-                <Text style={styles.reqMetaText}>📞 {req.contact}</Text>
+                <Text style={styles.reqMetaText}>🕒 {req.createdAt}</Text>
+                <Text style={styles.reqMetaText}>📞 {req.citizenPhone}</Text>
               </View>
 
-              <Text style={styles.reqDesc}>{req.desc}</Text>
+              <Text style={styles.reqDesc}>{req.reason}</Text>
 
               <View style={styles.reqActions}>
                 <TouchableOpacity
                   style={styles.acceptBtn}
-                  onPress={() => handleAcceptClientRequest(req.id, req.name)}
+                  onPress={() => handleAcceptClientRequest(req.id, req.citizenName)}
                 >
                   <Text style={styles.acceptBtnText}>✓ Accept Request</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.declineBtn}
-                  onPress={() => handleDeclineClientRequest(req.id, req.name)}
+                  onPress={() => handleDeclineClientRequest(req.id, req.citizenName)}
                 >
                   <Text style={styles.declineBtnText}>✕ Decline</Text>
                 </TouchableOpacity>
@@ -275,25 +311,31 @@ export default function LawyerHome() {
           </TouchableOpacity>
         </View>
 
-        {activeCases.map((c) => (
-          <TouchableOpacity
-            key={c.id}
-            style={styles.caseCard}
-            onPress={() => router.push({ pathname: '/(lawyer)/CaseDetail', params: { caseId: c.id } })}
-          >
-            <View style={styles.caseHeader}>
-              <Text style={styles.caseTitle}>{c.title}</Text>
-            </View>
-            <Text style={styles.caseCourt}>🏛️ {c.court || 'District Court Sindh'}</Text>
-            <Text style={styles.caseClient}>Client: {c.clientName || 'Assigned Client'}</Text>
-            <Text style={styles.caseDesc}>{c.description}</Text>
+        {activeCases.length === 0 ? (
+          <View style={{ backgroundColor: '#ffffff', padding: 18, borderRadius: 16, alignItems: 'center', marginBottom: 16, borderWidth: 1, borderColor: '#ece9e4' }}>
+            <Text style={{ color: '#666666', fontSize: 13 }}>No active cases assigned yet.</Text>
+          </View>
+        ) : (
+          activeCases.map((c) => (
+            <TouchableOpacity
+              key={c.id}
+              style={styles.caseCard}
+              onPress={() => router.push({ pathname: '/(lawyer)/CaseDetail', params: { caseId: c.id } })}
+            >
+              <View style={styles.caseHeader}>
+                <Text style={styles.caseTitle}>{c.title}</Text>
+              </View>
+              <Text style={styles.caseCourt}>🏛️ {c.court || 'District Court Sindh'}</Text>
+              <Text style={styles.caseClient}>Client: {c.citizenName || 'Assigned Client'}</Text>
+              <Text style={styles.caseDesc}>{c.description}</Text>
 
-            <View style={styles.caseFooterRow}>
-              <Text style={styles.evidenceCount}>📁 {c.evidence?.length || 0} Evidence Files</Text>
-              <Text style={styles.manageBtnText}>View Details →</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+              <View style={styles.caseFooterRow}>
+                <Text style={styles.evidenceCount}>📁 {c.evidence?.length || 0} Evidence Files</Text>
+                <Text style={styles.manageBtnText}>View Details →</Text>
+              </View>
+            </TouchableOpacity>
+          ))
+        )}
       </ScrollView>
 
       {/* ADVOCATE PROFILE MODAL */}
@@ -308,10 +350,10 @@ export default function LawyerHome() {
             </View>
 
             <View style={{ backgroundColor: '#f8f9fa', borderRadius: 14, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: '#ece9e4' }}>
-              <Text style={{ fontSize: 16, fontWeight: '800', color: '#1a1a1a' }}>Adv. {lawyerProfile.name}</Text>
-              <Text style={{ fontSize: 13, color: '#0F2744', fontWeight: '700', marginTop: 2 }}>{lawyerProfile.email}</Text>
-              <Text style={{ fontSize: 12, color: '#0F2744', marginTop: 4, fontWeight: '600' }}>SBC License: {lawyerProfile.sbc || 'SBC-4421'}</Text>
-              <Text style={{ fontSize: 12, color: '#666666', marginTop: 2 }}>Specialty: {lawyerProfile.spec} · District: {lawyerProfile.district || 'Karachi'}</Text>
+              <Text style={{ fontSize: 16, fontWeight: '800', color: '#1a1a1a' }}>Adv. {realUser.name}</Text>
+              <Text style={{ fontSize: 13, color: '#0F2744', fontWeight: '700', marginTop: 2 }}>{realUser.email}</Text>
+              <Text style={{ fontSize: 12, color: '#0F2744', marginTop: 4, fontWeight: '600' }}>SBC License: {realUser.lawyer_profile?.sbc_number || 'SBC-Verified'}</Text>
+              <Text style={{ fontSize: 12, color: '#666666', marginTop: 2 }}>Specialty: {realUser.lawyer_profile?.specialty || 'General Practice'} · District: {realUser.district || realUser.lawyer_profile?.district || 'Sindh'}</Text>
             </View>
 
             <TouchableOpacity

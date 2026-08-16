@@ -14,29 +14,75 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useMockStore, lawyerProfile, updateLawyerProfile } from './MockStore';
 import api from '../../services/api';
-import { clearTokens } from '../../services/authStorage';
+import { clearTokens, getUser, saveUser } from '../../services/authStorage';
 
 export default function LawyerProfile() {
-  useMockStore();
   const router = useRouter();
   const [editMode, setEditMode] = useState(false);
   const [showDPMenu, setShowDPMenu] = useState(false);
   const [showPwModal, setShowPwModal] = useState(false);
   
+  // Real User State
+  const [realUser, setRealUser] = useState({ name: 'Lawyer', email: '', phone: '', district: '', cnic: '', role: 'lawyer', joinedDate: 'Recently', dp: 'L' });
+
   // Local state for editing
   const [editedData, setEditedData] = useState({
-    name: lawyerProfile.name,
-    spec: lawyerProfile.spec,
-    address: lawyerProfile.address,
-    bio: lawyerProfile.about,
-    email: lawyerProfile.email,
-    phone: lawyerProfile.phone,
-    isAvailable: lawyerProfile.isAvailable,
-    experience: lawyerProfile.experience,
-    education: lawyerProfile.education,
+    name: '',
+    spec: '',
+    address: '',
+    bio: '',
+    email: '',
+    phone: '',
+    district: '',
+    isAvailable: true,
+    experience: '',
+    education: '',
   });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const stored = await getUser();
+        if (stored) {
+          setRealUser(prev => ({
+            ...prev,
+            ...stored,
+            dp: (stored.name || 'L').substring(0, 2).toUpperCase()
+          }));
+          setEditedData(prev => ({
+            ...prev,
+            name: stored.name || '',
+            email: stored.email || ''
+          }));
+        }
+
+        const res = await api.get('/auth/me');
+        if (res?.data) {
+          const user = res.data;
+          const lp = user.lawyer_profile || {};
+          setRealUser({
+            ...user,
+            dp: (user.name || 'L').substring(0, 2).toUpperCase()
+          });
+          setEditedData({
+            name: user.name || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            district: user.district || '',
+            spec: lp.specialty || '',
+            address: lp.office_address || '',
+            bio: lp.bio || '',
+            experience: lp.experience || '5 Years',
+            education: lp.education || 'LL.B, University of Karachi',
+            isAvailable: lp.is_available !== false
+          });
+        }
+      } catch (err) {
+        console.log('Error loading lawyer profile:', err);
+      }
+    })();
+  }, []);
 
   // Password state
   const [currPassword, setCurrPassword] = useState('');
@@ -47,26 +93,42 @@ export default function LawyerProfile() {
 
   const handleNav = (lbl) => {
     if (lbl === 'home') router.push('/(lawyer)/LawyerHome');
-    if (lbl === 'requests') router.push('/(lawyer)/CaseRequests');
+    if (lbl === 'requests') router.push('/(lawyer)/IncomingRequests');
     if (lbl === 'cases') router.push('/(lawyer)/MyCases');
     if (lbl === 'schedule') router.push('/(lawyer)/Schedule');
     if (lbl === 'profile') router.push('/(lawyer)/LawyerProfile');
   };
 
-  const handleSave = () => {
-    updateLawyerProfile({
-      name: editedData.name,
-      spec: editedData.spec,
-      address: editedData.address,
-      about: editedData.bio,
-      email: editedData.email,
-      phone: editedData.phone,
-      isAvailable: editedData.isAvailable,
-      experience: editedData.experience,
-      education: editedData.education,
-    });
-    setEditMode(false);
-    Alert.alert('Success', 'Lawyer profile details updated!');
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      const res = await api.put('/auth/profile', {
+        name: editedData.name,
+        phone: editedData.phone,
+        district: editedData.district || 'Karachi',
+        specialty: editedData.spec,
+        office_address: editedData.address,
+        bio: editedData.bio,
+      });
+
+      const updated = res.data;
+      setRealUser({
+        ...updated,
+        dp: (updated.name || 'L').substring(0, 2).toUpperCase()
+      });
+
+      const stored = await getUser();
+      if (stored) {
+        await saveUser({ ...stored, name: updated.name });
+      }
+
+      setEditMode(false);
+      Alert.alert('Success', 'Lawyer profile details updated!');
+    } catch (err) {
+      Alert.alert('Error ⚠️', err?.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChangePassword = async () => {
@@ -81,7 +143,7 @@ export default function LawyerProfile() {
     try {
       setLoading(true);
       await api.put('/auth/change-password', {
-        email: lawyerProfile.email,
+        email: realUser.email,
         oldPassword: currPassword,
         newPassword,
       });
@@ -92,15 +154,11 @@ export default function LawyerProfile() {
       setNewPassword('');
       setConfirmPassword('');
 
-      if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
-        window.alert('🔑 Password Changed Successfully!\n\nYour new advocate account password has been saved to Database & Supabase.');
-      } else {
-        Alert.alert('Password Updated 🔑', 'Advocate password updated successfully!');
-      }
+      Alert.alert('Success', 'Password has been changed successfully!');
     } catch (err) {
       setLoading(false);
-      setShowPwModal(false);
-      Alert.alert('Password Changed', 'Password updated locally and synced to Database store.');
+      const msg = err?.response?.data?.message || 'Password change nahi ho saka. Dobara koshish karein.';
+      Alert.alert('Password Change Failed ⚠️', msg);
     }
   };
 
@@ -148,19 +206,21 @@ export default function LawyerProfile() {
             style={styles.profilePicContainer}
             onPress={() => setShowDPMenu(true)}
           >
-            {lawyerProfile.dp ? (
-              <View style={styles.profilePic} />
+            {realUser.dp ? (
+              <View style={[styles.profilePic, { backgroundColor: '#0F2744' }]}>
+                <Text style={styles.profilePicText}>{realUser.dp}</Text>
+              </View>
             ) : (
-              <View style={[styles.profilePic, { backgroundColor: lawyerProfile.color }]}>
-                <Text style={styles.profilePicText}>{lawyerProfile.initials}</Text>
+              <View style={[styles.profilePic, { backgroundColor: '#0F2744' }]}>
+                <Text style={styles.profilePicText}>L</Text>
               </View>
             )}
             <View style={styles.dpBadge}>
               <Text style={styles.dpBadgeText}>Edit</Text>
             </View>
           </TouchableOpacity>
-          <Text style={styles.profileName}>{lawyerProfile.name}</Text>
-          <Text style={styles.profileSpec}>{lawyerProfile.spec} · SBC {lawyerProfile.sbc}</Text>
+          <Text style={styles.profileName}>{realUser.name}</Text>
+          <Text style={styles.profileSpec}>{realUser.lawyer_profile?.specialty || 'General Practice'} · SBC {realUser.lawyer_profile?.sbc_number || 'SBC-Verified'}</Text>
         </View>
 
         {/* Availability Toggle */}
@@ -171,16 +231,27 @@ export default function LawyerProfile() {
               <Text style={styles.cardSub}>Toggle whether clients can hire you</Text>
             </View>
             <Switch
-              value={editMode ? editedData.isAvailable : lawyerProfile.isAvailable}
-              onValueChange={(value) => {
+              value={editMode ? editedData.isAvailable : (realUser.lawyer_profile?.is_available !== false)}
+              onValueChange={async (value) => {
                 if (editMode) {
                   setEditedData({...editedData, isAvailable: value});
                 } else {
-                  updateLawyerProfile({ isAvailable: value });
+                  try {
+                    await api.put('/auth/profile', { is_available: value });
+                    setRealUser(prev => ({
+                      ...prev,
+                      lawyer_profile: {
+                        ...(prev.lawyer_profile || {}),
+                        is_available: value
+                      }
+                    }));
+                  } catch (err) {
+                    console.log('Error toggling availability:', err);
+                  }
                 }
               }}
               trackColor={{ false: '#767577', true: '#1B4332' }}
-              thumbColor={editMode ? (editedData.isAvailable ? '#4ade80' : '#f4f3f4') : (lawyerProfile.isAvailable ? '#4ade80' : '#f4f3f4')}
+              thumbColor={editMode ? (editedData.isAvailable ? '#4ade80' : '#f4f3f4') : ((realUser.lawyer_profile?.is_available !== false) ? '#4ade80' : '#f4f3f4')}
             />
           </View>
         </View>
@@ -213,7 +284,7 @@ export default function LawyerProfile() {
           />
         ) : (
           <View style={styles.detailCard}>
-            <Text style={styles.detailValue}>{lawyerProfile.name}</Text>
+            <Text style={styles.detailValue}>{realUser.name}</Text>
           </View>
         )}
 
@@ -226,7 +297,7 @@ export default function LawyerProfile() {
           />
         ) : (
           <View style={styles.detailCard}>
-            <Text style={styles.detailValue}>{lawyerProfile.spec}</Text>
+            <Text style={styles.detailValue}>{realUser.lawyer_profile?.specialty || 'General Practice'}</Text>
           </View>
         )}
 
@@ -240,7 +311,7 @@ export default function LawyerProfile() {
           />
         ) : (
           <View style={styles.detailCard}>
-            <Text style={styles.detailValue}>{lawyerProfile.email}</Text>
+            <Text style={styles.detailValue}>{realUser.email}</Text>
           </View>
         )}
 
@@ -254,7 +325,7 @@ export default function LawyerProfile() {
           />
         ) : (
           <View style={styles.detailCard}>
-            <Text style={styles.detailValue}>{lawyerProfile.phone}</Text>
+            <Text style={styles.detailValue}>{realUser.phone || 'N/A'}</Text>
           </View>
         )}
 
@@ -267,7 +338,7 @@ export default function LawyerProfile() {
           />
         ) : (
           <View style={styles.detailCard}>
-            <Text style={styles.detailValue}>{lawyerProfile.experience}</Text>
+            <Text style={styles.detailValue}>{realUser.lawyer_profile?.experience || '5 Years'}</Text>
           </View>
         )}
 
@@ -280,7 +351,7 @@ export default function LawyerProfile() {
           />
         ) : (
           <View style={styles.detailCard}>
-            <Text style={styles.detailValue}>{lawyerProfile.education}</Text>
+            <Text style={styles.detailValue}>{realUser.lawyer_profile?.education || 'LL.B, University of Karachi'}</Text>
           </View>
         )}
 
@@ -295,7 +366,7 @@ export default function LawyerProfile() {
           />
         ) : (
           <View style={styles.detailCard}>
-            <Text style={styles.detailValue}>{lawyerProfile.address}</Text>
+            <Text style={styles.detailValue}>{realUser.lawyer_profile?.office_address || 'Sindh Court, Karachi'}</Text>
           </View>
         )}
 

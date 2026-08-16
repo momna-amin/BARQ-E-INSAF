@@ -10,35 +10,66 @@ import {
   Alert 
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useMockStore, activeCases, caseRequests } from './MockStore';
+import { useEffect } from 'react';
+import { ActivityIndicator } from 'react-native';
+import api from '../../services/api';
 
 export default function CaseDetail() {
-  useMockStore();
   const router = useRouter();
   const params = useLocalSearchParams();
   const caseId = params.caseId;
   
-  // Find case in active cases
-  const activeCase = activeCases.find(c => c.id === caseId);
-  const requestCase = caseRequests.find(c => c.id === caseId);
+  const [caseData, setCaseData] = useState(null);
+  const [loading, setLoading] = useState(true);
   
-  const caseData = activeCase || requestCase;
-
+  useEffect(() => {
+    const fetchCase = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get(`/cases/${caseId}`);
+        const c = res.data;
+        setCaseData({
+          id: c.id,
+          title: c.title,
+          clientName: c.citizen?.name || 'Client',
+          contact: c.citizen?.phone || c.citizen?.email || null,
+          spec: c.type || 'General Case',
+          court: c.court || 'Sindh Court',
+          problemStatement: c.description,
+          evidence: []
+        });
+      } catch (err) {
+        console.log('Error fetching case detail:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (caseId) fetchCase();
+  }, [caseId]);
+  
   const handleContactClient = () => {
-    if (caseData.contact) {
-      Alert.alert('Contact Client', `Phone: ${caseData.contact}`);
+    if (caseData && caseData.contact) {
+      Alert.alert('Contact Client', `Phone/Email: ${caseData.contact}`);
     } else {
-      Alert.alert('Contact Hidden', 'Accept the case request to view client contact information.');
+      Alert.alert('Contact Hidden', 'Client contact details are not available.');
     }
   };
 
   const handleViewEvidence = () => {
-    if (caseData.evidence && caseData.evidence.length > 0) {
+    if (caseData && caseData.evidence && caseData.evidence.length > 0) {
       Alert.alert('Evidence', caseData.evidence.join('\n'));
     } else {
-      Alert.alert('No Evidence', 'No evidence has been uploaded for this case.');
+      Alert.alert('No Evidence', 'No evidence files uploaded for this case.');
     }
   };
+
+  if (loading || !caseData) {
+    return (
+      <SafeAreaView style={[styles.safe, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#fff" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safe}>

@@ -13,16 +13,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import styles from './CitizenHome.styles';
-import {
-  useMockStore,
-  userData,
-  lawyers,
-  activeCases,
-  consultationRequests,
-  addConsultationRequest,
-} from './MockStore';
 import api from '../../services/api';
-import { clearTokens } from '../../services/authStorage';
+import { clearTokens, getUser } from '../../services/authStorage';
 import showAlert from '../../utils/showAlert';
 
 const navItems = [
@@ -35,13 +27,18 @@ const navItems = [
 const filterCategories = ['All', 'Property Law', 'Family Law', 'Civil Cases', 'Criminal Law'];
 
 export default function CitizenHome() {
-  useMockStore();
   const router = useRouter();
   const [activeNav, setActiveNav] = useState('home');
   const [showCasePopup, setShowCasePopup] = useState(false);
   const [showLawyerProfile, setShowLawyerProfile] = useState(false);
   const [selectedLawyer, setSelectedLawyer] = useState(null);
   
+  // Real user and dynamic data states
+  const [realUser, setRealUser] = useState({ name: 'Citizen', role: 'citizen', cnic: '', phone: '', district: '', dp: 'C' });
+  const [lawyers, setLawyers] = useState([]);
+  const [activeCases, setActiveCases] = useState([]);
+  const [consultationRequests, setConsultationRequests] = useState([]);
+
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('All');
@@ -60,6 +57,77 @@ export default function CitizenHome() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      const [lawyersRes, casesRes, reqsRes] = await Promise.all([
+        api.get('/lawyers'),
+        api.get('/cases/my'),
+        api.get('/requests/my'),
+      ]);
+
+      const formattedLawyers = (lawyersRes.data || []).map(l => ({
+        id: l.id,
+        name: l.user?.name || 'Unknown Advocate',
+        spec: l.specialty || 'General Practice',
+        sbc: l.sbc_number,
+        district: l.district || 'Sindh',
+        initials: (l.user?.name || 'A').substring(0, 2).toUpperCase(),
+        rating: l.rating || '4.9',
+        cases: l.total_ratings || 0,
+        color: '#5C1A1A'
+      }));
+      setLawyers(formattedLawyers);
+
+      const formattedCases = (casesRes.data || []).map(c => ({
+        id: c.id,
+        title: c.title,
+        type: c.type,
+        status: c.status === 'active' ? 'Active' : c.status === 'pending' ? 'Pending' : 'Closed',
+        lawyerName: c.lawyer?.user?.name || 'Assigned Counsel',
+        nextHearing: c.hearing_date ? new Date(c.hearing_date).toLocaleDateString() : 'Pending Assignment',
+        filingDate: new Date(c.created_at).toLocaleDateString(),
+        lastUpdated: c.updated_at ? new Date(c.updated_at).toLocaleDateString() : 'Recently'
+      }));
+      setActiveCases(formattedCases);
+
+      const formattedReqs = (reqsRes.data || []).map(r => ({
+        id: r.id,
+        lawyerName: r.lawyers?.lawyer_users?.name || 'Advocate',
+        lawyerSbc: r.lawyers?.sbc_number || 'SBC-Verified',
+        status: r.status === 'pending' ? 'Pending' : r.status === 'accepted' ? 'Accepted' : 'Declined',
+        reason: r.reason || 'Legal Consultation',
+        caseCategory: r.lawyers?.specialty || 'General',
+        createdAt: new Date(r.created_at).toLocaleDateString()
+      }));
+      setConsultationRequests(formattedReqs);
+    } catch (err) {
+      console.log('Error fetching dashboard data:', err);
+    }
+  };
+
+  useEffect(() => {
+    getUser().then(u => {
+      if (u) {
+        setRealUser(prev => ({
+          ...prev,
+          ...u,
+          dp: (u.name || 'C').substring(0, 2).toUpperCase()
+        }));
+      }
+    });
+
+    api.get('/auth/me').then(res => {
+      if (res?.data) {
+        setRealUser({
+          ...res.data,
+          dp: (res.data.name || 'C').substring(0, 2).toUpperCase()
+        });
+      }
+    }).catch(() => {});
+
+    fetchData();
+  }, []);
 
   const handleNav = (id) => {
     setActiveNav(id);
@@ -82,38 +150,25 @@ export default function CitizenHome() {
     }
 
     const lawyerObj = selectedLawyer || lawyers[0];
+    if (!lawyerObj) return;
 
-    // 1. Optimistic UI update — record in store immediately
-    addConsultationRequest({
-      lawyerId: lawyerObj.id,
-      lawyerName: lawyerObj.name,
-      lawyerSpec: lawyerObj.spec,
-      lawyerSbc: lawyerObj.sbc,
-      citizenName: userData.name,
-      citizenEmail: userData.email,
-      citizenPhone: userData.phone,
-      caseCategory: lawyerObj.spec,
-      reason: requestReason,
-      urgency: requestUrgency,
-    });
-
-    // 2. UI feedback is immediate and not blocked by email/network delay
-    setShowConsultModal(false);
-    setRequestSuccessBanner(true);
-    setTimeout(() => setRequestSuccessBanner(false), 4000);
-
-    // 3. Asynchronous background API call (non-blocking)
     try {
-      api.post('/requests', {
-        lawyer_id: lawyerObj.id,
-        user_id: userData.email,
+      setLoading(true);
+      await api.post('/requests', {
+        lawyerId: lawyerObj.id,
         reason: requestReason,
-        urgency: requestUrgency,
-      }).catch(() => {
-        // Silent catch — UI has already saved optimistic request locally
+        urgency: requestUrgency
       });
-    } catch {
-      // Ignored — frontend operates optimistically
+
+      setShowConsultModal(false);
+      setRequestSuccessBanner(true);
+      setTimeout(() => setRequestSuccessBanner(false), 4000);
+      fetchData();
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Failed to send request';
+      showAlert('Error ⚠️', msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -212,13 +267,13 @@ export default function CitizenHome() {
             <TouchableOpacity style={styles.profileBtn} onPress={() => setShowProfileModal(true)}>
               <Text style={styles.profileBtnText}>Profile</Text>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{userData.dp}</Text>
+                <Text style={styles.avatarText}>{realUser.dp}</Text>
               </View>
             </TouchableOpacity>
           </View>
         </View>
 
-        <Text style={styles.greeting}>Asalam-u-Alaikum, {userData.name} 👋</Text>
+        <Text style={styles.greeting}>Asalam-u-Alaikum, {realUser.name} 👋</Text>
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -454,10 +509,10 @@ export default function CitizenHome() {
             </View>
 
             <View style={{ backgroundColor: '#f8f9fa', borderRadius: 14, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: '#ece9e4' }}>
-              <Text style={{ fontSize: 16, fontWeight: '800', color: '#1a1a1a' }}>{userData.name}</Text>
-              <Text style={{ fontSize: 13, color: '#5C1A1A', fontWeight: '700', marginTop: 2 }}>{userData.email}</Text>
-              <Text style={{ fontSize: 12, color: '#666666', marginTop: 4 }}>Phone: {userData.phone} · CNIC: {userData.cnic}</Text>
-              <Text style={{ fontSize: 12, color: '#666666', marginTop: 2 }}>District: {userData.district} · Sindh</Text>
+              <Text style={{ fontSize: 16, fontWeight: '800', color: '#1a1a1a' }}>{realUser.name}</Text>
+              <Text style={{ fontSize: 13, color: '#5C1A1A', fontWeight: '700', marginTop: 2 }}>{realUser.email}</Text>
+              <Text style={{ fontSize: 12, color: '#666666', marginTop: 4 }}>Phone: {realUser.phone || 'N/A'} · CNIC: {realUser.cnic || 'N/A'}</Text>
+              <Text style={{ fontSize: 12, color: '#666666', marginTop: 2 }}>District: {realUser.district || 'N/A'} · Sindh</Text>
             </View>
 
             <TouchableOpacity

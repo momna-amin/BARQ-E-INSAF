@@ -24,11 +24,29 @@ const createCase = async (req, res) => {
 // GET /api/cases/my
 const getMyCases = async (req, res) => {
   try {
-    const { data, error } = await supabase
-      .from('cases')
-      .select('*, lawyer:lawyer_id(id, name, email)')
-      .eq('citizen_id', req.user.id)
-      .order('created_at', { ascending: false });
+    let query = supabase.from('cases');
+
+    if (req.user.role === 'lawyer') {
+      const { data: lawyerRow, error: le } = await supabase
+        .from('lawyers')
+        .select('id')
+        .eq('user_id', req.user.id)
+        .single();
+
+      if (le || !lawyerRow) {
+        return res.status(404).json({ message: 'Lawyer profile not found' });
+      }
+
+      query = query
+        .select('*, citizen:citizen_id(id, name, email, phone)')
+        .eq('lawyer_id', lawyerRow.id);
+    } else {
+      query = query
+        .select('*, lawyer:lawyer_id(id, user:user_id(name, email))')
+        .eq('citizen_id', req.user.id);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) return res.status(500).json({ message: error.message });
     res.json(data);
@@ -42,7 +60,7 @@ const getCaseById = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('cases')
-      .select('*, citizen:citizen_id(id, name, email, phone), lawyer:lawyer_id(id, name, email)')
+      .select('*, citizen:citizen_id(id, name, email, phone), lawyer:lawyer_id(id, user:user_id(name, email))')
       .eq('id', req.params.id)
       .single();
 

@@ -13,59 +13,54 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import styles from './Profile.styles';
-import { useMockStore, userData, updateProfile } from './MockStore';
 import api from '../../services/api';
-import { clearTokens, getUser } from '../../services/authStorage';
+import { clearTokens, getUser, saveUser } from '../../services/authStorage';
 
 const mockAvatars = ['AK', 'ZK', 'BK', 'MK', 'SK'];
 
 export default function Profile() {
-  useMockStore();
   const router = useRouter();
   const [showSettings, setShowSettings] = useState(false);
   const [showDpModal, setShowDpModal] = useState(false);
   const [showPwModal, setShowPwModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
-  // Edit fields
-  const [inputName, setInputName] = useState(userData.name);
-  const [inputEmail, setInputEmail] = useState(userData.email);
-  const [inputPhone, setInputPhone] = useState(userData.phone);
-  const [inputDistrict, setInputDistrict] = useState(userData.district);
+  // Real User State
+  const [realUser, setRealUser] = useState({ name: 'Citizen', email: '', phone: '', district: '', cnic: '', role: 'citizen', joinedDate: 'Recently', dp: 'C' });
 
-  // ── Load the REAL logged-in user's data (was hardcoded dummy data before) ──
-  // MockStore.userData is used as the live "current user" cache: whatever
-  // was saved at login/register is pulled in here and overwrites the
-  // placeholder, so the profile always shows the actual account's name/
-  // email/etc — not the same fixed dummy every time.
+  // Edit fields
+  const [inputName, setInputName] = useState('');
+  const [inputEmail, setInputEmail] = useState('');
+  const [inputPhone, setInputPhone] = useState('');
+  const [inputDistrict, setInputDistrict] = useState('');
+
   useEffect(() => {
     (async () => {
       try {
-        const stored = await getUser(); // saved at login/register time
+        const stored = await getUser();
         if (stored) {
-          updateProfile({
-            name: stored.name || userData.name,
-            email: stored.email || userData.email,
-            role: stored.role || userData.role,
-          });
+          setRealUser(prev => ({
+            ...prev,
+            ...stored,
+            dp: (stored.name || 'C').substring(0, 2).toUpperCase()
+          }));
+          setInputName(stored.name || '');
+          setInputEmail(stored.email || '');
         }
-        // Pull the full, authoritative profile from the backend too
+
         const res = await api.get('/auth/me');
         if (res?.data) {
-          updateProfile({
-            name: res.data.name || userData.name,
-            email: res.data.email || userData.email,
-            phone: res.data.phone || userData.phone,
-            district: res.data.district || userData.district,
-            role: res.data.role || userData.role,
+          setRealUser({
+            ...res.data,
+            dp: (res.data.name || 'C').substring(0, 2).toUpperCase()
           });
-          setInputName(res.data.name || userData.name);
-          setInputEmail(res.data.email || userData.email);
-          setInputPhone(res.data.phone || userData.phone);
-          setInputDistrict(res.data.district || userData.district);
+          setInputName(res.data.name || '');
+          setInputEmail(res.data.email || '');
+          setInputPhone(res.data.phone || '');
+          setInputDistrict(res.data.district || '');
         }
-      } catch {
-        // Backend fetch failed — keep whatever was saved locally at login
+      } catch (err) {
+        console.log('Error loading profile:', err);
       }
     })();
   }, []);
@@ -84,19 +79,41 @@ export default function Profile() {
     if (id === 'profile') router.push('/(citizen)/Profile');
   };
 
-  const handleSaveProfile = () => {
-    updateProfile({
-      name: inputName,
-      email: inputEmail,
-      phone: inputPhone,
-      district: inputDistrict,
-    });
-    setEditMode(false);
-    Alert.alert('Profile Saved', 'Your citizen account details have been updated!');
+  const handleSaveProfile = async () => {
+    try {
+      setLoading(true);
+      const res = await api.put('/auth/profile', {
+        name: inputName,
+        phone: inputPhone,
+        district: inputDistrict,
+      });
+
+      const updated = res.data;
+      setRealUser(prev => ({
+        ...prev,
+        name: updated.name,
+        phone: updated.phone,
+        district: updated.district,
+        dp: (updated.name || 'C').substring(0, 2).toUpperCase()
+      }));
+
+      const stored = await getUser();
+      if (stored) {
+        await saveUser({ ...stored, name: updated.name });
+      }
+
+      setEditMode(false);
+      Alert.alert('Profile Saved', 'Your citizen account details have been updated!');
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Failed to update profile';
+      Alert.alert('Error ⚠️', msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSelectAvatar = (avatar) => {
-    updateProfile({ dp: avatar });
+    setRealUser(prev => ({ ...prev, dp: avatar }));
     setShowDpModal(false);
   };
 
@@ -112,7 +129,7 @@ export default function Profile() {
     try {
       setLoading(true);
       await api.put('/auth/change-password', {
-        email: userData.email,
+        email: realUser.email,
         oldPassword: currPassword,
         newPassword,
       });
@@ -175,7 +192,7 @@ export default function Profile() {
         <View style={styles.profileCard}>
           <View style={styles.avatarContainer}>
             <View style={styles.avatarLarge}>
-              <Text style={styles.avatarLargeText}>{userData.dp}</Text>
+              <Text style={styles.avatarLargeText}>{realUser.dp}</Text>
             </View>
             <TouchableOpacity style={styles.editAvatarBtn} onPress={() => setShowDpModal(true)}>
               <Text style={styles.editAvatarText}>Change Photo</Text>
@@ -198,29 +215,29 @@ export default function Profile() {
             </View>
           ) : (
             <View style={styles.displayForm}>
-              <Text style={styles.userName}>{userData.name}</Text>
-              <Text style={styles.userRole}>{userData.role.toUpperCase()} PORTAL</Text>
+              <Text style={styles.userName}>{realUser.name}</Text>
+              <Text style={styles.userRole}>{(realUser.role || 'citizen').toUpperCase()} PORTAL</Text>
 
               <View style={styles.infoGrid}>
                 <View style={styles.infoGridItem}>
                   <Text style={styles.infoGridLabel}>Email</Text>
-                  <Text style={styles.infoGridValue}>{userData.email}</Text>
+                  <Text style={styles.infoGridValue}>{realUser.email}</Text>
                 </View>
                 <View style={styles.infoGridItem}>
                   <Text style={styles.infoGridLabel}>Phone</Text>
-                  <Text style={styles.infoGridValue}>{userData.phone}</Text>
+                  <Text style={styles.infoGridValue}>{realUser.phone || 'N/A'}</Text>
                 </View>
                 <View style={styles.infoGridItem}>
                   <Text style={styles.infoGridLabel}>CNIC</Text>
-                  <Text style={styles.infoGridValue}>{userData.cnic}</Text>
+                  <Text style={styles.infoGridValue}>{realUser.cnic || 'N/A'}</Text>
                 </View>
                 <View style={styles.infoGridItem}>
                   <Text style={styles.infoGridLabel}>District</Text>
-                  <Text style={styles.infoGridValue}>{userData.district}</Text>
+                  <Text style={styles.infoGridValue}>{realUser.district || 'N/A'}</Text>
                 </View>
                 <View style={styles.infoGridItem}>
                   <Text style={styles.infoGridLabel}>Member Since</Text>
-                  <Text style={styles.infoGridValue}>{userData.joinedDate}</Text>
+                  <Text style={styles.infoGridValue}>{realUser.joinedDate || 'Recently'}</Text>
                 </View>
               </View>
 

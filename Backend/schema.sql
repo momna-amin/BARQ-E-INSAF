@@ -125,6 +125,22 @@ CREATE TABLE IF NOT EXISTS chat_history (
 ALTER TABLE chat_history DISABLE ROW LEVEL SECURITY;
 
 -- ============================================================================
+-- TABLE: lawyer_schedules
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS lawyer_schedules (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    lawyer_id UUID REFERENCES lawyers(id) ON DELETE CASCADE,
+    day_of_week TEXT NOT NULL,
+    start_time TEXT NOT NULL,
+    end_time TEXT NOT NULL,
+    is_available BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE lawyer_schedules DISABLE ROW LEVEL SECURITY;
+CREATE INDEX IF NOT EXISTS idx_schedules_lawyer ON lawyer_schedules(lawyer_id);
+
+-- ============================================================================
 -- SEED DATA — All passwords are pre-hashed using bcrypt (cost 10)
 -- Plain passwords shown in comments — will be inserted via seed.js script
 -- ============================================================================

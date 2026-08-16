@@ -17,6 +17,8 @@ app.use('/api/cases',    require('./routes/cases'));
 app.use('/api/admin',    require('./routes/admin'));
 app.use('/api/chat',     require('./routes/chat'));
 app.use('/api/requests', require('./routes/requests')); // Lawyer request flow + notifications
+app.use('/api/evidence', require('./routes/evidence'));
+app.use('/api/schedules',require('./routes/schedules'));
 
 app.get('/', (req, res) => {
   res.json({ message: 'Barq-e-Insaf API running with Supabase & Live Vercel' });

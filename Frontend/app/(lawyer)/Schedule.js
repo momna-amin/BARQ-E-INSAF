@@ -12,12 +12,12 @@ import {
   Alert 
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useMockStore, timingSlots, addTimingSlot, deleteTimingSlot, editTimingSlot } from './MockStore';
+import { useEffect } from 'react';
+import api from '../../services/api';
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 export default function Schedule() {
-  useMockStore();
   const router = useRouter();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -26,16 +26,48 @@ export default function Schedule() {
   const [newTime, setNewTime] = useState('');
   const [showDayDropdown, setShowDayDropdown] = useState(false);
 
-  const handleAddSlot = () => {
+  const [timingSlots, setTimingSlots] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchSchedules = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/schedules/my');
+      const formatted = (res.data || []).map(slot => ({
+        id: slot.id,
+        day: slot.day_of_week,
+        time: `${slot.start_time}${slot.end_time ? ' - ' + slot.end_time : ''}`
+      }));
+      setTimingSlots(formatted);
+    } catch (err) {
+      console.log('Error fetching schedules:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSchedules();
+  }, []);
+
+  const handleAddSlot = async () => {
     if (!newTime) {
       Alert.alert('Error', 'Please enter a time');
       return;
     }
-    addTimingSlot(newDay, newTime);
-    setNewDay('Monday');
-    setNewTime('');
-    setShowAddModal(false);
-    Alert.alert('Success', 'Time slot added successfully');
+    try {
+      setLoading(true);
+      await api.post('/schedules', { day: newDay, time: newTime });
+      setNewDay('Monday');
+      setNewTime('');
+      setShowAddModal(false);
+      Alert.alert('Success', 'Time slot added successfully');
+      fetchSchedules();
+    } catch (err) {
+      Alert.alert('Error', err?.response?.data?.message || 'Failed to add slot');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteSlot = (id) => {
@@ -43,7 +75,21 @@ export default function Schedule() {
       'Delete Slot',
       'Are you sure you want to delete this time slot?',
       [
-        { text: 'Yes', onPress: () => deleteTimingSlot(id) },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await api.delete(`/schedules/${id}`);
+              Alert.alert('Success', 'Time slot deleted successfully');
+              fetchSchedules();
+            } catch (err) {
+              Alert.alert('Error', err?.response?.data?.message || 'Failed to delete slot');
+            } finally {
+              setLoading(false);
+            }
+          }
+        },
         { text: 'No', style: 'cancel' }
       ]
     );
@@ -56,22 +102,32 @@ export default function Schedule() {
     setShowEditModal(true);
   };
 
-  const handleUpdateSlot = () => {
+  const handleUpdateSlot = async () => {
     if (!newTime) {
       Alert.alert('Error', 'Please enter a time');
       return;
     }
-    editTimingSlot(editingSlot.id, newDay, newTime);
-    setShowEditModal(false);
-    setEditingSlot(null);
-    setNewDay('Monday');
-    setNewTime('');
-    Alert.alert('Success', 'Time slot updated successfully');
+    try {
+      setLoading(true);
+      await api.delete(`/schedules/${editingSlot.id}`);
+      await api.post('/schedules', { day: newDay, time: newTime });
+      
+      setShowEditModal(false);
+      setEditingSlot(null);
+      setNewDay('Monday');
+      setNewTime('');
+      Alert.alert('Success', 'Time slot updated successfully');
+      fetchSchedules();
+    } catch (err) {
+      Alert.alert('Error', err?.response?.data?.message || 'Failed to update slot');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleNav = (lbl) => {
     if (lbl === 'home') router.push('/(lawyer)/LawyerHome');
-    if (lbl === 'requests') router.push('/(lawyer)/CaseRequests');
+    if (lbl === 'requests') router.push('/(lawyer)/IncomingRequests');
     if (lbl === 'cases') router.push('/(lawyer)/MyCases');
     if (lbl === 'schedule') router.push('/(lawyer)/Schedule');
     if (lbl === 'profile') router.push('/(lawyer)/LawyerProfile');

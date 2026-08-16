@@ -9,15 +9,41 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import styles from './MyCases.styles';
-import { useMockStore, activeCases } from './MockStore';
+import { useEffect } from 'react';
+import { ActivityIndicator } from 'react-native';
+import api from '../../services/api';
 
 const filters = ['All', 'Active', 'Pending', 'Closed'];
 
 export default function MyCases() {
-  useMockStore();
   const router = useRouter();
   const [activeNav, setActiveNav] = useState('cases');
   const [activeFilter, setActiveFilter] = useState('All');
+  const [activeCases, setActiveCases] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchCases = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get('/cases/my');
+        const formattedCases = (res.data || []).map(c => ({
+          id: c.id,
+          title: c.title,
+          type: c.type,
+          status: c.status === 'active' ? 'Active' : c.status === 'pending' ? 'Pending' : 'Closed',
+          filingDate: new Date(c.created_at).toLocaleDateString(),
+          lastUpdated: c.updated_at ? new Date(c.updated_at).toLocaleDateString() : 'Recently'
+        }));
+        setActiveCases(formattedCases);
+      } catch (err) {
+        console.log('Error fetching cases:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCases();
+  }, []);
 
   const filtered = activeFilter === 'All'
     ? activeCases
@@ -80,30 +106,37 @@ export default function MyCases() {
         </ScrollView>
 
         {/* CASE CARDS */}
-        {filtered.map((c, i) => (
-          <TouchableOpacity
-            key={i}
-            style={styles.caseCard}
-            onPress={() => handleCasePress(c)}
-          >
-            <View style={styles.caseCardTop}>
-              <View style={styles.caseType}>
-                <Text style={styles.caseTitle}>{c.title}</Text>
+        {loading ? (
+          <ActivityIndicator size="large" color="#5C1A1A" style={{ marginTop: 40 }} />
+        ) : filtered.length === 0 ? (
+          <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 30, alignItems: 'center', marginTop: 20, borderWidth: 1, borderColor: '#ece9e4' }}>
+            <Text style={{ fontSize: 15, fontWeight: '700', color: '#666' }}>No cases found</Text>
+            <Text style={{ fontSize: 12, color: '#999', marginTop: 4 }}>You don't have any cases in this category.</Text>
+          </View>
+        ) : (
+          filtered.map((c, i) => (
+            <TouchableOpacity
+              key={i}
+              style={styles.caseCard}
+              onPress={() => handleCasePress(c)}
+            >
+              <View style={styles.caseCardTop}>
+                <View style={styles.caseType}>
+                  <Text style={styles.caseTitle}>{c.title}</Text>
+                </View>
+                <Text style={styles.badgeText}>{c.status}</Text>
               </View>
-              <Text style={styles.badgeText}>{c.status}</Text>
-            </View>
-            <Text style={styles.caseMeta}>Filing Date: {c.filingDate}</Text>
-            
-            {/* NO case description shown here as per prompt details */}
-            
-            <View style={styles.caseFooter}>
-              <Text style={styles.caseFooterText}>Updated {c.lastUpdated}</Text>
-              <TouchableOpacity style={styles.viewBtn} onPress={() => handleCasePress(c)}>
-                <Text style={styles.viewBtnText}>View Details</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        ))}
+              <Text style={styles.caseMeta}>Filing Date: {c.filingDate}</Text>
+              
+              <View style={styles.caseFooter}>
+                <Text style={styles.caseFooterText}>Updated {c.lastUpdated}</Text>
+                <TouchableOpacity style={styles.viewBtn} onPress={() => handleCasePress(c)}>
+                  <Text style={styles.viewBtnText}>View Details</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          ))
+        )}
       </ScrollView>
 
       {/* BOTTOM NAV */}
