@@ -12,7 +12,7 @@ const { requestToLawyer, responseToUser, adminNotify } = require('../utils/email
 // ─────────────────────────────────────────────────────────────────────────────
 router.post('/', protect, allowRoles('citizen', 'user'), async (req, res) => {
   try {
-    const { lawyerId } = req.body;
+    const { lawyerId, reason } = req.body;
     const user = req.user;
 
     if (!lawyerId) return res.status(400).json({ message: 'lawyerId is required' });
@@ -42,7 +42,7 @@ router.post('/', protect, allowRoles('citizen', 'user'), async (req, res) => {
     // Insert request
     const { data: request, error: re } = await supabase
       .from('lawyer_requests')
-      .insert({ user_id: user.id, lawyer_id: lawyerId, status: 'pending' })
+      .insert({ user_id: user.id, lawyer_id: lawyerId, status: 'pending', reason: reason || null })
       .select()
       .single();
 
