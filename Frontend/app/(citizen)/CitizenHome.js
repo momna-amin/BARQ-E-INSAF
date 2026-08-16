@@ -240,7 +240,7 @@ export default function CitizenHome() {
       l.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       l.spec.toLowerCase().includes(searchQuery.toLowerCase()) ||
       l.district.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      l.sbc.toLowerCase().includes(searchQuery.toLowerCase());
+      (l.sbc || '').toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesFilter = selectedFilter === 'All' || l.spec.toLowerCase().includes(selectedFilter.toLowerCase());
 
