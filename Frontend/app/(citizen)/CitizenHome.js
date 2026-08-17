@@ -86,7 +86,7 @@ export default function CitizenHome() {
         status: c.status === 'active' ? 'Active' : c.status === 'pending' ? 'Pending' : 'Closed',
         lawyerName: c.lawyer?.user?.name || 'Assigned Counsel',
         nextHearing: c.hearing_date ? new Date(c.hearing_date).toLocaleDateString() : 'Pending Assignment',
-        filingDate: new Date(c.created_at).toLocaleDateString(),
+        creationDate: new Date(c.created_at).toLocaleDateString(),
         lastUpdated: c.updated_at ? new Date(c.updated_at).toLocaleDateString() : 'Recently'
       }));
       setActiveCases(formattedCases);
@@ -369,7 +369,7 @@ export default function CitizenHome() {
             </View>
             <Text style={styles.caseTitle}>{c.title}</Text>
             <Text style={styles.caseLawyer}>Advocate: {c.lawyerName || 'Assigned Counsel'}</Text>
-            <Text style={styles.caseDate}>Next Hearing: {c.nextHearing || c.filingDate}</Text>
+            <Text style={styles.caseDate}>Next Hearing: {c.nextHearing || c.creationDate}</Text>
           </TouchableOpacity>
         ))}
 

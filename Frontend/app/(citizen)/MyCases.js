@@ -32,7 +32,7 @@ export default function MyCases() {
           title: c.title,
           type: c.type,
           status: c.status === 'active' ? 'Active' : c.status === 'pending' ? 'Pending' : 'Closed',
-          filingDate: new Date(c.created_at).toLocaleDateString(),
+          creationDate: new Date(c.created_at).toLocaleDateString(),
           lastUpdated: c.updated_at ? new Date(c.updated_at).toLocaleDateString() : 'Recently'
         }));
         setActiveCases(formattedCases);
@@ -126,7 +126,7 @@ export default function MyCases() {
                 </View>
                 <Text style={styles.badgeText}>{c.status}</Text>
               </View>
-              <Text style={styles.caseMeta}>Filing Date: {c.filingDate}</Text>
+              <Text style={styles.caseMeta}>Date Created: {c.creationDate}</Text>
               
               <View style={styles.caseFooter}>
                 <Text style={styles.caseFooterText}>Updated {c.lastUpdated}</Text>

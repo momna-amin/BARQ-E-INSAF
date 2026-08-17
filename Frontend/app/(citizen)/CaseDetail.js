@@ -56,7 +56,7 @@ export default function CaseDetail() {
         status: c.status === 'active' ? 'Active' : c.status === 'pending' ? 'Pending' : 'Closed',
         type: c.type || 'General',
         description: c.description,
-        filingDate: new Date(c.created_at).toLocaleDateString(),
+        creationDate: new Date(c.created_at).toLocaleDateString(),
         lastUpdated: c.updated_at ? new Date(c.updated_at).toLocaleDateString() : 'Recently',
         district: c.district || 'Sindh',
         lawyerId: c.lawyer?.id || null,
@@ -288,10 +288,10 @@ export default function CaseDetail() {
 
         {/* METADATA INFO */}
         <View style={styles.infoSection}>
-          <Text style={styles.sectionTitle}>Filing Details</Text>
+          <Text style={styles.sectionTitle}>Case Details</Text>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Filing Date</Text>
-            <Text style={styles.infoValue}>{caseData.filingDate}</Text>
+            <Text style={styles.infoLabel}>Date Created</Text>
+            <Text style={styles.infoValue}>{caseData.creationDate}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Last Updated</Text>

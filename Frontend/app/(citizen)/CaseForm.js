@@ -274,7 +274,7 @@ export default function CaseForm() {
 
         {/* Uneditable Actual Date */}
         <View style={styles.formGroup}>
-          <Text style={styles.formLabel}>Filing Date</Text>
+          <Text style={styles.formLabel}>Date Created</Text>
           <View style={styles.uneditableField}>
             <Text style={styles.uneditableFieldText}>{todayDate}</Text>
           </View>
