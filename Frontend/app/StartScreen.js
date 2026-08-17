@@ -111,13 +111,7 @@ export default function StartScreen() {
               <TouchableOpacity
                 style={styles.btnFull}
                 activeOpacity={0.86}
-                onPress={() => {
-                  if (Platform.OS === 'web' && typeof window !== 'undefined') {
-                    window.location.href = '/RoleSelectScreen';
-                  } else {
-                    router.push('/RoleSelectScreen');
-                  }
-                }}
+                onPress={() => router.push('/RoleSelectScreen')}
               >
                 <LinearGradient
                   colors={['#1e3a8a', '#6d1530', '#b91c1c']}
@@ -136,13 +130,7 @@ export default function StartScreen() {
             <TouchableOpacity
               style={styles.secondaryBtn}
               activeOpacity={0.8}
-              onPress={() => {
-                if (Platform.OS === 'web' && typeof window !== 'undefined') {
-                  window.location.href = '/LandingScreen';
-                } else {
-                  router.push('/LandingScreen');
-                }
-              }}
+              onPress={() => router.push('/LandingScreen')}
             >
               <Text style={styles.secondaryBtnText}>EXPLORE PROJECT</Text>
             </TouchableOpacity>
