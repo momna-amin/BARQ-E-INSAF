@@ -108,34 +108,6 @@ export default function AddEvidence() {
     // Falls back to mock list
     processAndUploadFile(file.name, file.type, file.size, null);
   };
-        const updatedEvidence = [...currentEvidence, newFile];
-        
-        // Save to DB
-        await api.put('/cases/' + params.caseId, {
-          evidence: updatedEvidence
-        });
-        
-        showAlert('Success', 'File successfully added to case vault!');
-        router.replace({
-          pathname: '/(citizen)/CaseEvidence',
-          params: { caseId: params.caseId }
-        });
-      } catch (err) {
-        showAlert('Error', 'Failed to upload file.');
-      } finally {
-        setUploading(false);
-      }
-    } else {
-      router.push({
-        pathname: '/(citizen)/CaseForm',
-        params: { 
-          caseType, 
-          newFileName: file.name, 
-          newFileType: file.type 
-        }
-      });
-    }
-  };
 
   if (uploading) {
     return (

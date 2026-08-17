@@ -14,14 +14,15 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import styles from './CaseForm.styles';
 import api from '../../services/api';
 
-const sindhCities = {
-  Karachi: ['Karachi Central', 'Karachi East', 'Karachi South', 'Karachi West', 'Malir', 'Korangi', 'Keamari'],
-  Hyderabad: ['Hyderabad City', 'Latifabad', 'Qasimabad', 'Tando Jam', 'Badin', 'Dadu', 'Jamshoro', 'Matiari', 'Tando Allahyar', 'Tando Muhammad Khan', 'Thatta', 'Sujawal'],
-  Sukkur: ['Sukkur City', 'Rohri', 'Pano Aqil', 'Salehpat', 'Ghotki', 'Khairpur'],
-  Larkana: ['Larkana City', 'Ratodero', 'Dokri', 'Bakrani', 'Jacobabad', 'Kashmore', 'Qambar Shahdadkot', 'Shikarpur'],
-  Mirpurkhas: ['Mirpur Khas', 'Umerkot', 'Tharparkar'],
-  'Shaheed Benazirabad': ['Naushahro Feroze', 'Sanghar', 'Nawabshah']
-};
+const SINDH_DISTRICTS = [
+  'Badin', 'Dadu', 'Ghotki', 'Hyderabad', 'Jacobabad',
+  'Jamshoro', 'Karachi Central', 'Karachi East', 'Karachi South',
+  'Karachi West', 'Kashmore', 'Khairpur', 'Korangi', 'Larkana',
+  'Malir', 'Matiari', 'Mirpur Khas', 'Naushahro Feroze',
+  'Qambar Shahdadkot', 'Sanghar', 'Shaheed Benazirabad',
+  'Shikarpur', 'Sukkur', 'Tando Allahyar', 'Tando Muhammad Khan',
+  'Tharparkar', 'Thatta', 'Umerkot',
+];
 
 export default function CaseForm() {
   const router = useRouter();
@@ -41,9 +42,7 @@ export default function CaseForm() {
   });
   const [loading, setLoading] = useState(false);
 
-  const [selectedCity, setSelectedCity] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
-  const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(caseType === 'family' ? 'Family Law' : 'Property Law');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -97,7 +96,7 @@ export default function CaseForm() {
         title: formData.title,
         type: selectedCategory,
         description: formData.description,
-        district: `${selectedCity} - ${selectedDistrict}`,
+        district: selectedDistrict,
         evidence: evidenceList,
       });
 
@@ -203,74 +202,37 @@ export default function CaseForm() {
           />
         </View>
 
-        {/* Sindh City Dropdown */}
+
+
+        {/* District Dropdown */}
         <View style={styles.formGroup}>
-          <Text style={styles.formLabel}>Sindh City *</Text>
+          <Text style={styles.formLabel}>District *</Text>
           <TouchableOpacity 
             style={styles.dropdownSelector}
-            onPress={() => {
-              setShowCityDropdown(!showCityDropdown);
-              setShowDistrictDropdown(false);
-            }}
+            onPress={() => setShowDistrictDropdown(!showDistrictDropdown)}
           >
             <Text style={styles.dropdownValue}>
-              {selectedCity || 'Select Sindh City'}
+              {selectedDistrict || 'Select District'}
             </Text>
           </TouchableOpacity>
           
-          {showCityDropdown && (
+          {showDistrictDropdown && (
             <View style={styles.dropdownList}>
-              {Object.keys(sindhCities).map(city => (
+              {SINDH_DISTRICTS.map(dist => (
                 <TouchableOpacity 
-                  key={city} 
+                  key={dist} 
                   style={styles.dropdownItem}
                   onPress={() => {
-                    setSelectedCity(city);
-                    setSelectedDistrict('');
-                    setShowCityDropdown(false);
+                    setSelectedDistrict(dist);
+                    setShowDistrictDropdown(false);
                   }}
                 >
-                  <Text style={styles.dropdownItemText}>{city}</Text>
+                  <Text style={styles.dropdownItemText}>{dist}</Text>
                 </TouchableOpacity>
               ))}
             </View>
           )}
         </View>
-
-        {/* District Dropdown */}
-        {selectedCity !== '' && (
-          <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>District *</Text>
-            <TouchableOpacity 
-              style={styles.dropdownSelector}
-              onPress={() => {
-                setShowDistrictDropdown(!showDistrictDropdown);
-                setShowCityDropdown(false);
-              }}
-            >
-              <Text style={styles.dropdownValue}>
-                {selectedDistrict || 'Select District'}
-              </Text>
-            </TouchableOpacity>
-            
-            {showDistrictDropdown && (
-              <View style={styles.dropdownList}>
-                {sindhCities[selectedCity].map(dist => (
-                  <TouchableOpacity 
-                    key={dist} 
-                    style={styles.dropdownItem}
-                    onPress={() => {
-                      setSelectedDistrict(dist);
-                      setShowDistrictDropdown(false);
-                    }}
-                  >
-                    <Text style={styles.dropdownItemText}>{dist}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-          </View>
-        )}
 
         {/* Uneditable Actual Date */}
         <View style={styles.formGroup}>
