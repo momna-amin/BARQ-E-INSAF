@@ -16,14 +16,15 @@ import { ActivityIndicator } from 'react-native';
 import api from '../../services/api';
 import showAlert from '../../utils/showAlert';
 
-const sindhCities = {
-  Karachi: ['Karachi Central', 'Karachi East', 'Karachi South', 'Karachi West', 'Malir', 'Korangi', 'Keamari'],
-  Hyderabad: ['Hyderabad City', 'Latifabad', 'Qasimabad', 'Tando Jam', 'Badin', 'Dadu', 'Jamshoro', 'Matiari', 'Tando Allahyar', 'Tando Muhammad Khan', 'Thatta', 'Sujawal'],
-  Sukkur: ['Sukkur City', 'Rohri', 'Pano Aqil', 'Salehpat', 'Ghotki', 'Khairpur'],
-  Larkana: ['Larkana City', 'Ratodero', 'Dokri', 'Bakrani', 'Jacobabad', 'Kashmore', 'Qambar Shahdadkot', 'Shikarpur'],
-  Mirpurkhas: ['Mirpur Khas', 'Umerkot', 'Tharparkar'],
-  'Shaheed Benazirabad': ['Naushahro Feroze', 'Sanghar', 'Nawabshah']
-};
+const SINDH_DISTRICTS = [
+  'Badin', 'Dadu', 'Ghotki', 'Hyderabad', 'Jacobabad',
+  'Jamshoro', 'Karachi Central', 'Karachi East', 'Karachi South',
+  'Karachi West', 'Kashmore', 'Khairpur', 'Korangi', 'Larkana',
+  'Malir', 'Matiari', 'Mirpur Khas', 'Naushahro Feroze',
+  'Qambar Shahdadkot', 'Sanghar', 'Shaheed Benazirabad',
+  'Shikarpur', 'Sukkur', 'Tando Allahyar', 'Tando Muhammad Khan',
+  'Tharparkar', 'Thatta', 'Umerkot',
+];
 
 export default function CaseDetail() {
   const router = useRouter();
@@ -36,10 +37,8 @@ export default function CaseDetail() {
   const [editedTitle, setEditedTitle] = useState('');
   const [editedDesc, setEditedDesc] = useState('');
   const [editedCategory, setEditedCategory] = useState('Property Law');
-  const [editedCity, setEditedCity] = useState('');
   const [editedDistrict, setEditedDistrict] = useState('');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-  const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
   const categories = ['Property Law', 'Family Law', 'Civil Cases', 'Criminal Law'];
   const [submittingRating, setSubmittingRating] = useState(false);
@@ -65,9 +64,7 @@ export default function CaseDetail() {
       setEditedTitle(c.title);
       setEditedDesc(c.description);
       setEditedCategory(c.type || 'Property Law');
-      const parts = (c.district || '').split(' - ');
-      setEditedCity(parts[0] || '');
-      setEditedDistrict(parts[1] || '');
+      setEditedDistrict(c.district || '');
     } catch (err) {
       console.log('Error fetching case detail:', err);
       showAlert('Error', 'Failed to load case details.');
@@ -98,7 +95,7 @@ export default function CaseDetail() {
         title: editedTitle,
         description: editedDesc,
         type: editedCategory,
-        district: editedCity && editedDistrict ? `${editedCity} - ${editedDistrict}` : caseData.district
+        district: editedDistrict || caseData.district
       });
       const c = res.data;
       setCaseData(prev => ({
@@ -188,71 +185,34 @@ export default function CaseDetail() {
                 </View>
               )}
 
-              {/* Sindh City Dropdown */}
-              <Text style={styles.editLabel}>Edit Sindh City</Text>
+              {/* District Dropdown */}
+              <Text style={styles.editLabel}>Edit District</Text>
               <TouchableOpacity 
                 style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#ece9e4', padding: 12, marginBottom: 12 }}
                 onPress={() => {
-                  setShowCityDropdown(!showCityDropdown);
+                  setShowDistrictDropdown(!showDistrictDropdown);
                   setShowCategoryDropdown(false);
-                  setShowDistrictDropdown(false);
                 }}
               >
                 <Text style={{ fontSize: 14, color: '#1a1a1a', fontWeight: '600' }}>
-                  {editedCity || 'Select Sindh City'}
+                  {editedDistrict || 'Select District'}
                 </Text>
               </TouchableOpacity>
-              {showCityDropdown && (
+              {showDistrictDropdown && (
                 <View style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#ece9e4', padding: 6, marginBottom: 12 }}>
-                  {Object.keys(sindhCities).map(city => (
+                  {SINDH_DISTRICTS.map(dist => (
                     <TouchableOpacity 
-                      key={city} 
+                      key={dist} 
                       style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' }}
                       onPress={() => {
-                        setEditedCity(city);
-                        setEditedDistrict('');
-                        setShowCityDropdown(false);
+                        setEditedDistrict(dist);
+                        setShowDistrictDropdown(false);
                       }}
                     >
-                      <Text style={{ fontSize: 13, color: '#334155', fontWeight: '600' }}>{city}</Text>
+                      <Text style={{ fontSize: 13, color: '#334155', fontWeight: '600' }}>{dist}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
-              )}
-
-              {/* District Dropdown */}
-              {editedCity !== '' && (
-                <>
-                  <Text style={styles.editLabel}>Edit District</Text>
-                  <TouchableOpacity 
-                    style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#ece9e4', padding: 12, marginBottom: 12 }}
-                    onPress={() => {
-                      setShowDistrictDropdown(!showDistrictDropdown);
-                      setShowCityDropdown(false);
-                      setShowCategoryDropdown(false);
-                    }}
-                  >
-                    <Text style={{ fontSize: 14, color: '#1a1a1a', fontWeight: '600' }}>
-                      {editedDistrict || 'Select District'}
-                    </Text>
-                  </TouchableOpacity>
-                  {showDistrictDropdown && (
-                    <View style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#ece9e4', padding: 6, marginBottom: 12 }}>
-                      {sindhCities[editedCity].map(dist => (
-                        <TouchableOpacity 
-                          key={dist} 
-                          style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' }}
-                          onPress={() => {
-                            setEditedDistrict(dist);
-                            setShowDistrictDropdown(false);
-                          }}
-                        >
-                          <Text style={{ fontSize: 13, color: '#334155', fontWeight: '600' }}>{dist}</Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  )}
-                </>
               )}
             </View>
           ) : (
