@@ -76,8 +76,8 @@ export default function StartScreen() {
           <InstallAppButton />
         </View>
 
-+        {/* ── HERO AREA ── */}
-+        <Animated.View style={[styles.heroArea, { opacity: fadeIn }]} />
+     {/* ── HERO AREA ── */}
+     <Animated.View style={[styles.heroArea, { opacity: fadeIn }]} />
 
         {/* ── BOTTOM CARD ── */}
         <Animated.View style={[

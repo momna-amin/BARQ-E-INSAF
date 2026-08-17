@@ -113,7 +113,7 @@ export default function AIChatFloatingButton() {
 
   return (
     <>
-      {/* ⚡ ULTRA-ATTRACTIVE DRAGGABLE ORB FLOATING BUTTON ⚡ */}
+      {/*  ULTRA-ATTRACTIVE DRAGGABLE ORB FLOATING BUTTON  */}
       <Animated.View
         style={[styles.draggableFab, { transform: [{ translateX: pan.x }, { translateY: pan.y }] }]}
         {...panResponder.panHandlers}
