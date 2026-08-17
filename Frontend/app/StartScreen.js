@@ -59,13 +59,6 @@ export default function StartScreen() {
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
         />
-        {/* Subtle corner tints for depth */}
-        <LinearGradient
-          colors={['rgba(37,99,235,0.22)', 'transparent']}
-          style={styles.cornerTintTop}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        />
         <LinearGradient
           colors={['transparent', 'rgba(153,27,27,0.25)']}
           style={styles.cornerTintBottom}
@@ -206,7 +199,7 @@ const styles = StyleSheet.create({
 
   // ── BOTTOM CARD ──
   bottomCard: {
-    backgroundColor: 'rgba(255,255,255,0.96)',
+    backgroundColor: 'rgba(255,255,255,0.75)',
     borderTopLeftRadius: 36,
     borderTopRightRadius: 36,
     paddingHorizontal: 24,
