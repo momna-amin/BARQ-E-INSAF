@@ -30,11 +30,13 @@ function fetchUrl(url) {
       console.log(`Checking bundle: ${fullUrl}`);
       const bundleRes = await fetchUrl(fullUrl);
       
-      const hasSaveCase = bundleRes.data.includes('Save Case');
-      const hasCaseCategory = bundleRes.data.includes('Case Category');
+      const hasSindhDistricts = bundleRes.data.includes('SINDH_DISTRICTS');
+      const hasSindhCity = bundleRes.data.includes('Sindh City *');
+      const hasDateCreated = bundleRes.data.includes('DATE CREATED') || bundleRes.data.includes('Date Created');
       
-      console.log(`- Contains "Save Case"?`, hasSaveCase);
-      console.log(`- Contains "Case Category"?`, hasCaseCategory);
+      console.log(`- Contains "SINDH_DISTRICTS"?`, hasSindhDistricts);
+      console.log(`- Contains "Sindh City *"?`, hasSindhCity);
+      console.log(`- Contains "Date Created"?`, hasDateCreated);
     }
   } catch (err) {
     console.error('Error:', err.message);
