@@ -23,8 +23,36 @@ export default function Root({ children }: PropsWithChildren) {
         <link rel="apple-touch-icon" href="/icons/icon-any-192.png" />
 
         <ScrollViewStyleReset />
+
+        {/* Google Website Translator — persists via googtrans cookie across all routes */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              function googleTranslateElementInit() {
+                new google.translate.TranslateElement(
+                  { pageLanguage: 'ur', autoDisplay: false, layout: google.translate.TranslateElement.InlineLayout.SIMPLE },
+                  'google_translate_element'
+                );
+              }
+            `,
+          }}
+        />
+        <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async />
       </head>
       <body>
+        <div
+          id="google_translate_element"
+          style={{
+            position: 'fixed',
+            top: '8px',
+            right: '8px',
+            zIndex: 9999,
+            backgroundColor: 'rgba(255,255,255,0.95)',
+            borderRadius: '8px',
+            padding: '2px 4px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          }}
+        />
         {children}
         <script
           dangerouslySetInnerHTML={{

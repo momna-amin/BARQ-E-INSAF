@@ -304,7 +304,12 @@ export default function LoginScreen() {
       router.replace(destination);
 
     } catch (error) {
-      const errorMsg = error?.response?.data?.message || 'Login failed — please check your credentials or register a new account.';
+      const d = error?.response?.data || {};
+      if (d.pendingApproval) {
+        router.replace('/(lawyer)/VerificationPending');
+        return;
+      }
+      const errorMsg = d.message || 'Login failed — please check your credentials or register a new account.';
       showAlert('Login Error ⚠️', errorMsg);
     } finally {
       setLoading(false);

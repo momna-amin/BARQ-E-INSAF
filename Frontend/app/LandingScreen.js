@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -22,6 +22,17 @@ const STATUSBAR_HEIGHT = Platform.OS === 'android' ? (StatusBar.currentHeight ||
 export default function LandingScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Show Google Translate widget on first visit (web only)
+  // The widget's googtrans cookie persists across all pages automatically
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const alreadyTranslated = document.cookie.includes('googtrans=');
+    if (!alreadyTranslated) {
+      const el = document.getElementById('google_translate_element');
+      if (el) el.style.display = 'block';
+    }
+  }, []);
 
   const [fontsLoaded] = useFonts({ RacingSansOne_400Regular });
 

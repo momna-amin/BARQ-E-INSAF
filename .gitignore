@@ -1,18 +1,15 @@
-<<<<<<< HEAD
-node_modules/ 
-.expo/ 
-dist/ 
-=======
 node_modules/
 .expo/
 dist/
 admin-panel.zip
 *.zip
->>>>>>> f06f937636566780e4af62dedd07861ac3eaf169
+.env
+.env.local
+.env.*.local
+*.log
 
 # Python / Chatbot ignores
 venv/
 __pycache__/
-.env
 chroma_db/
 *.pyc
