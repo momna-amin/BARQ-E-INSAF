@@ -83,20 +83,8 @@ export default function StartScreen() {
           <InstallAppButton />
         </View>
 
-        {/* ── HERO AREA ── */}
-        <Animated.View style={[styles.heroArea, { opacity: fadeIn }]}>
-          <View style={styles.badgeWrap}>
-            <LinearGradient
-              colors={['#1d4ed8', '#7c2d92', '#b91c1c']}
-              style={styles.badgeGlow}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <Text style={styles.badgeIcon}>⚡</Text>
-            </LinearGradient>
-          </View>
-          <Text style={styles.heroKicker}>JUSTICE, DELIVERED SMARTLY</Text>
-        </Animated.View>
++        {/* ── HERO AREA ── */}
++        <Animated.View style={[styles.heroArea, { opacity: fadeIn }]} />
 
         {/* ── BOTTOM CARD ── */}
         <Animated.View style={[
@@ -208,27 +196,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
     paddingBottom: 18,
-  },
-  badgeWrap: {
-    marginBottom: 14,
-    shadowColor: '#1d4ed8',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 12,
-  },
-  badgeGlow: {
-    width: 74,
-    height: 74,
-    borderRadius: 37,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.25)',
-  },
-  badgeIcon: {
-    fontSize: 34,
-    color: '#FFD700',
   },
   heroKicker: {
     fontSize: 12,
