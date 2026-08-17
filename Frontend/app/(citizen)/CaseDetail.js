@@ -129,9 +129,9 @@ export default function CaseDetail() {
       {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Text style={styles.backText}>Back</Text>
+          <Text style={styles.backBtnText}>Back</Text>
         </TouchableOpacity>
-        <View style={styles.brandRow}>
+        <View style={styles.brandBadgeRow}>
           <View style={styles.logoBadge}>
             <Text style={styles.logoBadgeText}>BI</Text>
           </View>
