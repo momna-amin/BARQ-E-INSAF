@@ -21,7 +21,8 @@
       "package": "com.anonymous.BarqEInsafApp"
     },
     "web": {
-      "output": "static",
+      "bundler": "metro",
+      "output": "single",
       "favicon": "./assets/images/logo.png",
       "name": "Barq-e-Insaf",
       "shortName": "BarqInsaf",
