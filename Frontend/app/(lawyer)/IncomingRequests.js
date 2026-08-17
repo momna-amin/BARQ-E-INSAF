@@ -17,12 +17,20 @@ import api from '../../services/api';
 
 const STATUS_CONFIG = {
   pending:  { label: 'Pending', color: '#f59e0b', bg: '#fffbeb', icon: '⏳' },
-  accepted: { label: 'Qabool',  color: '#0b5d3b', bg: '#f0faf5', icon: '✅' },
-  rejected: { label: 'Reject',  color: '#dc2626', bg: '#fef2f2', icon: '❌' },
+  accepted: { label: 'Accepted',  color: '#0F2744', bg: '#e0f2fe', icon: '✅' },
+  rejected: { label: 'Rejected',  color: '#dc2626', bg: '#fef2f2', icon: '❌' },
 };
 
 export default function IncomingRequests() {
   const router = useRouter();
+
+  const handleNav = (lbl) => {
+    if (lbl === 'home')     router.push('/(lawyer)/LawyerHome');
+    if (lbl === 'requests') router.push('/(lawyer)/IncomingRequests');
+    if (lbl === 'cases')    router.push('/(lawyer)/MyCases');
+    if (lbl === 'schedule') router.push('/(lawyer)/Schedule');
+    if (lbl === 'profile')  router.push('/(lawyer)/LawyerProfile');
+  };
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -42,7 +50,7 @@ export default function IncomingRequests() {
       setRequests(res.data || []);
     } catch (err) {
       if (!silent) {
-        showAlert('Error', err?.response?.data?.message || 'Requests load nahi ho sake');
+        showAlert('Error', err?.response?.data?.message || 'Failed to load client requests.');
       }
     } finally {
       setLoading(false);
@@ -71,12 +79,12 @@ export default function IncomingRequests() {
       });
       setShowModal(false);
       showAlert(
-        '✅ Jawab Bhej Diya',
-        `Request ${responseAction === 'accepted' ? 'qabool' : 'reject'} kar di — user ko email bhi pohonch gayi.`,
+        '✅ Response Submitted',
+        `Request has been ${responseAction === 'accepted' ? 'accepted' : 'declined'}. Client has been notified via email.`
       );
       fetchRequests(true);
     } catch (err) {
-      showAlert('Error', err?.response?.data?.message || 'Kuch masla ho gaya');
+      showAlert('Error', err?.response?.data?.message || 'Failed to submit response. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -91,13 +99,13 @@ export default function IncomingRequests() {
 
   const tabs = [
     { key: 'pending', label: 'Pending', icon: '⏳' },
-    { key: 'accepted', label: 'Qabool', icon: '✅' },
-    { key: 'rejected', label: 'Reject', icon: '❌' },
+    { key: 'accepted', label: 'Accepted', icon: '✅' },
+    { key: 'rejected', label: 'Rejected', icon: '❌' },
   ];
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor="#0b5d3b" />
+      <StatusBar barStyle="light-content" backgroundColor="#0F2744" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -106,7 +114,7 @@ export default function IncomingRequests() {
         </TouchableOpacity>
         <View>
           <Text style={styles.headerTitle}>Client Requests</Text>
-          <Text style={styles.headerSub}>{requests.length} kul requests</Text>
+          <Text style={styles.headerSub}>{requests.length} total requests</Text>
         </View>
         <TouchableOpacity onPress={() => fetchRequests()} style={styles.refreshBtn}>
           <Text style={styles.refreshIcon}>🔄</Text>
@@ -137,14 +145,14 @@ export default function IncomingRequests() {
       {/* Content */}
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator color="#0b5d3b" size="large" />
-          <Text style={styles.loadingText}>Requests load ho rahi hain...</Text>
+          <ActivityIndicator color="#0F2744" size="large" />
+          <Text style={styles.loadingText}>Loading requests...</Text>
         </View>
       ) : (
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#0b5d3b']} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#0F2744']} />}
         >
           {filtered.length === 0 ? (
             <View style={styles.emptyBox}>
@@ -171,7 +179,7 @@ export default function IncomingRequests() {
                       </Text>
                     </View>
                     <View style={styles.cardInfo}>
-                      <Text style={styles.cardName}>{user.name || 'Naam nahi'}</Text>
+                      <Text style={styles.cardName}>{user.name || 'No Name'}</Text>
                       <Text style={styles.cardEmail}>{user.email || '—'}</Text>
                       {user.phone && <Text style={styles.cardPhone}>📞 {user.phone}</Text>}
                       {user.district && <Text style={styles.cardCity}>📍 {user.district}</Text>}
@@ -185,7 +193,7 @@ export default function IncomingRequests() {
 
                   {/* Date */}
                   <Text style={styles.cardDate}>
-                    📅 {new Date(req.created_at).toLocaleDateString('ur-PK', {
+                    📅 {new Date(req.created_at).toLocaleDateString('en-US', {
                       year: 'numeric', month: 'long', day: 'numeric'
                     })}
                   </Text>
@@ -193,7 +201,7 @@ export default function IncomingRequests() {
                   {/* Reason (if any) */}
                   {req.reason && (
                     <View style={styles.reasonBox}>
-                      <Text style={styles.reasonLabel}>Wajah:</Text>
+                      <Text style={styles.reasonLabel}>Reason / Details:</Text>
                       <Text style={styles.reasonText}>{req.reason}</Text>
                     </View>
                   )}
@@ -205,13 +213,13 @@ export default function IncomingRequests() {
                         style={styles.acceptBtn}
                         onPress={() => openResponseModal(req, 'accepted')}
                       >
-                        <Text style={styles.acceptBtnText}>✅ Qabool Karein</Text>
+                        <Text style={styles.acceptBtnText}>✅ Accept Request</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={styles.rejectBtn}
                         onPress={() => openResponseModal(req, 'rejected')}
                       >
-                        <Text style={styles.rejectBtnText}>❌ Manzoor Nahi</Text>
+                        <Text style={styles.rejectBtnText}>❌ Decline Request</Text>
                       </TouchableOpacity>
                     </View>
                   )}
@@ -221,6 +229,22 @@ export default function IncomingRequests() {
           )}
         </ScrollView>
       )}
+
+      {/* FOOTER */}
+      <View style={styles.bottomNav}>
+        {['Dashboard', 'Requests', 'Cases', 'Schedule', 'Profile'].map((lbl, idx) => {
+          const ids = ['home', 'requests', 'cases', 'schedule', 'profile'];
+          return (
+            <TouchableOpacity
+              key={lbl}
+              style={styles.navItem}
+              onPress={() => handleNav(ids[idx])}
+            >
+              <Text style={[styles.navLabel, ids[idx] === 'requests' && styles.navLabelActive]}>{lbl}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
 
       {/* Response Modal */}
       <Modal
@@ -232,7 +256,7 @@ export default function IncomingRequests() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <Text style={styles.modalTitle}>
-              {responseAction === 'accepted' ? '✅ Request Qabool Karein' : '❌ Request Reject Karein'}
+              {responseAction === 'accepted' ? '✅ Accept Consultation Request' : '❌ Decline Consultation Request'}
             </Text>
 
             {selectedRequest && (
@@ -243,7 +267,7 @@ export default function IncomingRequests() {
             )}
 
             <Text style={styles.modalReasonLabel}>
-              Wajah likhein (ikhtiari — optional):
+              Enter message/reason (optional):
             </Text>
             <TextInput
               style={styles.modalReasonInput}
@@ -251,8 +275,8 @@ export default function IncomingRequests() {
               onChangeText={setReason}
               placeholder={
                 responseAction === 'accepted'
-                  ? 'Mubarak ho! Ya koi khas baat likhein...'
-                  : 'Reject ki wajah batayein (masalan: schedule full hai)'
+                  ? 'Write a note for the client...'
+                  : 'Write a reason for declining (e.g. schedule full)...'
               }
               placeholderTextColor="#9ca3af"
               multiline
@@ -261,10 +285,10 @@ export default function IncomingRequests() {
 
             <Text style={styles.modalNote}>
               {responseAction === 'accepted'
-                ? 'Client ko email aur in-app notification jayegi ke request qabool ho gayi.'
-                : 'Client ko email aur notification jayegi ke request manzoor nahi hui.'}
+                ? 'Client will receive an email and in-app notification that their request has been accepted.'
+                : 'Client will receive an email that their request has been declined.'}
             </Text>
-            <Text style={styles.modalAdminNote}>Admin ko bhi automatically email jayegi.</Text>
+            <Text style={styles.modalAdminNote}>Admin will also be automatically notified.</Text>
 
             <View style={styles.modalBtns}>
               <TouchableOpacity
@@ -272,7 +296,7 @@ export default function IncomingRequests() {
                 onPress={() => setShowModal(false)}
                 disabled={submitting}
               >
-                <Text style={styles.modalCancelText}>Wapis</Text>
+                <Text style={styles.modalCancelText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
@@ -286,7 +310,7 @@ export default function IncomingRequests() {
                 {submitting
                   ? <ActivityIndicator color="#fff" size="small" />
                   : <Text style={styles.modalConfirmText}>
-                      {responseAction === 'accepted' ? 'Haan, Qabool Hai' : 'Haan, Reject Karein'}
+                      {responseAction === 'accepted' ? 'Confirm Accept' : 'Confirm Decline'}
                     </Text>
                 }
               </TouchableOpacity>
@@ -301,7 +325,7 @@ export default function IncomingRequests() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#f3f4f6' },
   header: {
-    backgroundColor: '#0b5d3b', flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#0F2744', flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 14, gap: 12,
   },
   backBtn: { padding: 4 },
@@ -316,16 +340,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: '#e5e7eb',
   },
   tab: { flex: 1, alignItems: 'center', paddingVertical: 12, flexDirection: 'row', justifyContent: 'center', gap: 4 },
-  tabActive: { borderBottomWidth: 3, borderBottomColor: '#0b5d3b' },
+  tabActive: { borderBottomWidth: 3, borderBottomColor: '#0F2744' },
   tabIcon: { fontSize: 14 },
   tabLabel: { fontSize: 13, color: '#9ca3af', fontWeight: '500' },
-  tabLabelActive: { color: '#0b5d3b', fontWeight: '700' },
+  tabLabelActive: { color: '#0F2744', fontWeight: '700' },
   badge: { backgroundColor: '#e5e7eb', borderRadius: 10, paddingHorizontal: 6, paddingVertical: 1 },
-  badgeActive: { backgroundColor: '#0b5d3b' },
+  badgeActive: { backgroundColor: '#0F2744' },
   badgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
 
   scroll: { flex: 1 },
-  scrollContent: { padding: 16, gap: 12 },
+  scrollContent: { padding: 16, gap: 12, paddingBottom: 100 },
 
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
   loadingText: { color: '#6b7280', fontSize: 14 },
@@ -356,10 +380,10 @@ const styles = StyleSheet.create({
 
   actionRow: { flexDirection: 'row', gap: 10, marginTop: 4 },
   acceptBtn: {
-    flex: 1, backgroundColor: '#f0faf5', borderWidth: 1.5, borderColor: '#0b5d3b',
+    flex: 1, backgroundColor: '#f0faf5', borderWidth: 1.5, borderColor: '#0F2744',
     borderRadius: 10, padding: 12, alignItems: 'center',
   },
-  acceptBtnText: { color: '#0b5d3b', fontWeight: '700', fontSize: 14 },
+  acceptBtnText: { color: '#0F2744', fontWeight: '700', fontSize: 14 },
   rejectBtn: {
     flex: 1, backgroundColor: '#fef2f2', borderWidth: 1.5, borderColor: '#dc2626',
     borderRadius: 10, padding: 12, alignItems: 'center',
@@ -389,9 +413,25 @@ const styles = StyleSheet.create({
   },
   modalCancelText: { color: '#374151', fontWeight: '700', fontSize: 15 },
   modalConfirmBtn: {
-    flex: 1, backgroundColor: '#0b5d3b', borderRadius: 12, padding: 15, alignItems: 'center',
+    flex: 1, backgroundColor: '#0F2744', borderRadius: 12, padding: 15, alignItems: 'center',
   },
   modalConfirmBtnRed: { backgroundColor: '#dc2626' },
   modalConfirmBtnDisabled: { opacity: 0.6 },
   modalConfirmText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  bottomNav: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#ece9e4',
+    flexDirection: 'row',
+    height: 80,
+    paddingBottom: 24,
+    paddingTop: 10,
+  },
+  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  navLabel: { fontSize: 11, fontWeight: '600', color: '#bbb' },
+  navLabelActive: { color: '#0F2744' },
 });
