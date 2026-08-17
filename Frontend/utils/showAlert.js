@@ -10,7 +10,7 @@ export function showAlert(title, message, buttons) {
       overlay.style.left = '0';
       overlay.style.right = '0';
       overlay.style.bottom = '0';
-      overlay.style.backgroundColor = 'rgba(15, 23, 42, 0.65)'; // Sleek slate backdrop
+      overlay.style.backgroundColor = 'rgba(15, 23, 42, 0.65)';
       overlay.style.backdropFilter = 'blur(4px)';
       overlay.style.display = 'flex';
       overlay.style.alignItems = 'center';
@@ -23,11 +23,12 @@ export function showAlert(title, message, buttons) {
       const card = document.createElement('div');
       card.style.backgroundColor = '#ffffff';
       card.style.borderRadius = '16px';
-      card.style.padding = '24px';
-      card.style.maxWidth = '400px';
+      card.style.padding = '28px 24px 24px 24px';
+      card.style.maxWidth = '420px';
       card.style.width = '100%';
-      card.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+      card.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
       card.style.textAlign = 'center';
+      card.style.position = 'relative';
       card.style.animation = 'scaleIn 0.2s ease-out';
 
       // Add simple scale-in animation keyframe
@@ -40,11 +41,33 @@ export function showAlert(title, message, buttons) {
       `;
       document.head.appendChild(styleSheet);
 
+      // Top-right Close (✖) Button
+      const closeBtn = document.createElement('button');
+      closeBtn.innerHTML = '✕';
+      closeBtn.style.position = 'absolute';
+      closeBtn.style.top = '12px';
+      closeBtn.style.right = '14px';
+      closeBtn.style.border = 'none';
+      closeBtn.style.background = 'transparent';
+      closeBtn.style.fontSize = '16px';
+      closeBtn.style.fontWeight = '700';
+      closeBtn.style.color = '#94a3b8';
+      closeBtn.style.cursor = 'pointer';
+      closeBtn.style.padding = '4px 8px';
+      closeBtn.style.borderRadius = '6px';
+      closeBtn.onmouseover = () => { closeBtn.style.color = '#1e293b'; closeBtn.style.background = '#f1f5f9'; };
+      closeBtn.onmouseout = () => { closeBtn.style.color = '#94a3b8'; closeBtn.style.background = 'transparent'; };
+      closeBtn.onclick = () => {
+        if (document.body.contains(overlay)) document.body.removeChild(overlay);
+        if (document.head.contains(styleSheet)) document.head.removeChild(styleSheet);
+      };
+      card.appendChild(closeBtn);
+
       // 3. Render Title & Description
       const titleEl = document.createElement('h3');
       titleEl.innerText = title;
       titleEl.style.margin = '0 0 10px 0';
-      titleEl.style.fontSize = '19px';
+      titleEl.style.fontSize = '18px';
       titleEl.style.fontWeight = '800';
       titleEl.style.color = '#1e293b';
 
@@ -71,7 +94,7 @@ export function showAlert(title, message, buttons) {
         actionBtn.innerText = btn.text || 'OK';
         
         // Button Styles
-        actionBtn.style.padding = '10px 20px';
+        actionBtn.style.padding = '11px 20px';
         actionBtn.style.fontSize = '14px';
         actionBtn.style.fontWeight = '700';
         actionBtn.style.borderRadius = '10px';
@@ -81,13 +104,11 @@ export function showAlert(title, message, buttons) {
         actionBtn.style.flex = '1';
 
         if (btn.style === 'cancel' || btn.text.toLowerCase() === 'cancel' || btn.text.toLowerCase() === 'no') {
-          // Secondary button styling
           actionBtn.style.backgroundColor = '#f1f5f9';
           actionBtn.style.color = '#475569';
           actionBtn.onmouseover = () => { actionBtn.style.backgroundColor = '#e2e8f0'; };
           actionBtn.onmouseout = () => { actionBtn.style.backgroundColor = '#f1f5f9'; };
         } else {
-          // Primary action button styling (matching dark red theme)
           actionBtn.style.backgroundColor = '#5C1A1A';
           actionBtn.style.color = '#ffffff';
           actionBtn.onmouseover = () => { actionBtn.style.backgroundColor = '#7c2222'; };
@@ -96,8 +117,8 @@ export function showAlert(title, message, buttons) {
 
         // OnClick Handler
         actionBtn.onclick = () => {
-          document.body.removeChild(overlay);
-          document.head.removeChild(styleSheet);
+          if (document.body.contains(overlay)) document.body.removeChild(overlay);
+          if (document.head.contains(styleSheet)) document.head.removeChild(styleSheet);
           if (btn.onPress) btn.onPress();
         };
 
