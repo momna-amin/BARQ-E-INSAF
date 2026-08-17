@@ -1,0 +1,171 @@
+import { StyleSheet } from 'react-native';
+
+export default StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: '#f5f3ef',
+  },
+  header: {
+    backgroundColor: '#5C1A1A',
+    paddingHorizontal: 20,
+    paddingTop: 48,
+    paddingBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  backBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+  },
+  backText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
+  logoBadge: {
+    backgroundColor: '#fff',
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoBadgeText: {
+    color: '#5C1A1A',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '750',
+    color: '#fff',
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 120,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ece9e4',
+  },
+  filterChipActive: {
+    backgroundColor: '#5C1A1A',
+    borderColor: '#5C1A1A',
+  },
+  filterText: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '600',
+  },
+  filterTextActive: {
+    color: '#fff',
+  },
+  caseCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#ece9e4',
+  },
+  caseCardTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  caseType: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  caseTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1a1a1a',
+  },
+  badgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#5c1a1a',
+    backgroundColor: '#f5e8e8',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  caseMeta: {
+    fontSize: 12,
+    color: '#888',
+    marginBottom: 12,
+  },
+  caseFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#f5f3ef',
+    paddingTop: 10,
+  },
+  caseFooterText: {
+    fontSize: 11,
+    color: '#999',
+  },
+  viewBtn: {
+    backgroundColor: '#5C1A1A',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  viewBtnText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  bottomNav: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#ece9e4',
+    flexDirection: 'row',
+    height: 80,
+    paddingBottom: 24,
+    paddingTop: 10,
+  },
+  navItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#bbb',
+  },
+  navLabelActive: {
+    color: '#5C1A1A',
+  },
+});
