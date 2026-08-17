@@ -54,7 +54,7 @@ export default StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
   caseHeader: {
     backgroundColor: '#fff',
@@ -245,5 +245,28 @@ export default StyleSheet.create({
   editTextArea: {
     height: 100,
     textAlignVertical: 'top',
+  },
+  bottomNav: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#ece9e4',
+    flexDirection: 'row',
+    height: 80,
+    paddingBottom: 24,
+    paddingTop: 10,
+  },
+  navItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#bbb',
   },
 });
