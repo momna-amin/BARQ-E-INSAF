@@ -296,7 +296,7 @@ export default function IncomingRequests() {
 
             <Text style={styles.modalNote}>
               {responseAction === 'accepted'
-                ? '⭐ Accepting this request will automatically assign you to this client's case.'
+                ? "⭐ Accepting this request will automatically assign you to this client's case."
                 : '⚠️ Client will receive an email containing this decline explanation.'}
             </Text>
             <Text style={styles.modalAdminNote}>Notifications and emails will be handled instantly by our server.</Text>
