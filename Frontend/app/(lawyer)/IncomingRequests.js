@@ -35,6 +35,7 @@ export default function IncomingRequests() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('pending'); // pending | accepted | rejected
+  const [isMounted, setIsMounted] = useState(false);
 
   // Response modal state
   const [showModal, setShowModal] = useState(false);
@@ -58,7 +59,10 @@ export default function IncomingRequests() {
     }
   }, []);
 
-  useEffect(() => { fetchRequests(); }, []);
+  useEffect(() => {
+    setIsMounted(true);
+    fetchRequests();
+  }, []);
 
   const onRefresh = () => { setRefreshing(true); fetchRequests(true); };
 
@@ -197,9 +201,9 @@ export default function IncomingRequests() {
 
                   {/* Date */}
                   <Text style={styles.cardDate}>
-                    📅 {new Date(req.created_at).toLocaleDateString('en-US', {
+                    📅 {isMounted ? new Date(req.created_at).toLocaleDateString('en-US', {
                       year: 'numeric', month: 'long', day: 'numeric'
-                    })}
+                    }) : ''}
                   </Text>
 
                   {/* Reason (if any) */}
