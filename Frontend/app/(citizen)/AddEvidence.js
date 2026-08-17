@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, ActivityIndicator, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import styles from './AddEvidence.styles';
 
@@ -27,22 +27,87 @@ export default function AddEvidence() {
   };
 
   const [uploading, setUploading] = useState(false);
-  
-  const handleSelectFile = async (file) => {
-    if (params.caseId) {
-      try {
-        setUploading(true);
-        // Fetch current case details
-        const getRes = await api.get('/cases/' + params.caseId);
+
+  const processAndUploadFile = async (fileName, fileType, fileSize, fileDataUrl) => {
+    try {
+      setUploading(true);
+      const targetCaseId = params.caseId;
+      
+      if (targetCaseId) {
+        // Mode A: Save directly to existing case in DB
+        const getRes = await api.get('/cases/' + targetCaseId);
         const currentEvidence = getRes.data.evidence || [];
         
         const newFile = {
           id: String(currentEvidence.length + 1),
-          type: file.type,
-          name: file.name,
-          size: file.size,
-          date: new Date().toISOString().split('T')[0]
+          type: fileType,
+          name: fileName,
+          size: fileSize,
+          date: new Date().toISOString().split('T')[0],
+          dataUrl: fileDataUrl
         };
+        const updatedEvidence = [...currentEvidence, newFile];
+        
+        await api.put('/cases/' + targetCaseId, {
+          evidence: updatedEvidence
+        });
+        
+        showAlert('Success', 'File successfully uploaded to your case vault!');
+        router.replace({
+          pathname: '/(citizen)/CaseEvidence',
+          params: { caseId: targetCaseId }
+        });
+      } else {
+        // Mode B: Pass back to CaseForm via Router params (for new cases)
+        router.push({
+          pathname: '/(citizen)/CaseForm',
+          params: { 
+            caseType, 
+            newFileName: fileName, 
+            newFileType: fileType,
+            newFileSize: fileSize,
+            newFileDataUrl: fileDataUrl
+          }
+        });
+      }
+    } catch (err) {
+      showAlert('Upload Error', err?.response?.data?.message || 'Failed to save file.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRealFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Convert bytes to readable size
+    const bytes = file.size;
+    let sizeStr = '0 KB';
+    if (bytes < 1024 * 1024) {
+      sizeStr = (bytes / 1024).toFixed(1) + ' KB';
+    } else {
+      sizeStr = (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    // Determine simplified type
+    let typeLabel = 'File';
+    if (file.type.startsWith('image/')) typeLabel = 'Photo';
+    else if (file.type.startsWith('video/')) typeLabel = 'Video';
+    else if (file.type === 'application/pdf') typeLabel = 'PDF';
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      processAndUploadFile(file.name, typeLabel, sizeStr, dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSelectFile = async (file) => {
+    // Falls back to mock list
+    processAndUploadFile(file.name, file.type, file.size, null);
+  };
         const updatedEvidence = [...currentEvidence, newFile];
         
         // Save to DB
@@ -98,11 +163,35 @@ export default function AddEvidence() {
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-        <Text style={styles.sectionTitle}>Select File from Phone Explorer</Text>
-        <Text style={styles.subtitle}>Select the file you want to upload to your secure vault.</Text>
+        <Text style={styles.sectionTitle}>Upload Evidence File</Text>
+        <Text style={styles.subtitle}>Upload any real picture, document, or video from your device directly into the database.</Text>
+
+        {/* Real File Input (Hidden, triggered by button) */}
+        {Platform.OS === 'web' && (
+          <input 
+            type="file" 
+            id="device-file-picker" 
+            style={{ display: 'none' }} 
+            onChange={handleRealFileSelect}
+            accept="image/*,video/*,application/pdf"
+          />
+        )}
+
+        <TouchableOpacity 
+          style={{ backgroundColor: '#5C1A1A', padding: 18, borderRadius: 12, alignItems: 'center', marginBottom: 24 }}
+          onPress={() => {
+            if (Platform.OS === 'web') {
+              document.getElementById('device-file-picker').click();
+            } else {
+              showAlert('Info', 'Real device file upload is supported in browser view.');
+            }
+          }}
+        >
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '800' }}>📁 Choose File from Device</Text>
+        </TouchableOpacity>
 
         <View style={styles.explorerBox}>
-          <Text style={styles.explorerHeader}>Phone File Explorer</Text>
+          <Text style={styles.explorerHeader}>Or Choose Quick Demo Files:</Text>
           
           {mockExplorerFiles.map((file, idx) => (
             <TouchableOpacity 
