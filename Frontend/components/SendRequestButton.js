@@ -31,7 +31,7 @@ export default function SendRequestButton({ lawyerId, lawyerName, reason, caseId
       // Success feedback
       showAlert(
         '✅ Request Sent',
-        `Your consultation request has been sent to Advocate ${lawyerName || 'Advocate'}. They will receive your details and contact you soon.`,Ref:
+        `Your consultation request has been sent to Advocate ${lawyerName || 'Advocate'}. They will receive your details and contact you soon.`,
         [{ text: 'OK', style: 'default' }]
       );
     } catch (err) {
