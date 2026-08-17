@@ -41,7 +41,7 @@ export default function LawyerHome() {
   const [realUser, setRealUser] = useState({ name: 'Lawyer', email: '', role: 'lawyer', dp: 'L' });
   const [incomingRequests, setIncomingRequests] = useState([]);
   const [activeCases, setActiveCases] = useState([]);
-  const [stats, setStats] = useState({ activeCases: 0, pendingRequests: 0, rating: 5.0 });
+  const [stats, setStats] = useState({ activeCases: 0, pendingRequests: 0, rating: 'New' });
 
   const fetchDashboardData = async () => {
     try {
