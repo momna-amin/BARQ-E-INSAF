@@ -39,6 +39,7 @@ export default function LawyerProfile() {
     isAvailable: true,
     experience: '',
     education: '',
+    sbcNumber: '',
   });
 
   useEffect(() => {
@@ -76,6 +77,7 @@ export default function LawyerProfile() {
             bio: lp.bio || '',
             experience: lp.experience || '',
             education: lp.education || '',
+            sbcNumber: lp.sbc_number || '',
             isAvailable: lp.is_available !== false
           });
         }
@@ -110,6 +112,7 @@ export default function LawyerProfile() {
         specialty: editedData.spec,
         office_address: editedData.address,
         bio: editedData.bio,
+        sbc_number: editedData.sbcNumber,
       });
 
       const updated = res.data;
@@ -299,6 +302,19 @@ export default function LawyerProfile() {
         ) : (
           <View style={styles.detailCard}>
             <Text style={styles.detailValue}>{realUser.lawyer_profile?.specialty || 'General Practice'}</Text>
+          </View>
+        )}
+
+        <Text style={styles.label}>SBC License Number</Text>
+        {editMode ? (
+          <TextInput
+            style={styles.input}
+            value={editedData.sbcNumber}
+            onChangeText={(text) => setEditedData({...editedData, sbcNumber: text})}
+          />
+        ) : (
+          <View style={styles.detailCard}>
+            <Text style={styles.detailValue}>{realUser.lawyer_profile?.sbc_number || 'SBC-Verified'}</Text>
           </View>
         )}
 

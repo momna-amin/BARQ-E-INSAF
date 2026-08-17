@@ -625,7 +625,7 @@ const googleAuth = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const { name, phone, district, specialty, office_address, bio, is_available } = req.body;
+    const { name, phone, district, specialty, office_address, bio, is_available, sbc_number, sbcNumber } = req.body;
 
     const { data: user, error: userErr } = await supabase
       .from('users')
@@ -638,6 +638,10 @@ const updateProfile = async (req, res) => {
 
     if (req.user.role === 'lawyer') {
       const updateData = { specialty, office_address, bio, district };
+      const finalSbc = sbc_number || sbcNumber;
+      if (finalSbc !== undefined) {
+        updateData.sbc_number = finalSbc;
+      }
       if (is_available !== undefined) {
         updateData.is_available = is_available;
       }
