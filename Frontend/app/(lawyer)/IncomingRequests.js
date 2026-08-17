@@ -102,9 +102,9 @@ export default function IncomingRequests() {
   };
 
   const tabs = [
-    { key: 'pending', label: 'Pending', icon: '⏳' },
-    { key: 'accepted', label: 'Accepted', icon: '✅' },
-    { key: 'rejected', label: 'Rejected', icon: '❌' },
+    { key: 'pending', label: 'Pending' },
+    { key: 'accepted', label: 'Accepted' },
+    { key: 'rejected', label: 'Rejected' },
   ];
 
   return (
@@ -113,7 +113,7 @@ export default function IncomingRequests() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => router.push('/(lawyer)/LawyerHome')} style={styles.backBtn} activeOpacity={0.7}>
           <Text style={styles.backText}>←</Text>
         </TouchableOpacity>
         <View>
@@ -121,7 +121,7 @@ export default function IncomingRequests() {
           <Text style={styles.headerSub}>{requests.length} total requests</Text>
         </View>
         <TouchableOpacity onPress={() => fetchRequests()} style={styles.refreshBtn}>
-          <Text style={styles.refreshIcon}>🔄</Text>
+          <Text style={{ color: '#fff', fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 }}>Refresh</Text>
         </TouchableOpacity>
       </View>
 
@@ -133,7 +133,7 @@ export default function IncomingRequests() {
             style={[styles.tab, activeTab === tab.key && styles.tabActive]}
             onPress={() => setActiveTab(tab.key)}
           >
-            <Text style={styles.tabIcon}>{tab.icon}</Text>
+            
             <Text style={[styles.tabLabel, activeTab === tab.key && styles.tabLabelActive]}>
               {tab.label}
             </Text>
@@ -160,13 +160,11 @@ export default function IncomingRequests() {
         >
           {filtered.length === 0 ? (
             <View style={styles.emptyBox}>
-              <Text style={styles.emptyIcon}>
-                {activeTab === 'pending' ? '📭' : activeTab === 'accepted' ? '🤝' : '🚫'}
-              </Text>
+
               <Text style={styles.emptyText}>
-                {activeTab === 'pending' ? 'Abhi koi pending request nahi' :
-                 activeTab === 'accepted' ? 'Koi qabool shuda request nahi' :
-                 'Koi reject shuda request nahi'}
+                {activeTab === 'pending' ? 'No pending requests found' :
+                 activeTab === 'accepted' ? 'No accepted requests found' :
+                 'No rejected requests found'}
               </Text>
             </View>
           ) : (
@@ -337,7 +335,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0F2744', flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 14, gap: 12,
   },
-  backBtn: { padding: 4 },
+  backBtn: { paddingVertical: 10, paddingHorizontal: 12, marginRight: 8, justifyContent: 'center', alignItems: 'center' },
   backText: { color: '#fff', fontSize: 22, fontWeight: '600' },
   headerTitle: { color: '#fff', fontSize: 18, fontWeight: '800' },
   headerSub: { color: 'rgba(255,255,255,0.7)', fontSize: 12 },
