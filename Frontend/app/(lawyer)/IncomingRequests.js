@@ -71,6 +71,10 @@ export default function IncomingRequests() {
 
   const handleSubmitResponse = async () => {
     if (!selectedRequest || !responseAction) return;
+    if (responseAction === 'rejected' && !reason.trim()) {
+      showAlert('Reason Required ⚠️', 'Please enter a reason for declining this request.');
+      return;
+    }
     try {
       setSubmitting(true);
       await api.patch(`/requests/${selectedRequest.id}`, {
@@ -173,14 +177,16 @@ export default function IncomingRequests() {
                 <View key={req.id} style={[styles.card, { borderLeftColor: cfg.color }]}>
                   {/* Client Info */}
                   <View style={styles.cardHeader}>
-                    <View style={[styles.avatar, { backgroundColor: cfg.color + '22' }]}>
+                    <View style={[styles.avatar, { backgroundColor: cfg.bg || '#f1f5f9' }]}>
                       <Text style={[styles.avatarText, { color: cfg.color }]}>
                         {(user.name || '?')[0].toUpperCase()}
                       </Text>
                     </View>
                     <View style={styles.cardInfo}>
                       <Text style={styles.cardName}>{user.name || 'No Name'}</Text>
-                      <Text style={styles.cardEmail}>{user.email || '—'}</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                        <Text style={{ fontSize: 13, color: '#475569' }}>📧 {user.email || '—'}</Text>
+                      </View>
                       {user.phone && <Text style={styles.cardPhone}>📞 {user.phone}</Text>}
                       {user.district && <Text style={styles.cardCity}>📍 {user.district}</Text>}
                     </View>
@@ -267,28 +273,31 @@ export default function IncomingRequests() {
             )}
 
             <Text style={styles.modalReasonLabel}>
-              Enter message/reason (optional):
+              {responseAction === 'accepted' ? 'Acceptance message / next steps (optional):' : 'Reason for decline * (Required):'}
             </Text>
             <TextInput
-              style={styles.modalReasonInput}
+              style={[
+                styles.modalReasonInput, 
+                responseAction === 'rejected' && !reason.trim() && { borderColor: '#fca5a5', backgroundColor: '#fffbeb' }
+              ]}
               value={reason}
               onChangeText={setReason}
               placeholder={
                 responseAction === 'accepted'
-                  ? 'Write a note for the client...'
-                  : 'Write a reason for declining (e.g. schedule full)...'
+                  ? 'e.g. I can meet you on Monday at 10 AM at my office.'
+                  : 'Please explain why you cannot take this case...'
               }
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor="#94a3b8"
               multiline
-              numberOfLines={3}
+              numberOfLines={4}
             />
 
             <Text style={styles.modalNote}>
               {responseAction === 'accepted'
-                ? 'Client will receive an email and in-app notification that their request has been accepted.'
-                : 'Client will receive an email that their request has been declined.'}
+                ? '⭐ Accepting this request will automatically assign you to this client's case.'
+                : '⚠️ Client will receive an email containing this decline explanation.'}
             </Text>
-            <Text style={styles.modalAdminNote}>Admin will also be automatically notified.</Text>
+            <Text style={styles.modalAdminNote}>Notifications and emails will be handled instantly by our server.</Text>
 
             <View style={styles.modalBtns}>
               <TouchableOpacity
@@ -359,8 +368,8 @@ const styles = StyleSheet.create({
   emptyText: { color: '#9ca3af', fontSize: 15 },
 
   card: {
-    backgroundColor: '#fff', borderRadius: 14, padding: 16,
-    borderLeftWidth: 4, shadowColor: '#000',
+    backgroundColor: '#fff', borderRadius: 16, padding: 18, marginBottom: 12,
+    borderLeftWidth: 6, borderWidth: 1, borderColor: '#e2e8f0', shadowColor: '#0f172a',
     shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3,
   },
   cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 10 },
@@ -380,15 +389,13 @@ const styles = StyleSheet.create({
 
   actionRow: { flexDirection: 'row', gap: 10, marginTop: 4 },
   acceptBtn: {
-    flex: 1, backgroundColor: '#f0faf5', borderWidth: 1.5, borderColor: '#0F2744',
-    borderRadius: 10, padding: 12, alignItems: 'center',
+    flex: 1, backgroundColor: '#10b981', borderRadius: 12, paddingVertical: 12, alignItems: 'center',
   },
-  acceptBtnText: { color: '#0F2744', fontWeight: '700', fontSize: 14 },
+  acceptBtnText: { color: '#fff', fontWeight: '800', fontSize: 14 },
   rejectBtn: {
-    flex: 1, backgroundColor: '#fef2f2', borderWidth: 1.5, borderColor: '#dc2626',
-    borderRadius: 10, padding: 12, alignItems: 'center',
+    flex: 1, backgroundColor: '#fee2e2', borderWidth: 1.5, borderColor: '#ef4444', borderRadius: 12, paddingVertical: 12, alignItems: 'center',
   },
-  rejectBtnText: { color: '#dc2626', fontWeight: '700', fontSize: 14 },
+  rejectBtnText: { color: '#b91c1c', fontWeight: '800', fontSize: 14 },
 
   // Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' },
@@ -413,7 +420,7 @@ const styles = StyleSheet.create({
   },
   modalCancelText: { color: '#374151', fontWeight: '700', fontSize: 15 },
   modalConfirmBtn: {
-    flex: 1, backgroundColor: '#0F2744', borderRadius: 12, padding: 15, alignItems: 'center',
+    flex: 1, backgroundColor: '#0F2744', borderRadius: 12, paddingVertical: 15, alignItems: 'center',
   },
   modalConfirmBtnRed: { backgroundColor: '#dc2626' },
   modalConfirmBtnDisabled: { opacity: 0.6 },
