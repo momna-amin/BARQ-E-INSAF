@@ -48,8 +48,10 @@ const rateLawyer = async (req, res) => {
 
     if (error) return res.status(404).json({ message: 'Lawyer not found' });
 
-    const newTotal  = lawyer.total_ratings + 1;
-    const newRating = ((lawyer.rating * lawyer.total_ratings) + rating) / newTotal;
+    const currentRating = lawyer.rating || 0;
+    const currentTotal = lawyer.total_ratings || 0;
+    const newTotal  = currentTotal + 1;
+    const newRating = ((currentRating * currentTotal) + rating) / newTotal;
 
     const { data, error: updateError } = await supabase
       .from('lawyers')

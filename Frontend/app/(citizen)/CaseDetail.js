@@ -26,6 +26,8 @@ export default function CaseDetail() {
   const [editMode, setEditMode] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
   const [editedDesc, setEditedDesc] = useState('');
+  const [submittingRating, setSubmittingRating] = useState(false);
+  const [ratedStars, setRatedStars] = useState(null);
 
   const fetchCaseDetail = async () => {
     try {
@@ -40,7 +42,9 @@ export default function CaseDetail() {
         description: c.description,
         filingDate: new Date(c.created_at).toLocaleDateString(),
         lastUpdated: c.updated_at ? new Date(c.updated_at).toLocaleDateString() : 'Recently',
-        district: c.district || 'Sindh'
+        district: c.district || 'Sindh',
+        lawyerId: c.lawyer?.id || null,
+        lawyerName: c.lawyer?.user?.name || null
       });
       setEditedTitle(c.title);
       setEditedDesc(c.description);
@@ -176,6 +180,53 @@ export default function CaseDetail() {
             <Text style={styles.infoValue}>{caseData.district || 'Sindh'}</Text>
           </View>
         </View>
+
+        {/* ASSIGNED ADVOCATE & RATING */}
+        {caseData.lawyerId && (
+          <View style={styles.infoSection}>
+            <Text style={styles.sectionTitle}>Assigned Advocate</Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Advocate Name</Text>
+              <Text style={styles.infoValue}>Adv. {caseData.lawyerName}</Text>
+            </View>
+
+            {ratedStars ? (
+              <View style={{ marginTop: 12, alignItems: 'center' }}>
+                <Text style={{ fontSize: 13, color: '#16a34a', fontWeight: '700' }}>
+                  ✅ Thank you! You rated this advocate {ratedStars} stars.
+                </Text>
+              </View>
+            ) : (
+              <View style={{ marginTop: 12, borderTopWidth: 1, borderTopColor: '#ece9e4', paddingTop: 12 }}>
+                <Text style={{ fontSize: 13, fontWeight: '700', color: '#1a1a1a', marginBottom: 8, textAlign: 'center' }}>
+                  Rate your experience with this advocate:
+                </Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 12 }}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <TouchableOpacity
+                      key={star}
+                      onPress={async () => {
+                        try {
+                          setSubmittingRating(true);
+                          await api.post(`/lawyers/${caseData.lawyerId}/rate`, { rating: star });
+                          setRatedStars(star);
+                          showAlert('Success 🌟', `Thank you for rating Adv. ${caseData.lawyerName}!`);
+                        } catch (err) {
+                          showAlert('Error', 'Failed to submit rating. Please try again.');
+                        } finally {
+                          setSubmittingRating(false);
+                        }
+                      }}
+                      disabled={submittingRating}
+                    >
+                      <Text style={{ fontSize: 28 }}>⭐</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
+          </View>
+        )}
 
         {/* EVIDENCE BUTTON */}
         <TouchableOpacity 
