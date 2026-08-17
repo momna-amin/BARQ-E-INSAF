@@ -50,7 +50,7 @@ export default function CitizenHome() {
   const [requestSuccessBanner, setRequestSuccessBanner] = useState(false);
 
   // Profile & Logout Modal State
-  const [showProfileModal, setShowProfileModal] = useState(false);
+
   const [showPwModal, setShowPwModal] = useState(false);
   const [currPassword, setCurrPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -134,7 +134,7 @@ export default function CitizenHome() {
     if (id === 'cases') router.push('/(citizen)/MyCases');
     if (id === 'lawyers') router.push('/(citizen)/FindLawyer');
     if (id === 'home') router.push('/(citizen)/CitizenHome');
-    if (id === 'profile') setShowProfileModal(true);
+    if (id === 'profile') router.push('/(citizen)/Profile');
   };
 
   const handleConsultPress = (lawyer) => {
@@ -198,7 +198,7 @@ export default function CitizenHome() {
 
       setLoading(false);
       setShowPwModal(false);
-      setShowProfileModal(false);
+
       setCurrPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -221,7 +221,7 @@ export default function CitizenHome() {
   };
 
   const handleLogout = () => {
-    setShowProfileModal(false);
+
     if (Platform.OS === 'web' && typeof window !== 'undefined' && window.confirm) {
       if (window.confirm('Are you sure you want to log out of Barq-e-Insaf?')) {
         doLogout();
@@ -264,7 +264,8 @@ export default function CitizenHome() {
             </View>
           </View>
           <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.profileBtn} onPress={() => setShowProfileModal(true)}>
+            <TouchableOpacity style={styles.profileBtn} onPress={() => router.push('/(citizen)/Profile')}>
+
               <Text style={styles.profileBtnText}>Profile</Text>
               <View style={styles.avatar}>
                 <Text style={styles.avatarText}>{realUser.dp}</Text>
@@ -497,40 +498,7 @@ export default function CitizenHome() {
         </View>
       </Modal>
 
-      {/* PROFILE MODAL */}
-      <Modal visible={showProfileModal} animationType="slide" transparent>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <View style={{ width: '100%', maxWidth: 440, backgroundColor: '#ffffff', borderRadius: 20, padding: 24, borderWidth: 1, borderColor: '#ece9e4' }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <Text style={{ fontSize: 18, fontWeight: '800', color: '#1a1a1a' }}>👤 Citizen Account Details</Text>
-              <TouchableOpacity onPress={() => setShowProfileModal(false)} style={{ padding: 6, backgroundColor: '#f3f4f6', borderRadius: 8 }}>
-                <Text style={{ fontSize: 14, fontWeight: '800', color: '#666666' }}>✕</Text>
-              </TouchableOpacity>
-            </View>
 
-            <View style={{ backgroundColor: '#f8f9fa', borderRadius: 14, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: '#ece9e4' }}>
-              <Text style={{ fontSize: 16, fontWeight: '800', color: '#1a1a1a' }}>{realUser.name}</Text>
-              <Text style={{ fontSize: 13, color: '#5C1A1A', fontWeight: '700', marginTop: 2 }}>{realUser.email}</Text>
-              <Text style={{ fontSize: 12, color: '#666666', marginTop: 4 }}>Phone: {realUser.phone || 'N/A'} · CNIC: {realUser.cnic || 'N/A'}</Text>
-              <Text style={{ fontSize: 12, color: '#666666', marginTop: 2 }}>District: {realUser.district || 'N/A'} · Sindh</Text>
-            </View>
-
-            <TouchableOpacity
-              style={{ backgroundColor: '#5C1A1A', paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginBottom: 12 }}
-              onPress={() => { setShowProfileModal(false); setShowPwModal(true); }}
-            >
-              <Text style={{ color: '#ffffff', fontSize: 14, fontWeight: '800' }}>🔑 Change Password</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{ backgroundColor: '#fee2e2', borderWidth: 1, borderColor: '#fca5a5', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
-              onPress={handleLogout}
-            >
-              <Text style={{ color: '#b91c1c', fontSize: 14, fontWeight: '800' }}>🚪 Logout Account</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
 
       {/* CHANGE PASSWORD MODAL */}
       <Modal visible={showPwModal} animationType="slide" transparent>
