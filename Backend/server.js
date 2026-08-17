@@ -12,7 +12,9 @@ const runDbMigration = async () => {
   try {
     const sql = `
       ALTER TABLE cases ADD COLUMN IF NOT EXISTS evidence JSONB DEFAULT '[]'::jsonb;
-      ALTER TABLE lawyer_requests ADD COLUMN IF NOT EXISTS case_id UUID REFERENCES cases(id) ON DELETE SET NULL;
+      ALTER TABLE lawyer_requests ADD COLUMN IF NOT EXISTS case_id UUID;
+      ALTER TABLE lawyer_requests DROP CONSTRAINT IF EXISTS fk_lawyer_requests_case;
+      ALTER TABLE lawyer_requests ADD CONSTRAINT fk_lawyer_requests_case FOREIGN KEY (case_id) REFERENCES cases(id) ON DELETE SET NULL;
       UPDATE lawyers SET is_verified = true;
       NOTIFY pgrst, 'reload schema';
     `;
