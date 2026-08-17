@@ -1,5 +1,6 @@
-import { Redirect } from 'expo-router';
+import React from 'react';
+import SplashScreen from './SplashScreen';
 
 export default function Index() {
-  return <Redirect href={"/SplashScreen" as any} />;
+  return <SplashScreen />;
 }
