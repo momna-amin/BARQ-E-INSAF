@@ -259,6 +259,7 @@ const verifyRegisterOtpAndCreate = async (req, res) => {
           bar_council: 'Sindh Bar Council',
           experience_years: 1,
           verification_status: 'pending',
+          cnic: p.cnic || null,
         });
       if (lawyerError) console.error('Lawyer profile creation error:', lawyerError.message);
     }

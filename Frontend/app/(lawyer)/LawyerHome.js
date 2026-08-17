@@ -85,10 +85,11 @@ export default function LawyerHome() {
       }));
       setActiveCases(formattedCases);
 
+      const lp = profileRes?.data?.lawyer_profile || {};
       setStats({
         activeCases: formattedCases.length,
         pendingRequests: formattedReqs.filter(r => r.status === 'pending').length,
-        rating: (profileRes?.data?.lawyer_profile?.total_ratings > 0) ? (profileRes?.data?.lawyer_profile?.rating || '0.0') : 'New'
+        rating: (lp.total_ratings > 0) ? (lp.rating || '0.0') : 'New'
       });
     } catch (err) {
       console.log('Error fetching lawyer dashboard:', err);
