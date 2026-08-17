@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS lawyers (
     verification_status TEXT DEFAULT 'approved',
     bio TEXT,
     office_address TEXT,
+    cnic TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

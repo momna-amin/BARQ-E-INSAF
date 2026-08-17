@@ -19,6 +19,7 @@ const sindhCities = {
   Hyderabad: ['Hyderabad City', 'Latifabad', 'Qasimabad', 'Tando Jam'],
   Sukkur: ['Sukkur City', 'Rohri', 'Pano Aqil', 'Salehpat'],
   Larkana: ['Larkana City', 'Ratodero', 'Dokri', 'Bakrani'],
+  Other: ['Other']
 };
 
 export default function CaseForm() {
@@ -38,6 +39,8 @@ export default function CaseForm() {
     description: '',
   });
   const [loading, setLoading] = useState(false);
+  const [customCity, setCustomCity] = useState('');
+  const [customDistrict, setCustomDistrict] = useState('');
 
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
@@ -81,7 +84,10 @@ export default function CaseForm() {
   const todayDate = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
 
   const handleSubmit = async () => {
-    if (!formData.title || !formData.description || !selectedCity || !selectedDistrict) {
+    const finalCity = selectedCity === 'Other' ? customCity.trim() : selectedCity;
+    const finalDistrict = selectedDistrict === 'Other' ? customDistrict.trim() : selectedDistrict;
+
+    if (!formData.title || !formData.description || !finalCity || !finalDistrict) {
       showAlert('Error', 'Please fill in all required fields');
       return;
     }
@@ -92,7 +98,7 @@ export default function CaseForm() {
         title: formData.title,
         type: caseType === 'property' ? 'Property' : 'Family',
         description: formData.description,
-        district: `${selectedCity} - ${selectedDistrict}`,
+        district: `${finalCity} - ${finalDistrict}`,
       });
 
       showAlert('Success', 'Case submitted successfully!');
@@ -190,13 +196,26 @@ export default function CaseForm() {
                   style={styles.dropdownItem}
                   onPress={() => {
                     setSelectedCity(city);
-                    setSelectedDistrict('');
+                    setSelectedDistrict(city === 'Other' ? 'Other' : '');
                     setShowCityDropdown(false);
                   }}
                 >
                   <Text style={styles.dropdownItemText}>{city}</Text>
                 </TouchableOpacity>
               ))}
+            </View>
+          )}
+
+          {selectedCity === 'Other' && (
+            <View style={{ marginTop: 10 }}>
+              <Text style={styles.formLabel}>Enter Custom City *</Text>
+              <TextInput
+                style={styles.formInput}
+                placeholder="e.g. Islamabad, Lahore"
+                placeholderTextColor="#999"
+                value={customCity}
+                onChangeText={setCustomCity}
+              />
             </View>
           )}
         </View>
@@ -231,6 +250,19 @@ export default function CaseForm() {
                     <Text style={styles.dropdownItemText}>{dist}</Text>
                   </TouchableOpacity>
                 ))}
+              </View>
+            )}
+
+            {selectedDistrict === 'Other' && selectedCity !== 'Other' && (
+              <View style={{ marginTop: 10 }}>
+                <Text style={styles.formLabel}>Enter Custom District *</Text>
+                <TextInput
+                  style={styles.formInput}
+                  placeholder="e.g. Town Name / Sector"
+                  placeholderTextColor="#999"
+                  value={customDistrict}
+                  onChangeText={setCustomDistrict}
+                />
               </View>
             )}
           </View>

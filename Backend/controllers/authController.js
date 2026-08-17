@@ -102,6 +102,7 @@ const register = async (req, res) => {
           bar_council: 'Sindh Bar Council',
           experience_years: 1,
           verification_status: 'pending',
+          cnic: cnic || null,
         });
 
       if (lawyerError) {
@@ -389,6 +390,7 @@ const getMe = async (req, res) => {
             sbc_number: 'SBC-' + Math.floor(1000 + Math.random() * 9000),
             specialty: 'General Practice',
             verification_status: 'approved',
+            cnic: req.user.cnic || null,
           })
           .select()
           .single();
