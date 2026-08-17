@@ -16,6 +16,15 @@ import { ActivityIndicator } from 'react-native';
 import api from '../../services/api';
 import showAlert from '../../utils/showAlert';
 
+const sindhCities = {
+  Karachi: ['Karachi Central', 'Karachi East', 'Karachi South', 'Karachi West', 'Malir', 'Korangi', 'Keamari'],
+  Hyderabad: ['Hyderabad City', 'Latifabad', 'Qasimabad', 'Tando Jam', 'Badin', 'Dadu', 'Jamshoro', 'Matiari', 'Tando Allahyar', 'Tando Muhammad Khan', 'Thatta', 'Sujawal'],
+  Sukkur: ['Sukkur City', 'Rohri', 'Pano Aqil', 'Salehpat', 'Ghotki', 'Khairpur'],
+  Larkana: ['Larkana City', 'Ratodero', 'Dokri', 'Bakrani', 'Jacobabad', 'Kashmore', 'Qambar Shahdadkot', 'Shikarpur'],
+  Mirpurkhas: ['Mirpur Khas', 'Umerkot', 'Tharparkar'],
+  'Shaheed Benazirabad': ['Naushahro Feroze', 'Sanghar', 'Nawabshah']
+};
+
 export default function CaseDetail() {
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -26,6 +35,13 @@ export default function CaseDetail() {
   const [editMode, setEditMode] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
   const [editedDesc, setEditedDesc] = useState('');
+  const [editedCategory, setEditedCategory] = useState('Property Law');
+  const [editedCity, setEditedCity] = useState('');
+  const [editedDistrict, setEditedDistrict] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
+  const categories = ['Property Law', 'Family Law', 'Civil Cases', 'Criminal Law'];
   const [submittingRating, setSubmittingRating] = useState(false);
   const [ratedStars, setRatedStars] = useState(null);
 
@@ -48,6 +64,10 @@ export default function CaseDetail() {
       });
       setEditedTitle(c.title);
       setEditedDesc(c.description);
+      setEditedCategory(c.type || 'Property Law');
+      const parts = (c.district || '').split(' - ');
+      setEditedCity(parts[0] || '');
+      setEditedDistrict(parts[1] || '');
     } catch (err) {
       console.log('Error fetching case detail:', err);
       showAlert('Error', 'Failed to load case details.');
@@ -76,13 +96,17 @@ export default function CaseDetail() {
       setLoading(true);
       const res = await api.put('/cases/' + caseId, {
         title: editedTitle,
-        description: editedDesc
+        description: editedDesc,
+        type: editedCategory,
+        district: editedCity && editedDistrict ? `${editedCity} - ${editedDistrict}` : caseData.district
       });
       const c = res.data;
       setCaseData(prev => ({
         ...prev,
         title: c.title,
-        description: c.description
+        description: c.description,
+        type: c.type || prev.type,
+        district: c.district || prev.district
       }));
       setEditMode(false);
       showAlert('Success', 'Case updated successfully!');
@@ -132,6 +156,104 @@ export default function CaseDetail() {
                 value={editedTitle}
                 onChangeText={setEditedTitle}
               />
+
+              {/* Case Category Dropdown */}
+              <Text style={styles.editLabel}>Edit Case Category</Text>
+              <TouchableOpacity 
+                style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#ece9e4', padding: 12, marginBottom: 12 }}
+                onPress={() => {
+                  setShowCategoryDropdown(!showCategoryDropdown);
+                  setShowCityDropdown(false);
+                  setShowDistrictDropdown(false);
+                }}
+              >
+                <Text style={{ fontSize: 14, color: '#1a1a1a', fontWeight: '600' }}>
+                  {editedCategory}
+                </Text>
+              </TouchableOpacity>
+              {showCategoryDropdown && (
+                <View style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#ece9e4', padding: 6, marginBottom: 12 }}>
+                  {categories.map(cat => (
+                    <TouchableOpacity 
+                      key={cat} 
+                      style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' }}
+                      onPress={() => {
+                        setEditedCategory(cat);
+                        setShowCategoryDropdown(false);
+                      }}
+                    >
+                      <Text style={{ fontSize: 13, color: '#334155', fontWeight: '600' }}>{cat}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+
+              {/* Sindh City Dropdown */}
+              <Text style={styles.editLabel}>Edit Sindh City</Text>
+              <TouchableOpacity 
+                style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#ece9e4', padding: 12, marginBottom: 12 }}
+                onPress={() => {
+                  setShowCityDropdown(!showCityDropdown);
+                  setShowCategoryDropdown(false);
+                  setShowDistrictDropdown(false);
+                }}
+              >
+                <Text style={{ fontSize: 14, color: '#1a1a1a', fontWeight: '600' }}>
+                  {editedCity || 'Select Sindh City'}
+                </Text>
+              </TouchableOpacity>
+              {showCityDropdown && (
+                <View style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#ece9e4', padding: 6, marginBottom: 12 }}>
+                  {Object.keys(sindhCities).map(city => (
+                    <TouchableOpacity 
+                      key={city} 
+                      style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' }}
+                      onPress={() => {
+                        setEditedCity(city);
+                        setEditedDistrict('');
+                        setShowCityDropdown(false);
+                      }}
+                    >
+                      <Text style={{ fontSize: 13, color: '#334155', fontWeight: '600' }}>{city}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+
+              {/* District Dropdown */}
+              {editedCity !== '' && (
+                <>
+                  <Text style={styles.editLabel}>Edit District</Text>
+                  <TouchableOpacity 
+                    style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#ece9e4', padding: 12, marginBottom: 12 }}
+                    onPress={() => {
+                      setShowDistrictDropdown(!showDistrictDropdown);
+                      setShowCityDropdown(false);
+                      setShowCategoryDropdown(false);
+                    }}
+                  >
+                    <Text style={{ fontSize: 14, color: '#1a1a1a', fontWeight: '600' }}>
+                      {editedDistrict || 'Select District'}
+                    </Text>
+                  </TouchableOpacity>
+                  {showDistrictDropdown && (
+                    <View style={{ backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#ece9e4', padding: 6, marginBottom: 12 }}>
+                      {sindhCities[editedCity].map(dist => (
+                        <TouchableOpacity 
+                          key={dist} 
+                          style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' }}
+                          onPress={() => {
+                            setEditedDistrict(dist);
+                            setShowDistrictDropdown(false);
+                          }}
+                        >
+                          <Text style={{ fontSize: 13, color: '#334155', fontWeight: '600' }}>{dist}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                </>
+              )}
             </View>
           ) : (
             <Text style={styles.caseTitle}>{caseData.title}</Text>
@@ -141,7 +263,7 @@ export default function CaseDetail() {
             <View style={styles.statusBadge}>
               <Text style={styles.statusText}>{caseData.status}</Text>
             </View>
-            <Text style={styles.caseType}>{caseData.type} Law</Text>
+            <Text style={styles.caseType}>{caseData.type}</Text>
           </View>
         </View>
 

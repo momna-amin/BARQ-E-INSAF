@@ -16,9 +16,11 @@ import api from '../../services/api';
 
 const sindhCities = {
   Karachi: ['Karachi Central', 'Karachi East', 'Karachi South', 'Karachi West', 'Malir', 'Korangi', 'Keamari'],
-  Hyderabad: ['Hyderabad City', 'Latifabad', 'Qasimabad', 'Tando Jam'],
-  Sukkur: ['Sukkur City', 'Rohri', 'Pano Aqil', 'Salehpat'],
-  Larkana: ['Larkana City', 'Ratodero', 'Dokri', 'Bakrani'],
+  Hyderabad: ['Hyderabad City', 'Latifabad', 'Qasimabad', 'Tando Jam', 'Badin', 'Dadu', 'Jamshoro', 'Matiari', 'Tando Allahyar', 'Tando Muhammad Khan', 'Thatta', 'Sujawal'],
+  Sukkur: ['Sukkur City', 'Rohri', 'Pano Aqil', 'Salehpat', 'Ghotki', 'Khairpur'],
+  Larkana: ['Larkana City', 'Ratodero', 'Dokri', 'Bakrani', 'Jacobabad', 'Kashmore', 'Qambar Shahdadkot', 'Shikarpur'],
+  Mirpurkhas: ['Mirpur Khas', 'Umerkot', 'Tharparkar'],
+  'Shaheed Benazirabad': ['Naushahro Feroze', 'Sanghar', 'Nawabshah']
 };
 
 export default function CaseForm() {
@@ -313,7 +315,7 @@ export default function CaseForm() {
 
         {/* Submit Button */}
         <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={loading}>
-          <Text style={styles.submitBtnText}>{loading ? 'Submitting...' : 'Submit Case'}</Text>
+          <Text style={styles.submitBtnText}>{loading ? 'Saving...' : 'Save Case'}</Text>
         </TouchableOpacity>
       </ScrollView>
 
