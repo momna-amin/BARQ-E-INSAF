@@ -31,6 +31,11 @@ const { colors, gradients, gradientDir, orbConfig, shadows } = theme;
 export default function AIChatFloatingButton() {
   const pathname = usePathname();
 
+  // SSR / Build-time guard: Return null when pre-rendering HTML on Node server
+  if (Platform.OS === 'web' && typeof window === 'undefined') {
+    return null;
+  }
+
   const [modalVisible, setModalVisible] = useState(false);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
