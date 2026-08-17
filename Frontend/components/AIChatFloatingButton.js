@@ -21,7 +21,7 @@ import { usePathname } from 'expo-router';
 
 import api from '../services/api';
 // Import the new global theme
-import theme from '../constants/theme';
+import theme from '../constants/app-theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
