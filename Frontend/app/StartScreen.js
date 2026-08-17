@@ -130,11 +130,11 @@ export default function StartScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#07152e" />
+      <StatusBar barStyle="light-content" backgroundColor="#2e0707" />
 
       {/* Background gradient */}
       <LinearGradient
-        colors={['#14557a', '#040808', '#141363', '#180669']}
+        colors={['#7a1414', '#080404', '#630d13', '#690614']}
         style={styles.gradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -144,19 +144,19 @@ export default function StartScreen() {
       <View style={[styles.ambientBlob, {
         top: height * 0.02, left: -width * 0.2,
         width: width * 0.65, height: width * 0.65,
-        backgroundColor: 'rgba(37,99,235,0.09)',
+        backgroundColor: 'rgba(220,38,38,0.09)',
         borderRadius: width * 0.35,
       }]} />
       <View style={[styles.ambientBlob, {
         top: height * 0.18, right: -width * 0.15,
         width: width * 0.55, height: width * 0.55,
-        backgroundColor: 'rgba(99,179,237,0.07)',
+        backgroundColor: 'rgba(248,113,113,0.07)',
         borderRadius: width * 0.3,
       }]} />
       <View style={[styles.ambientBlob, {
         top: height * 0.35, left: width * 0.1,
         width: width * 0.4, height: width * 0.4,
-        backgroundColor: 'rgba(14,165,233,0.05)',
+        backgroundColor: 'rgba(239,68,68,0.05)',
         borderRadius: width * 0.22,
       }]} />
 
@@ -213,7 +213,7 @@ export default function StartScreen() {
 
           {/* Orb body */}
           <LinearGradient
-            colors={['#1eb7c2', '#1b45ce', '#1d8cf8', '#07c2b9', '#0661d8']}
+            colors={['#c21e5c', '#ce1b2f', '#f81d2f', '#c20733', '#d80614']}
             style={styles.orbBody}
             start={{ x: 0.1, y: 0 }}
             end={{ x: 0.9, y: 1 }}
@@ -223,7 +223,7 @@ export default function StartScreen() {
             <View style={styles.eyesRow}>
               <Animated.View style={[styles.eyeWrap, { transform: [{ scaleY: blinkAnim }] }]}>
                 <LinearGradient
-                  colors={['#ffffff', '#e0f2fe']}
+                  colors={['#ffffff', '#fee2e2']}
                   style={styles.eyeInner}
                   start={{ x: 0.3, y: 0 }}
                   end={{ x: 0.7, y: 1 }}
@@ -231,7 +231,7 @@ export default function StartScreen() {
               </Animated.View>
               <Animated.View style={[styles.eyeWrap, { transform: [{ scaleY: blinkAnim }] }]}>
                 <LinearGradient
-                  colors={['#ffffff', '#e0f2fe']}
+                  colors={['#ffffff', '#fee2e2']}
                   style={styles.eyeInner}
                   start={{ x: 0.3, y: 0 }}
                   end={{ x: 0.7, y: 1 }}
@@ -298,7 +298,7 @@ export default function StartScreen() {
               }}
             >
               <LinearGradient
-                colors={['#0232b6', '#2563eb', '#5694f8']}
+                colors={['#8f0202', '#dc2626', '#f87171']}
                 style={styles.primaryBtn}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
@@ -340,7 +340,7 @@ const ORB = width * 0.55;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0D1B2A',
+    backgroundColor: '#2A0D0D',
     overflow: 'hidden',
   },
   gradient: {
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   },
   particle: {
     position: 'absolute',
-    backgroundColor: '#93C5FD',
+    backgroundColor: '#FCA5A5',
     zIndex: 1,
   },
 
@@ -370,8 +370,8 @@ const styles = StyleSheet.create({
     width: ORB + 120,
     height: ORB + 120,
     borderRadius: (ORB + 120) / 2,
-    backgroundColor: 'rgba(96,165,250,0.14)',
-    shadowColor: '#60A5FA',
+    backgroundColor: 'rgba(248,113,113,0.14)',
+    shadowColor: '#F87171',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.6,
     shadowRadius: 40,
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
     height: ORB + 66,
     borderRadius: (ORB + 66) / 2,
     borderWidth: 1,
-    borderColor: 'rgba(147,197,253,0.3)',
+    borderColor: 'rgba(252,165,165,0.3)',
     borderStyle: 'dashed',
   },
   orbitRing2: {
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
     height: ORB + 44,
     borderRadius: (ORB + 44) / 2,
     borderWidth: 1,
-    borderColor: 'rgba(186,230,253,0.18)',
+    borderColor: 'rgba(254,202,202,0.18)',
     borderStyle: 'dashed',
   },
   innerRing: {
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
     height: ORB + 20,
     borderRadius: (ORB + 20) / 2,
     borderWidth: 1,
-    borderColor: 'rgba(186,230,253,0.12)',
+    borderColor: 'rgba(254,202,202,0.12)',
   },
   orbFloat: {
     alignItems: 'center',
@@ -413,10 +413,10 @@ const styles = StyleSheet.create({
     borderRadius: (ORB + 28) / 2,
     borderWidth: 20,
     borderColor: 'transparent',
-    borderTopColor:    'rgba(96,165,250,0.16)',
-    borderRightColor:  'rgba(56,189,248,0.12)',
-    borderBottomColor: 'rgba(147,197,253,0.09)',
-    borderLeftColor:   'rgba(96,165,250,0.07)',
+    borderTopColor:    'rgba(248,113,113,0.16)',
+    borderRightColor:  'rgba(239,68,68,0.12)',
+    borderBottomColor: 'rgba(252,165,165,0.09)',
+    borderLeftColor:   'rgba(248,113,113,0.07)',
   },
   orbBody: {
     width: ORB,
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    shadowColor: '#3B82F6',
+    shadowColor: '#EF4444',
     shadowOffset: { width: 0, height: 20 },
     shadowOpacity: 0.45,
     shadowRadius: 36,
@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
     width: ORB * 0.68,
     height: 14,
     borderRadius: 50,
-    backgroundColor: 'rgba(96,165,250,0.25)',
+    backgroundColor: 'rgba(248,113,113,0.25)',
     alignSelf: 'center',
   },
 
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
     paddingTop: 14,
     paddingBottom: 50,
     alignItems: 'center',
-    shadowColor: '#1E3A5F',
+    shadowColor: '#5F1E1E',
     shadowOffset: { width: 0, height: -8 },
     shadowOpacity: 0.08,
     shadowRadius: 20,
@@ -512,7 +512,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#DBEAFE',
+    backgroundColor: '#FEE2E2',
     marginBottom: 14,
   },
   titleRow: {
@@ -523,12 +523,12 @@ const styles = StyleSheet.create({
   },
   mainTitle: {
     fontSize: 35,
-    color: '#1E3A5F',
+    color: '#5F1E1E',
     letterSpacing: -0.5,
   },
   tagSubtext: {
     fontSize: 12,
-    color: '#3B82F6',
+    color: '#DC2626',
     fontWeight: '700',
     marginTop: -7,
     marginBottom: 10,
@@ -541,7 +541,7 @@ const styles = StyleSheet.create({
   urduPoetryLine: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1E40AF',
+    color: '#991B1B',
     textAlign: 'center',
     lineHeight: 26,
     letterSpacing: 0.3,
@@ -582,20 +582,20 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#BFDBFE',
+    borderColor: '#FECACA',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#EFF6FF',
+    backgroundColor: '#FEF2F2',
   },
   secondaryBtnText: {
-    color: '#1D4ED8',
+    color: '#B91C1C',
     fontSize: 14,
     fontWeight: '700',
     letterSpacing: 0.2,
   },
   bottomHint: {
     fontSize: 10,
-    color: '#93C5FD',
+    color: '#FCA5A5',
     fontWeight: '500',
     letterSpacing: 0.5,
     textAlign: 'center',
