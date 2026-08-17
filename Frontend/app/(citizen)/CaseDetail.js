@@ -128,7 +128,7 @@ export default function CaseDetail() {
 
       {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.push('/(citizen)/CitizenHome')}>
           <Text style={styles.backBtnText}>Back</Text>
         </TouchableOpacity>
         <View style={styles.brandBadgeRow}>
@@ -344,15 +344,28 @@ export default function CaseDetail() {
 
       {/* FOOTER */}
       <View style={styles.bottomNav}>
-        {['Home', 'Cases', 'Lawyers', 'Profile'].map((lbl) => (
-          <TouchableOpacity
-            key={lbl}
-            style={styles.navItem}
-            onPress={() => handleNav(lbl.toLowerCase())}
-          >
-            <Text style={styles.navLabel}>{lbl}</Text>
-          </TouchableOpacity>
-        ))}
+        {[
+          { id: 'home', label: 'Home' },
+          { id: 'cases', label: 'Cases' },
+          { id: 'lawyers', label: 'Lawyers' },
+          { id: 'profile', label: 'Profile' }
+        ].map((item) => {
+          const isActive = item.id === 'cases';
+          return (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.navItem}
+              onPress={() => handleNav(item.id)}
+            >
+              <Text style={[
+                styles.navLabel,
+                isActive && { color: '#5C1A1A', fontWeight: '800' }
+              ]}>
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </SafeAreaView>
   );
