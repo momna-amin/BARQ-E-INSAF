@@ -236,7 +236,7 @@ export default function FindLawyer() {
                   </View>
                   <View style={styles.profileDetailItem}>
                     <Text style={styles.profileDetailLabel}>Rating</Text>
-                    <Text style={styles.profileDetailValue}>{selectedLawyer.rating} / 5.0</Text>
+                    <Text style={styles.profileDetailValue}>{selectedLawyer.rating === 'New' ? 'New' : `${selectedLawyer.rating} / 5.0`}</Text>
                   </View>
                   <View style={styles.profileDetailItem}>
                     <Text style={styles.profileDetailLabel}>Successful Cases</Text>
