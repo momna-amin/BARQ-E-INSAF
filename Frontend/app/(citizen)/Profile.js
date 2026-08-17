@@ -181,6 +181,12 @@ export default function Profile() {
 
       {/* Header */}
       <View style={styles.header}>
+        <TouchableOpacity 
+          style={{ marginRight: 16, paddingVertical: 4, paddingHorizontal: 8 }} 
+          onPress={() => router.push('/(citizen)/CitizenHome')}
+        >
+          <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#ffffff' }}>←</Text>
+        </TouchableOpacity>
         <View style={styles.brandRow}>
           <View style={styles.logoBadge}>
             <Text style={styles.logoBadgeText}>BI</Text>
