@@ -23,7 +23,7 @@ export default function CaseEvidence() {
       setCaseData({
         id: c.id,
         title: c.title,
-        evidence: []
+        evidence: c.evidence || []
       });
     } catch (err) {
       console.log('Error fetching case detail for evidence:', err);
@@ -76,12 +76,27 @@ export default function CaseEvidence() {
           These are the verified documents uploaded for legal consultations.
         </Text>
 
+        <TouchableOpacity 
+          style={{ backgroundColor: '#5C1A1A', paddingVertical: 12, paddingHorizontal: 16, borderRadius: 10, alignItems: 'center', marginBottom: 20, flexDirection: 'row', justifyContent: 'center', gap: 8 }}
+          onPress={() => router.push({
+            pathname: '/(citizen)/AddEvidence',
+            params: { caseId: caseData.id }
+          })}
+        >
+          <Text style={{ color: '#fff', fontWeight: '800', fontSize: 14 }}>+ Add Evidence File</Text>
+        </TouchableOpacity>
+
         <View style={styles.evidenceContainer}>
           {caseData.evidence.length > 0 ? (
             caseData.evidence.map((item, index) => (
-              <View key={index} style={styles.evidenceCard}>
-                <View style={styles.bulletBox} />
-                <Text style={styles.evidenceText}>{item}</Text>
+              <View key={index} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: '#ece9e4', marginBottom: 10 }}>
+                <View style={{ width: 44, height: 44, borderRadius: 8, backgroundColor: '#fbeedb', justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={{ fontSize: 10, color: '#b45309', fontWeight: '800' }}>{String(item.type || 'FILE').toUpperCase()}</Text>
+                </View>
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <Text style={{ fontSize: 14, fontWeight: '750', color: '#1a1a1a' }}>{item.name}</Text>
+                  <Text style={{ fontSize: 11, color: '#666', marginTop: 2 }}>{item.size} • Uploaded {item.date}</Text>
+                </View>
               </View>
             ))
           ) : (

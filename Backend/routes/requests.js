@@ -12,7 +12,7 @@ const { requestToLawyer, responseToUser, adminNotify } = require('../utils/email
 // ─────────────────────────────────────────────────────────────────────────────
 router.post('/', protect, allowRoles('citizen', 'user'), async (req, res) => {
   try {
-    const { lawyerId, reason } = req.body;
+    const { lawyerId, reason, caseId } = req.body;
     const user = req.user;
 
     if (!lawyerId) return res.status(400).json({ message: 'lawyerId is required' });
@@ -42,7 +42,7 @@ router.post('/', protect, allowRoles('citizen', 'user'), async (req, res) => {
     // Insert request
     const { data: request, error: re } = await supabase
       .from('lawyer_requests')
-      .insert({ user_id: user.id, lawyer_id: lawyerId, status: 'pending', reason: reason || null })
+      .insert({ user_id: user.id, lawyer_id: lawyerId, status: 'pending', reason: reason || null, case_id: caseId || null })
       .select()
       .single();
 
@@ -113,17 +113,27 @@ router.patch('/:id', protect, allowRoles('lawyer'), async (req, res) => {
       type: 'request_update',
     });
 
-    // 1b) Auto-create case if accepted
+    // 1b) Auto-create or assign case if accepted
     if (status === 'accepted') {
-      await supabase.from('cases').insert({
-        citizen_id: request.user_id,
-        lawyer_id: request.lawyer_id,
-        title: `Consultation with Adv. ${lawyerName}`,
-        type: 'Consultation',
-        description: request.reason || 'Consultation request accepted.',
-        status: 'active',
-        district: request.users?.district || null,
-      });
+      if (request.case_id) {
+        await supabase
+          .from('cases')
+          .update({ 
+            lawyer_id: request.lawyer_id, 
+            status: 'active'
+          })
+          .eq('id', request.case_id);
+      } else {
+        await supabase.from('cases').insert({
+          citizen_id: request.user_id,
+          lawyer_id: request.lawyer_id,
+          title: `Consultation with Adv. ${lawyerName}`,
+          type: 'Consultation',
+          description: request.reason || 'Consultation request accepted.',
+          status: 'active',
+          district: request.users?.district || null,
+        });
+      }
     }
 
     // 2) Email to user
@@ -167,7 +177,7 @@ router.get('/incoming', protect, allowRoles('lawyer'), async (req, res) => {
 
     const { data, error } = await supabase
       .from('lawyer_requests')
-      .select('*, users:user_id ( name, email, phone, district )')
+      .select('*, users:user_id ( name, email, phone, district ), cases:case_id ( id, title, type, description, district, evidence )')
       .eq('lawyer_id', lawyerRow.id)
       .order('created_at', { ascending: false });
 
@@ -188,6 +198,7 @@ router.get('/my', protect, async (req, res) => {
       .from('lawyer_requests')
       .select(`
         *,
+        cases:case_id ( id, title, type, description ),
         lawyers:lawyer_id (
           id, sbc_number, specialty,
           lawyer_users:user_id ( name )

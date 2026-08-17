@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../../services/api';
+import showAlert from '../../utils/showAlert';
+import { ActivityIndicator } from 'react-native';
 import {
   View,
   Text,
@@ -17,6 +20,25 @@ export default function RequestConsultation() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [message, setMessage] = useState('');
+  const [myCases, setMyCases] = useState([]);
+  const [selectedCaseId, setSelectedCaseId] = useState(null);
+  const [selectedCaseTitle, setSelectedCaseTitle] = useState('');
+  const [showCaseDropdown, setShowCaseDropdown] = useState(false);
+  const [loadingCases, setLoadingCases] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoadingCases(true);
+        const res = await api.get('/cases/my');
+        setMyCases(res.data || []);
+      } catch (err) {
+        console.log('Error loading citizen cases:', err);
+      } finally {
+        setLoadingCases(false);
+      }
+    })();
+  }, []);
 
   const lawyerId = params.lawyerId;
   const lawyerName = params.lawyerName || 'Advocate';
@@ -40,18 +62,60 @@ export default function RequestConsultation() {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 120 }}>
-        <Text style={styles.title}>Consultation Request Bhejein</Text>
-        <Text style={styles.lawyerName}>{lawyerName}</Text>
+        <Text style={styles.title}>Request Consultation</Text>
+        <Text style={styles.lawyerName}>Adv. {lawyerName}</Text>
         {!!lawyerSpec && <Text style={styles.subtitle}>{lawyerSpec}</Text>}
 
-        <Text style={styles.subtitle}>
-          Apna case ya masla mukhtasar likhein — advocate ko yehi tafseel email par bhi bheji jayegi
-          taake wo behtar rehnumai kar sakein.
-        </Text>
+        {/* Case selector to attach an existing built case */}
+        <Text style={styles.formLabel}>Attach Built Case (Optional)</Text>
+        {loadingCases ? (
+          <ActivityIndicator size="small" color="#5C1A1A" style={{ marginVertical: 12 }} />
+        ) : (
+          <>
+            <TouchableOpacity 
+              style={styles.dropdownSelector}
+              onPress={() => setShowCaseDropdown(!showCaseDropdown)}
+            >
+              <Text style={styles.dropdownValue}>
+                {selectedCaseTitle || 'Select one of your cases to attach...'}
+              </Text>
+            </TouchableOpacity>
+            
+            {showCaseDropdown && (
+              <View style={styles.dropdownList}>
+                <TouchableOpacity 
+                  style={styles.dropdownItem}
+                  onPress={() => {
+                    setSelectedCaseId(null);
+                    setSelectedCaseTitle('No Case Attached');
+                    setShowCaseDropdown(false);
+                  }}
+                >
+                  <Text style={{ fontSize: 13, color: '#ef4444', fontWeight: '800' }}>-- Do Not Attach Case --</Text>
+                </TouchableOpacity>
+                {myCases.map(c => (
+                  <TouchableOpacity 
+                    key={c.id} 
+                    style={styles.dropdownItem}
+                    onPress={() => {
+                      setSelectedCaseId(c.id);
+                      setSelectedCaseTitle(c.title);
+                      setMessage(`Attached Case: ${c.title}\nCategory: ${c.type}\n\nDetails: ${c.description}`);
+                      setShowCaseDropdown(false);
+                    }}
+                  >
+                    <Text style={styles.dropdownItemText}>{c.title} ({c.type})</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </>
+        )}
 
+        <Text style={styles.formLabel}>Additional Notes / Questions *</Text>
         <TextInput
           style={styles.messageInput}
-          placeholder="Apna case ya sawal yahan likhein... (e.g. Property dispute Hyderabad mein)"
+          placeholder="Describe your legal issue, ask questions, or provide additional case context..."
           placeholderTextColor="#999"
           multiline
           value={message}
@@ -61,6 +125,8 @@ export default function RequestConsultation() {
         <SendRequestButton
           lawyerId={lawyerId}
           lawyerName={lawyerName}
+          reason={message}
+          caseId={selectedCaseId}
           style={{ width: '100%' }}
         />
       </ScrollView>

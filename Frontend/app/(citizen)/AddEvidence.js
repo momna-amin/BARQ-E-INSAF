@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import styles from './AddEvidence.styles';
 
@@ -10,6 +10,10 @@ const mockExplorerFiles = [
   { name: 'witness_affidavit.pdf', type: 'PDF', size: '940 KB' },
   { name: 'eviction_notice.pdf', type: 'PDF', size: '1.1 MB' },
 ];
+
+import { useState } from 'react';
+import showAlert from '../../utils/showAlert';
+import api from '../../services/api';
 
 export default function AddEvidence() {
   const router = useRouter();
@@ -23,17 +27,60 @@ export default function AddEvidence() {
     if (id === 'profile') router.push('/(citizen)/Profile');
   };
 
-  const handleSelectFile = (file) => {
-    router.push({
-      pathname: '/(citizen)/CaseForm',
-      params: { 
-        caseType, 
-        newFileName: file.name, 
-        newFileType: file.type 
+  const [uploading, setUploading] = useState(false);
+  
+  const handleSelectFile = async (file) => {
+    if (params.caseId) {
+      try {
+        setUploading(true);
+        // Fetch current case details
+        const getRes = await api.get('/cases/' + params.caseId);
+        const currentEvidence = getRes.data.evidence || [];
+        
+        const newFile = {
+          id: String(currentEvidence.length + 1),
+          type: file.type,
+          name: file.name,
+          size: file.size,
+          date: new Date().toISOString().split('T')[0]
+        };
+        const updatedEvidence = [...currentEvidence, newFile];
+        
+        // Save to DB
+        await api.put('/cases/' + params.caseId, {
+          evidence: updatedEvidence
+        });
+        
+        showAlert('Success', 'File successfully added to case vault!');
+        router.replace({
+          pathname: '/(citizen)/CaseEvidence',
+          params: { caseId: params.caseId }
+        });
+      } catch (err) {
+        showAlert('Error', 'Failed to upload file.');
+      } finally {
+        setUploading(false);
       }
-    });
+    } else {
+      router.push({
+        pathname: '/(citizen)/CaseForm',
+        params: { 
+          caseType, 
+          newFileName: file.name, 
+          newFileType: file.type 
+        }
+      });
+    }
   };
 
+  if (uploading) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f3ef', justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#5C1A1A" />
+        <Text style={{ marginTop: 12, fontWeight: '700', color: '#5C1A1A' }}>Saving file to secure vault...</Text>
+      </SafeAreaView>
+    );
+  }
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor="#5C1A1A" />

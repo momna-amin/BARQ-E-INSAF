@@ -112,10 +112,10 @@ const assignLawyer = async (req, res) => {
 // PUT /api/cases/:id
 const updateCase = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, type, district, evidence } = req.body;
     const { data, error } = await supabase
       .from('cases')
-      .update({ title, description })
+      .update({ title, description, type, district, evidence })
       .eq('id', req.params.id)
       .select()
       .single();

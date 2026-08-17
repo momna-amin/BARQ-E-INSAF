@@ -295,7 +295,7 @@ export default function CitizenHome() {
           <Text style={styles.bannerSub}>Connect with verified Sindh Bar Council lawyers & track your cases live.</Text>
 
           <TouchableOpacity style={styles.bannerBtn} onPress={() => router.push('/(citizen)/CaseForm')}>
-            <Text style={styles.bannerBtnText}>+ File New Legal Case</Text>
+            <Text style={styles.bannerBtnText}>+ Build Your Case</Text>
           </TouchableOpacity>
         </View>
 

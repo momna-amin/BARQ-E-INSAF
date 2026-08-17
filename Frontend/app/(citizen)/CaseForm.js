@@ -43,6 +43,9 @@ export default function CaseForm() {
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(caseType === 'family' ? 'Family Law' : 'Property Law');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const categories = ['Property Law', 'Family Law', 'Civil Cases', 'Criminal Law'];
 
   const [evidenceList, setEvidenceList] = useState([
     { id: '1', type: 'PDF', name: 'Sindh Land Deed.pdf', size: '2.4 MB', date: '2026-08-10' },
@@ -90,9 +93,10 @@ export default function CaseForm() {
       setLoading(true);
       await api.post('/cases', {
         title: formData.title,
-        type: caseType === 'property' ? 'Property' : 'Family',
+        type: selectedCategory,
         description: formData.description,
         district: `${selectedCity} - ${selectedDistrict}`,
+        evidence: evidenceList,
       });
 
       showAlert('Success', 'Case submitted successfully!');
@@ -138,8 +142,38 @@ export default function CaseForm() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.caseTypeBanner}>
-          <Text style={styles.caseTypeName}>{getCaseTypeName()}</Text>
+        {/* Case Category Dropdown */}
+        <View style={styles.formGroup}>
+          <Text style={styles.formLabel}>Case Category *</Text>
+          <TouchableOpacity 
+            style={styles.dropdownSelector}
+            onPress={() => {
+              setShowCategoryDropdown(!showCategoryDropdown);
+              setShowCityDropdown(false);
+              setShowDistrictDropdown(false);
+            }}
+          >
+            <Text style={styles.dropdownValue}>
+              {selectedCategory}
+            </Text>
+          </TouchableOpacity>
+          
+          {showCategoryDropdown && (
+            <View style={styles.dropdownList}>
+              {categories.map(cat => (
+                <TouchableOpacity 
+                  key={cat} 
+                  style={styles.dropdownItem}
+                  onPress={() => {
+                    setSelectedCategory(cat);
+                    setShowCategoryDropdown(false);
+                  }}
+                >
+                  <Text style={styles.dropdownItemText}>{cat}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
         </View>
 
         {/* Form Fields */}

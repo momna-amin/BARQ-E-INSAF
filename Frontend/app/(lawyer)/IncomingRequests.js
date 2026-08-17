@@ -206,6 +206,18 @@ export default function IncomingRequests() {
                     }) : ''}
                   </Text>
 
+                                    {/* Attached Case Details */}
+                  {req.cases && (
+                    <View style={{ backgroundColor: '#f0fdf4', borderRadius: 8, padding: 10, marginBottom: 10, borderWidth: 1, borderColor: '#bbf7d0' }}>
+                      <Text style={{ fontSize: 10, fontWeight: '800', color: '#15803d', textTransform: 'uppercase', marginBottom: 2 }}>📂 Attached Case Details:</Text>
+                      <Text style={{ fontSize: 13, fontWeight: '750', color: '#166534' }}>{req.cases.title}</Text>
+                      <Text style={{ fontSize: 11, color: '#16a34a', marginTop: 1, fontWeight: '600' }}>Category: {req.cases.type} • {req.cases.district}</Text>
+                      {req.cases.description && (
+                        <Text style={{ fontSize: 12, color: '#374151', marginTop: 4 }}>{req.cases.description}</Text>
+                      )}
+                    </View>
+                  )}
+
                   {/* Reason (if any) */}
                   {req.reason && (
                     <View style={styles.reasonBox}>

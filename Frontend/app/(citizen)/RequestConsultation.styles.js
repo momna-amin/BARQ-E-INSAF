@@ -117,4 +117,43 @@ export default StyleSheet.create({
     fontWeight: '600',
     color: '#bbb',
   },
+  formLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#5C1A1A',
+    textTransform: 'uppercase',
+    marginBottom: 6,
+    marginTop: 10,
+  },
+  dropdownSelector: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#ece9e4',
+    padding: 14,
+    marginBottom: 16,
+  },
+  dropdownValue: {
+    fontSize: 14,
+    color: '#1a1a1a',
+    fontWeight: '600',
+  },
+  dropdownList: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#ece9e4',
+    padding: 6,
+    marginBottom: 16,
+  },
+  dropdownItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  dropdownItemText: {
+    fontSize: 14,
+    color: '#334155',
+    fontWeight: '600',
+  },
 });

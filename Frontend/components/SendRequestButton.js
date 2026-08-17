@@ -13,7 +13,7 @@ import {
 import showAlert from '../utils/showAlert';
 import api from '../services/api';
 
-export default function SendRequestButton({ lawyerId, lawyerName, style }) {
+export default function SendRequestButton({ lawyerId, lawyerName, reason, caseId, style }) {
   const [status, setStatus] = useState('idle'); // idle | loading | sent | error
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
@@ -26,17 +26,17 @@ export default function SendRequestButton({ lawyerId, lawyerName, style }) {
     if (status === 'loading' || status === 'sent') return;
     try {
       setStatus('loading');
-      await api.post('/requests', { lawyerId });
+      await api.post('/requests', { lawyerId, reason, caseId });
       setStatus('sent');
       // Success feedback
       showAlert(
-        '✅ Request Bhej Di Gayi',
-        `Advocate ${lawyerName || 'Sahab'} ko email bhi send kar di gayi hai. Jawab ka intezaar karein.`,
-        [{ text: 'Theek Hai', style: 'default' }]
+        '✅ Request Sent',
+        `Your consultation request has been sent to Advocate ${lawyerName || 'Advocate'}. They will receive your details and contact you soon.`,Ref:
+        [{ text: 'OK', style: 'default' }]
       );
     } catch (err) {
       setStatus('error');
-      const msg = err?.response?.data?.message || 'Request nahi bheji ja saki — dobara koshish karein';
+      const msg = err?.response?.data?.message || 'Failed to send consultation request. Please try again.';
       showAlert('⚠️ Error', msg, [
         { text: 'Theek Hai', onPress: () => setStatus('idle') },
       ]);
@@ -59,17 +59,17 @@ export default function SendRequestButton({ lawyerId, lawyerName, style }) {
         {isLoading ? (
           <View style={styles.row}>
             <ActivityIndicator color="#fff" size="small" />
-            <Text style={styles.btnText}>Bheja Ja Raha Hai...</Text>
+            <Text style={styles.btnText}>Sending Request...</Text>
           </View>
         ) : isSent ? (
           <View style={styles.row}>
             <Text style={styles.checkIcon}>✅</Text>
-            <Text style={styles.btnText}>Request Bhej Di Gayi</Text>
+            <Text style={styles.btnText}>Request Sent Successfully</Text>
           </View>
         ) : (
           <View style={styles.row}>
             <Text style={styles.sendIcon}>📨</Text>
-            <Text style={styles.btnText}>Request Bhejein</Text>
+            <Text style={styles.btnText}>Send Consultation Request</Text>
           </View>
         )}
       </TouchableOpacity>
@@ -79,13 +79,13 @@ export default function SendRequestButton({ lawyerId, lawyerName, style }) {
 
 const styles = StyleSheet.create({
   btn: {
-    backgroundColor: '#0b5d3b',
+    backgroundColor: '#5C1A1A',
     paddingVertical: 15,
     paddingHorizontal: 28,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#0b5d3b',
+    shadowColor: '#5C1A1A',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 10,
