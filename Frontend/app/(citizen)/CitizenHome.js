@@ -422,7 +422,7 @@ export default function CitizenHome() {
               <View style={styles.ratingRow}>
                 <Text style={{ fontSize: 11, color: '#5C1A1A' }}>⭐</Text>
                 <Text style={styles.ratingText}>{l.rating || '4.8'}</Text>
-                <Text style={{ fontSize: 10, color: '#888888' }}>({l.cases || 30}+ cases)</Text>
+                <Text style={{ fontSize: 10, color: '#888888' }}>({l.cases} cases)</Text>
               </View>
 
               <View style={styles.hireBtn}>

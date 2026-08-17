@@ -626,11 +626,11 @@ const googleAuth = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const { name, phone, district, specialty, office_address, bio, is_available, sbc_number, sbcNumber } = req.body;
+    const { name, phone, district, cnic, specialty, office_address, bio, is_available, sbc_number, sbcNumber } = req.body;
 
     const { data: user, error: userErr } = await supabase
       .from('users')
-      .update({ name, phone, district })
+      .update({ name, phone, district, cnic })
       .eq('id', req.user.id)
       .select()
       .single();

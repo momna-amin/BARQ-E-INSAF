@@ -34,6 +34,7 @@ export default function Profile() {
   const [inputEmail, setInputEmail] = useState('');
   const [inputPhone, setInputPhone] = useState('');
   const [inputDistrict, setInputDistrict] = useState('');
+  const [inputCnic, setInputCnic] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -59,6 +60,7 @@ export default function Profile() {
           setInputEmail(res.data.email || '');
           setInputPhone(res.data.phone || '');
           setInputDistrict(res.data.district || '');
+          setInputCnic(res.data.cnic || '');
         }
       } catch (err) {
         console.log('Error loading profile:', err);
@@ -87,6 +89,7 @@ export default function Profile() {
         name: inputName,
         phone: inputPhone,
         district: inputDistrict,
+        cnic: inputCnic,
       });
 
       const updated = res.data;
@@ -95,6 +98,7 @@ export default function Profile() {
         name: updated.name,
         phone: updated.phone,
         district: updated.district,
+        cnic: updated.cnic,
         dp: (updated.name || 'C').substring(0, 2).toUpperCase()
       }));
 
@@ -210,6 +214,8 @@ export default function Profile() {
               <TextInput style={styles.editInput} value={inputPhone} onChangeText={setInputPhone} />
               <Text style={styles.editLabel}>District</Text>
               <TextInput style={styles.editInput} value={inputDistrict} onChangeText={setInputDistrict} />
+              <Text style={styles.editLabel}>CNIC Number</Text>
+              <TextInput style={styles.editInput} value={inputCnic} onChangeText={setInputCnic} placeholder="e.g. 42101-1234567-1" placeholderTextColor="#aaa" />
               <TouchableOpacity style={styles.saveBtn} onPress={handleSaveProfile}>
                 <Text style={styles.saveBtnText}>Save Profile</Text>
               </TouchableOpacity>
@@ -238,7 +244,7 @@ export default function Profile() {
                 </View>
                 <View style={styles.infoGridItem}>
                   <Text style={styles.infoGridLabel}>Member Since</Text>
-                  <Text style={styles.infoGridValue}>{realUser.joinedDate || 'Recently'}</Text>
+                  <Text style={styles.infoGridValue}>{realUser.created_at ? new Date(realUser.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : 'Recently'}</Text>
                 </View>
               </View>
 
