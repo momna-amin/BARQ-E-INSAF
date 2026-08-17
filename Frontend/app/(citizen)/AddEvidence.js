@@ -11,7 +11,6 @@ const mockExplorerFiles = [
   { name: 'eviction_notice.pdf', type: 'PDF', size: '1.1 MB' },
 ];
 
-import { useState } from 'react';
 import showAlert from '../../utils/showAlert';
 import api from '../../services/api';
 
