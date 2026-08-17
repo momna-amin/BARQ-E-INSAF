@@ -59,7 +59,7 @@ export default function LawyerHome() {
         });
         setStats(prev => ({
           ...prev,
-          rating: profileRes.data.lawyer_profile?.rating || 5.0,
+          rating: (profileRes.data.lawyer_profile?.total_ratings > 0) ? (profileRes.data.lawyer_profile?.rating || '0.0') : 'New',
         }));
       }
 
@@ -88,7 +88,7 @@ export default function LawyerHome() {
       setStats({
         activeCases: formattedCases.length,
         pendingRequests: formattedReqs.filter(r => r.status === 'pending').length,
-        rating: profileRes?.data?.lawyer_profile?.rating || 5.0
+        rating: (profileRes?.data?.lawyer_profile?.total_ratings > 0) ? (profileRes?.data?.lawyer_profile?.rating || '0.0') : 'New'
       });
     } catch (err) {
       console.log('Error fetching lawyer dashboard:', err);
@@ -243,7 +243,7 @@ export default function LawyerHome() {
           </View>
 
           <View style={styles.statCard}>
-            <Text style={styles.statNum}>⭐ {stats.rating || '5.0'}</Text>
+            <Text style={styles.statNum}>{stats.rating === 'New' ? '⭐ New' : '⭐ ' + stats.rating}</Text>
             <Text style={styles.statLabel}>Rating</Text>
           </View>
         </View>

@@ -42,7 +42,7 @@ export default function FindLawyer() {
           sbc: l.sbc_number,
           location: l.district || 'Sindh',
           initials: (l.user?.name || 'A').substring(0, 2).toUpperCase(),
-          rating: l.rating || '4.9',
+          rating: (l.total_ratings > 0) ? (l.rating || '0.0') : 'New',
           cases: l.total_ratings || 0,
           color: '#5C1A1A',
           about: l.bio || 'Advocate practicing in Sindh.',

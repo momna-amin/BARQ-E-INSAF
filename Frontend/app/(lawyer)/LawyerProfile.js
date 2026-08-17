@@ -74,8 +74,8 @@ export default function LawyerProfile() {
             spec: lp.specialty || '',
             address: lp.office_address || '',
             bio: lp.bio || '',
-            experience: lp.experience || '5 Years',
-            education: lp.education || 'LL.B, University of Karachi',
+            experience: lp.experience || '',
+            education: lp.education || '',
             isAvailable: lp.is_available !== false
           });
         }
@@ -339,7 +339,7 @@ export default function LawyerProfile() {
           />
         ) : (
           <View style={styles.detailCard}>
-            <Text style={styles.detailValue}>{realUser.lawyer_profile?.experience || '5 Years'}</Text>
+            <Text style={styles.detailValue}>{realUser.lawyer_profile?.experience || 'Not Specified'}</Text>
           </View>
         )}
 
@@ -352,7 +352,7 @@ export default function LawyerProfile() {
           />
         ) : (
           <View style={styles.detailCard}>
-            <Text style={styles.detailValue}>{realUser.lawyer_profile?.education || 'LL.B, University of Karachi'}</Text>
+            <Text style={styles.detailValue}>{realUser.lawyer_profile?.education || 'Not Specified'}</Text>
           </View>
         )}
 
@@ -367,7 +367,7 @@ export default function LawyerProfile() {
           />
         ) : (
           <View style={styles.detailCard}>
-            <Text style={styles.detailValue}>{realUser.lawyer_profile?.office_address || 'Sindh Court, Karachi'}</Text>
+            <Text style={styles.detailValue}>{realUser.lawyer_profile?.office_address || 'Not Specified'}</Text>
           </View>
         )}
 
