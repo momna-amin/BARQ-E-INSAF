@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
 
   // ── BOTTOM CARD ──
   bottomCard: {
-    backgroundColor: 'rgba(255,255,255,0.75)',
+    backgroundColor: 'rgba(255,255,255,0.65)',
     borderTopLeftRadius: 36,
     borderTopRightRadius: 36,
     paddingHorizontal: 24,
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
   },
   bottomHint: {
     fontSize: 10,
-    color: '#9AA3C7',
+    color: '#cad1ec',
     fontWeight: '500',
     letterSpacing: 0.5,
     textAlign: 'center',

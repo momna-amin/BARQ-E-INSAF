@@ -20,8 +20,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { usePathname } from 'expo-router';
 
 import api from '../services/api';
+// Import the new global theme
+import theme from '../constants/theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Destructure theme values for easier use
+const { colors, gradients, gradientDir, orbConfig, shadows } = theme;
 
 export default function AIChatFloatingButton() {
   const pathname = usePathname();
@@ -82,7 +87,7 @@ export default function AIChatFloatingButton() {
 
       setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), sender: 'ai', text: aiResponseText, sources: data.sources }]);
     } catch (error) {
-      // 🛡️ Fail-Proof Fallback — Never stop working!
+      // Fail-Proof Fallback — Never stop working!
       const fallbackText = `⚡ **Barq-e-Insaf AI Assistant (Offline Legal Guidance):**\n\n` +
         `Regarding your query: "${userQuery}"\n` +
         `• Under the Laws of Pakistan & Constitution 1973, legal rights are protected under Fundamental Rights (Articles 4 & 10A).\n` +
@@ -101,7 +106,6 @@ export default function AIChatFloatingButton() {
   };
 
   // Chatbot only allowed on the entry screens (Start + Role Select).
-  // Everywhere else — login, signup, dashboards, admin, etc. — it stays hidden.
   const normalizedPath = (pathname || '/').replace(/\/+$/, '') || '/';
   const ALLOWED_PATHS = ['/', '/StartScreen', '/RoleSelectScreen'];
   const isAllowed = ALLOWED_PATHS.includes(normalizedPath);
@@ -109,28 +113,46 @@ export default function AIChatFloatingButton() {
 
   return (
     <>
-      {/* ⚡ ULTRA-ATTRACTIVE DRAGGABLE FLOATING BUTTON ⚡ */}
+      {/* ⚡ ULTRA-ATTRACTIVE DRAGGABLE ORB FLOATING BUTTON ⚡ */}
       <Animated.View
         style={[styles.draggableFab, { transform: [{ translateX: pan.x }, { translateY: pan.y }] }]}
         {...panResponder.panHandlers}
       >
-        <TouchableOpacity style={styles.fabBtn} activeOpacity={0.88} onPress={() => setModalVisible(true)}>
+        <TouchableOpacity 
+          style={styles.orbWrapper} 
+          activeOpacity={0.88} 
+          onPress={() => setModalVisible(true)}
+        >
+          {/* Outer Glow */}
+          <View style={styles.outerGlow} />
+
+          {/* Orbiting Rings */}
+          <View style={styles.ring1} />
+          <View style={styles.ring2} />
+
+          {/* Main Orb Body */}
           <LinearGradient
-            colors={['#3b82f6', '#1d4ed8', '#0F2744']}
-            style={styles.fabGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+            colors={gradients.orb}
+            style={styles.orbBody}
+            start={gradientDir.start}
+            end={gradientDir.end}
           >
-            {/* Inner Glow Circle & Lightning Symbol */}
-            <View style={styles.glowCircle}>
-              <Text style={styles.fabIcon}>⚡</Text>
+            {/* Inner Vignette */}
+            <View style={styles.vignette} />
+
+            {/* Orb Eyes (Blinking animation effect) */}
+            <View style={styles.eyeRow}>
+              <View style={[styles.eye, { backgroundColor: colors.orbEye1 }]} />
+              <View style={[styles.eye, { backgroundColor: colors.orbEye1 }]} />
             </View>
 
-            {/* AI Assistant Label Tag */}
-            <View style={styles.aiTagPill}>
-              <Text style={styles.aiTagText}>AI LEGAL</Text>
-            </View>
+            {/* Orb Shine Highlights */}
+            <View style={[styles.shine1, { backgroundColor: colors.orbShine1 }]} />
+            <View style={[styles.shine2, { backgroundColor: colors.orbShine2 }]} />
           </LinearGradient>
+
+          {/* Haze Ring Overlay */}
+          <View style={[styles.hazeRing, { backgroundColor: colors.orbHaze1 }]} />
         </TouchableOpacity>
       </Animated.View>
 
@@ -176,7 +198,7 @@ export default function AIChatFloatingButton() {
               ))}
               {loading && (
                 <View style={[styles.msgBubble, styles.aiBubble, styles.loadingRow]}>
-                  <ActivityIndicator size="small" color="#3b82f6" />
+                  <ActivityIndicator size="small" color={colors.btnBlue2} />
                   <Text style={styles.loadingText}>Searching legal database & statutes...</Text>
                 </View>
               )}
@@ -205,68 +227,253 @@ export default function AIChatFloatingButton() {
 }
 
 const styles = StyleSheet.create({
-  draggableFab: { position: 'absolute', top: 0, left: 0, zIndex: 9999, elevation: 12 },
-  fabBtn: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    elevation: 10,
-    shadowColor: '#3b82f6',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.45,
-    shadowRadius: 10,
+  draggableFab: { 
+    position: 'absolute', 
+    top: 0, 
+    left: 0, 
+    zIndex: 9999, 
+    elevation: 12 
   },
-  fabGradient: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 34,
-    justify: 'center',
+
+  // --- NEW ORB STYLES ---
+  orbWrapper: {
+    width: orbConfig.size,
+    height: orbConfig.size,
+    justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
+  },
+  outerGlow: {
+    position: 'absolute',
+    width: orbConfig.outerGlowSize,
+    height: orbConfig.outerGlowSize,
+    borderRadius: orbConfig.outerGlowSize / 2,
+    ...shadows.outerGlow,
+  },
+  ring1: {
+    position: 'absolute',
+    width: orbConfig.ring1Size,
+    height: orbConfig.ring1Size,
+    borderRadius: orbConfig.ring1Size / 2,
     borderWidth: 2,
-    borderColor: '#fbbf24',
-    padding: 2,
+    borderColor: colors.ring1,
   },
-  glowCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justify: 'center',
+  ring2: {
+    position: 'absolute',
+    width: orbConfig.ring2Size,
+    height: orbConfig.ring2Size,
+    borderRadius: orbConfig.ring2Size / 2,
+    borderWidth: 1.5,
+    borderColor: colors.ring2,
+  },
+  orbBody: {
+    width: orbConfig.size,
+    height: orbConfig.size,
+    borderRadius: orbConfig.borderRadius,
+    justifyContent: 'center',
     alignItems: 'center',
+    ...shadows.orbBody,
   },
-  fabIcon: { fontSize: 24 },
-  aiTagPill: {
-    backgroundColor: '#fbbf24',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 8,
-    marginTop: -4,
+  vignette: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: orbConfig.borderRadius,
+    backgroundColor: colors.orbVignette,
+    borderWidth: orbConfig.vignetteBorder,
+    borderColor: 'rgba(0,0,0,0.15)',
   },
-  aiTagText: { color: '#0F2744', fontSize: 8, fontWeight: '900', letterSpacing: 0.5 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.75)', justifyContent: 'flex-end' },
-  modalCard: { backgroundColor: '#0F172A', borderTopLeftRadius: 28, borderTopRightRadius: 28, height: SCREEN_HEIGHT * 0.84 },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 16, backgroundColor: '#020617', borderTopLeftRadius: 28, borderTopRightRadius: 28 },
-  headerTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  headerBadge: { width: 38, height: 38, borderRadius: 19, backgroundColor: '#3b82f6', justifyContent: 'center', alignItems: 'center' },
-  headerIcon: { fontSize: 20 },
-  headerTitle: { color: '#f8fafc', fontSize: 16, fontWeight: '800' },
-  headerSub: { color: '#fbbf24', fontSize: 11, fontWeight: '600', marginTop: 1 },
-  closeBtn: { width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255, 255, 255, 0.1)', justifyContent: 'center', alignItems: 'center' },
-  closeBtnText: { color: '#f8fafc', fontSize: 16, fontWeight: '800' },
-  chatScroll: { flex: 1, backgroundColor: '#0F172A' },
-  chatContent: { padding: 18, gap: 12 },
-  msgBubble: { maxWidth: '84%', padding: 14, borderRadius: 18, marginBottom: 8 },
-  userBubble: { alignSelf: 'flex-end', backgroundColor: '#3b82f6', borderBottomRightRadius: 4 },
-  aiBubble: { alignSelf: 'flex-start', backgroundColor: '#1E293B', borderBottomLeftRadius: 4, borderWidth: 1, borderColor: '#334155' },
-  userMsgText: { color: '#ffffff', fontSize: 13, lineHeight: 19 },
-  aiMsgText: { color: '#e2e8f0', fontSize: 13, lineHeight: 19 },
-  loadingRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  loadingText: { color: '#94a3b8', fontSize: 12, fontStyle: 'italic' },
-  inputBar: { flexDirection: 'row', alignItems: 'center', padding: 14, paddingHorizontal: 16, backgroundColor: '#020617', borderTopWidth: 1, borderTopColor: '#1E293B', gap: 10 },
-  textInput: { flex: 1, backgroundColor: '#1E293B', borderRadius: 24, paddingHorizontal: 18, paddingVertical: 10, fontSize: 13, color: '#f8fafc' },
-  sendBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#3b82f6', justifyContent: 'center', alignItems: 'center' },
-  sendBtnText: { color: '#ffffff', fontSize: 18, fontWeight: '800' },
-  sourcesContainer: { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#334155' },
-  sourcesTitle: { color: '#fbbf24', fontSize: 11, fontWeight: 'bold', marginBottom: 4 },
-  sourceItem: { color: '#94a3b8', fontSize: 11, fontStyle: 'italic', marginBottom: 2 },
+  eyeRow: {
+    flexDirection: 'row',
+    gap: orbConfig.eyeGap,
+    marginTop: -8,
+  },
+  eye: {
+    width: orbConfig.eyeWidth,
+    height: orbConfig.eyeHeight,
+    borderRadius: orbConfig.eyeBorderRad,
+  },
+  shine1: {
+    position: 'absolute',
+    top: orbConfig.shine1.top,
+    left: orbConfig.shine1.left,
+    width: orbConfig.shine1.width,
+    height: orbConfig.shine1.height,
+    borderRadius: 12,
+  },
+  shine2: {
+    position: 'absolute',
+    top: orbConfig.shine2.top,
+    left: orbConfig.shine2.left,
+    width: orbConfig.shine2.size,
+    height: orbConfig.shine2.size,
+    borderRadius: 50,
+  },
+  hazeRing: {
+    position: 'absolute',
+    width: orbConfig.hazeRingSize,
+    height: orbConfig.hazeRingSize,
+    borderRadius: orbConfig.hazeRingSize / 2,
+  },
+
+  // --- MODAL STYLES (Kept mostly identical) ---
+  modalOverlay: { 
+    flex: 1, 
+    backgroundColor: 'rgba(0, 0, 0, 0.75)', 
+    justifyContent: 'flex-end' 
+  },
+  modalCard: { 
+    backgroundColor: '#0F172A', 
+    borderTopLeftRadius: 28, 
+    borderTopRightRadius: 28, 
+    height: SCREEN_HEIGHT * 0.84 
+  },
+  modalHeader: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    paddingHorizontal: 20, 
+    paddingVertical: 16, 
+    backgroundColor: '#020617', 
+    borderTopLeftRadius: 28, 
+    borderTopRightRadius: 28 
+  },
+  headerTitleRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 12 
+  },
+  headerBadge: { 
+    width: 38, 
+    height: 38, 
+    borderRadius: 19, 
+    backgroundColor: colors.btnBlue2, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  headerIcon: { 
+    fontSize: 20 
+  },
+  headerTitle: { 
+    color: '#f8fafc', 
+    fontSize: 16, 
+    fontWeight: '800' 
+  },
+  headerSub: { 
+    color: colors.lightning1, 
+    fontSize: 11, 
+    fontWeight: '600', 
+    marginTop: 1 
+  },
+  closeBtn: { 
+    width: 34, 
+    height: 34, 
+    borderRadius: 17, 
+    backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  closeBtnText: { 
+    color: '#f8fafc', 
+    fontSize: 16, 
+    fontWeight: '800' 
+  },
+  chatScroll: { 
+    flex: 1, 
+    backgroundColor: '#0F172A' 
+  },
+  chatContent: { 
+    padding: 18, 
+    gap: 12 
+  },
+  msgBubble: { 
+    maxWidth: '84%', 
+    padding: 14, 
+    borderRadius: 18, 
+    marginBottom: 8 
+  },
+  userBubble: { 
+    alignSelf: 'flex-end', 
+    backgroundColor: colors.btnBlue2, 
+    borderBottomRightRadius: 4 
+  },
+  aiBubble: { 
+    alignSelf: 'flex-start', 
+    backgroundColor: '#1E293B', 
+    borderBottomLeftRadius: 4, 
+    borderWidth: 1, 
+    borderColor: '#334155' 
+  },
+  userMsgText: { 
+    color: '#ffffff', 
+    fontSize: 13, 
+    lineHeight: 19 
+  },
+  aiMsgText: { 
+    color: '#e2e8f0', 
+    fontSize: 13, 
+    lineHeight: 19 
+  },
+  loadingRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 8 
+  },
+  loadingText: { 
+    color: '#94a3b8', 
+    fontSize: 12, 
+    fontStyle: 'italic' 
+  },
+  inputBar: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    padding: 14, 
+    paddingHorizontal: 16, 
+    backgroundColor: '#020617', 
+    borderTopWidth: 1, 
+    borderTopColor: '#1E293B', 
+    gap: 10 
+  },
+  textInput: { 
+    flex: 1, 
+    backgroundColor: '#1E293B', 
+    borderRadius: 24, 
+    paddingHorizontal: 18, 
+    paddingVertical: 10, 
+    fontSize: 13, 
+    color: '#f8fafc' 
+  },
+  sendBtn: { 
+    width: 44, 
+    height: 44, 
+    borderRadius: 22, 
+    backgroundColor: colors.btnBlue2, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  sendBtnText: { 
+    color: '#ffffff', 
+    fontSize: 18, 
+    fontWeight: '800' 
+  },
+  sourcesContainer: { 
+    marginTop: 10, 
+    paddingTop: 10, 
+    borderTopWidth: 1, 
+    borderTopColor: '#334155' 
+  },
+  sourcesTitle: { 
+    color: colors.lightning1, 
+    fontSize: 11, 
+    fontWeight: 'bold', 
+    marginBottom: 4 
+  },
+  sourceItem: { 
+    color: '#94a3b8', 
+    fontSize: 11, 
+    fontStyle: 'italic', 
+    marginBottom: 2 
+  },
 });
