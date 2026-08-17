@@ -35,7 +35,7 @@ const SINDH_DISTRICTS = [
   'Malir', 'Matiari', 'Mirpur Khas', 'Naushahro Feroze',
   'Qambar Shahdadkot', 'Sanghar', 'Shaheed Benazirabad',
   'Shikarpur', 'Sukkur', 'Tando Allahyar', 'Tando Muhammad Khan',
-  'Tharparkar', 'Thatta', 'Umerkot', 'Other',
+  'Tharparkar', 'Thatta', 'Umerkot',
 ];
 
 // -- VALIDATION HELPERS -----------------------------------------------------
@@ -207,7 +207,6 @@ export default function LoginScreen() {
   const [loading,     setLoading]     = useState(false);
   const [errors,      setErrors]      = useState({});
   const [sessionChecking, setSessionChecking] = useState(true);
-  const [customDistrict, setCustomDistrict] = useState('');
 
   const strength = getPasswordStrength(password);
 
@@ -347,15 +346,13 @@ export default function LoginScreen() {
     if (!retypePass) newErrors.retypePass = 'Re-type password';
     if (password !== retypePass) newErrors.retypePass = 'Passwords do not match';
 
-    const finalDistrict = district === 'Other' ? customDistrict.trim() : district;
-
     // Citizen-specific validations
     if (role === 'citizen') {
       const cnicErr  = validateCNIC(cnic);
       const phoneErr = validatePhone(phone);
       if (cnicErr)  newErrors.cnic     = cnicErr;
       if (phoneErr) newErrors.phone    = phoneErr;
-      if (!finalDistrict) newErrors.district = 'Please select or enter your district';
+      if (!district) newErrors.district = 'Please select your district';
     }
 
     // Lawyer-specific
@@ -364,7 +361,7 @@ export default function LoginScreen() {
       const phoneErr = validatePhone(phone);
       if (cnicErr) newErrors.cnic = cnicErr;
       if (phoneErr) newErrors.phone = phoneErr;
-      if (!finalDistrict) newErrors.district = 'Please select or enter your district';
+      if (!district) newErrors.district = 'Please select your district';
       if (!sbcNumber) newErrors.sbcNumber = 'SBC number is required';
       if (!specialty) newErrors.specialty = 'Specialty is required';
     }
@@ -375,7 +372,7 @@ export default function LoginScreen() {
       const phoneErr = validatePhone(phone);
       if (cnicErr) newErrors.cnic = cnicErr;
       if (phoneErr) newErrors.phone = phoneErr;
-      if (!finalDistrict) newErrors.district = 'Please select or enter your district';
+      if (!district) newErrors.district = 'Please select your district';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -387,7 +384,7 @@ export default function LoginScreen() {
 
     try {
       setLoading(true);
-      const body = { name, email, password, role, phone, district: district === 'Other' ? customDistrict.trim() : district, cnic };
+      const body = { name, email, password, role, phone, district, cnic };
       if (role === 'lawyer') {
         body.sbcNumber = sbcNumber;
         body.specialty = specialty;
@@ -522,19 +519,6 @@ export default function LoginScreen() {
                 color={config.color}
               />
               {errors.district && <Text style={styles.errorText}>{errors.district}</Text>}
-
-              {district === 'Other' && (
-                <View style={{ marginTop: 10 }}>
-                  <Text style={styles.inputLabel}>Enter Custom District / City</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="e.g. Islamabad, Lahore, Sialkot"
-                    placeholderTextColor="#bbb"
-                    value={customDistrict}
-                    onChangeText={setCustomDistrict}
-                  />
-                </View>
-              )}
 
               {/* LAWYER FIELDS */}
               {role === 'lawyer' && (
