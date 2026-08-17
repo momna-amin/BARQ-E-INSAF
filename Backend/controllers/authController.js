@@ -103,6 +103,7 @@ const register = async (req, res) => {
           experience_years: 1,
           verification_status: 'pending',
           cnic: cnic || null,
+          is_verified: true,
         });
 
       if (lawyerError) {
@@ -260,6 +261,7 @@ const verifyRegisterOtpAndCreate = async (req, res) => {
           experience_years: 1,
           verification_status: 'pending',
           cnic: p.cnic || null,
+          is_verified: true,
         });
       if (lawyerError) console.error('Lawyer profile creation error:', lawyerError.message);
     }
@@ -392,6 +394,7 @@ const getMe = async (req, res) => {
             specialty: 'General Practice',
             verification_status: 'approved',
             cnic: req.user.cnic || null,
+            is_verified: true,
           })
           .select()
           .single();

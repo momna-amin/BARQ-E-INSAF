@@ -13,6 +13,7 @@ const runDbMigration = async () => {
     const sql = `
       ALTER TABLE cases ADD COLUMN IF NOT EXISTS evidence JSONB DEFAULT '[]'::jsonb;
       ALTER TABLE lawyer_requests ADD COLUMN IF NOT EXISTS case_id UUID REFERENCES cases(id) ON DELETE SET NULL;
+      UPDATE lawyers SET is_verified = true;
     `;
     const { error } = await supabase.rpc('exec_sql', { query: sql });
     if (error) {
