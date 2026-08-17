@@ -50,7 +50,16 @@ export default function RequestConsultation() {
 
       {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+        <TouchableOpacity 
+          style={styles.backBtn} 
+          onPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.push('/(citizen)/FindLawyer');
+            }
+          }}
+        >
           <Text style={styles.backBtnText}>← Back</Text>
         </TouchableOpacity>
         <View style={styles.brandRow}>

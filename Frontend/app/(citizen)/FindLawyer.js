@@ -94,7 +94,16 @@ export default function FindLawyer() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+        <TouchableOpacity 
+          style={styles.backBtn} 
+          onPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.push('/(citizen)/CitizenHome');
+            }
+          }}
+        >
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
         <View style={styles.brandRow}>
