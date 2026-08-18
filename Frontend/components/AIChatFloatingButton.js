@@ -40,12 +40,20 @@ export default function AIChatFloatingButton() {
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // --- NEW: Splash screen state ---
+  const [splashVisible, setSplashVisible] = useState(true);
+
   // Hover animation (slight float)
   const floatAnim = useRef(new Animated.Value(0)).current;
   // Blink animation for eyes
   const blinkAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
+    // --- NEW: Hide icon after splash screen finishes ---
+    const timer = setTimeout(() => {
+      setSplashVisible(false);
+    }, 600); // 600ms delay after app boots
+
     // Slight floating hover animation (gentle up and down)
     Animated.loop(
       Animated.sequence([
@@ -78,6 +86,8 @@ export default function AIChatFloatingButton() {
         Animated.delay(4000), // Blink every 4 seconds
       ])
     ).start();
+
+    return () => clearTimeout(timer);
   }, []);
 
   const [messages, setMessages] = useState([
@@ -152,6 +162,10 @@ export default function AIChatFloatingButton() {
 
   // Chatbot only allowed on the entry screens (Start + Role Select).
   const normalizedPath = (pathname || '/').replace(/\/+$/, '') || '/';
+  
+  // --- NEW: Hide completely during splash screen ---
+  if (splashVisible) return null;
+
   const ALLOWED_PATHS = ['/', '/StartScreen', '/RoleSelectScreen'];
   const isAllowed = ALLOWED_PATHS.includes(normalizedPath);
   if (!isAllowed) return null;
@@ -336,7 +350,7 @@ const styles = StyleSheet.create({
   },
   eye: {
     width: 4, // Scaled down for 56px
-    height: 10, // Scaled down for 56px
+    height: 8, // Scaled down for 56px
     borderRadius: 2,
   },
   shine1: {
