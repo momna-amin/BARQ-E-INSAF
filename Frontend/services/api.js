@@ -12,21 +12,11 @@ import { getTokens, saveTokens, clearTokens } from '../services/authStorage';
 // ── Base URL detection ────────────────────────────────────────────────────────
 // On Expo dev, hostUri gives you your laptop's local IP automatically.
 // On Vercel (production web), use the deployed backend URL.
-const PROD_BACKEND = 'https://barq-e-insaf.vercel.app/api';
+const PROD_BACKEND = 'https://barq-e-insaaf.vercel.app/api';
 
 function getBaseUrl() {
-  if (Platform.OS === 'web' && typeof window !== 'undefined') {
-    // If running on localhost (Expo web dev server), use local
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:5000/api';
-    }
-    // Production PWA on Vercel
-    return PROD_BACKEND;
-  }
-  // Native: auto-detect Expo dev server IP
-  const debuggerHost = Constants.expoConfig?.hostUri;
-  const laptopIp = debuggerHost ? debuggerHost.split(':')[0] : 'localhost';
-  return `http://${laptopIp}:5000/api`;
+  // Directly connect to the live cloud backend so local dev works out-of-the-box without needing a local .env
+  return PROD_BACKEND;
 }
 
 const BASE_URL = getBaseUrl();
