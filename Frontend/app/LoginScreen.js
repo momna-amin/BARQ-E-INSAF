@@ -395,14 +395,30 @@ export default function LoginScreen() {
         body.specialty = specialty;
       }
 
-      await api.post('/auth/send-register-otp', body);
+      const res = await api.post('/auth/register', body);
+      const user = res.data;
 
-      router.push({
-        pathname: '/RegisterVerifyOtp',
-        params: { email: email.trim().toLowerCase(), role },
-      });
+      // Save tokens and user session
+      if (user.accessToken && user.refreshToken) {
+        await saveTokens(user.accessToken, user.refreshToken);
+      } else if (user.token) {
+        await saveTokens(user.token, user.token);
+      }
+      await saveUser({ id: user.id, name: user.name, email: user.email, role: user.role });
+
+      if (role === 'lawyer') {
+        router.replace('/(lawyer)/VerificationPending');
+      } else {
+        const dest =
+          user.role === 'citizen' ? '/(citizen)/CitizenHome' :
+          user.role === 'admin'   ? '/(Admin)/AdminDashboard' :
+          '/(ngo)/NGOHome';
+        router.replace(dest);
+      }
+
+      showAlert('Account Created 🎉', 'Aapka account kamyabi se ban gaya hai!');
     } catch (error) {
-      const errorMsg = error?.response?.data?.message || 'Failed to send OTP. Please check details and try again.';
+      const errorMsg = error?.response?.data?.message || 'Registration failed. Please check details and try again.';
       showAlert('Registration Error ⚠️', errorMsg);
     } finally {
       setLoading(false);
