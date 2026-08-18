@@ -8,10 +8,6 @@
     {
       "source": "/api/(.*)",
       "destination": "/Backend/server.js"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
   ]
 }
