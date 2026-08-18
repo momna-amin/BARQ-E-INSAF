@@ -174,11 +174,7 @@ export default function LawyerHome() {
 
   const doLogout = async () => {
     await clearTokens();
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      window.location.href = '/RoleSelectScreen';
-    } else {
-      router.replace('/RoleSelectScreen');
-    }
+    router.replace('/RoleSelectScreen');
   };
 
   const handleLogout = () => {

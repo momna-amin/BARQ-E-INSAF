@@ -430,10 +430,8 @@ export default function LoginScreen() {
             onPress={() => {
               if (router.canGoBack && router.canGoBack()) {
                 router.back();
-              } else if (Platform.OS === 'web' && typeof window !== 'undefined') {
-                window.location.href = '/RoleSelectScreen';
               } else {
-                router.replace('/RoleSelectScreen');
+                router.push('/RoleSelectScreen');
               }
             }}
           >
