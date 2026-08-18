@@ -12,10 +12,10 @@ import { getTokens, saveTokens, clearTokens } from '../services/authStorage';
 // ── Base URL detection ────────────────────────────────────────────────────────
 // On Expo dev, hostUri gives you your laptop's local IP automatically.
 // On Vercel (production web), use the deployed backend URL.
-const PROD_BACKEND = 'https://barq-e-insaaf.vercel.app/api';
+const PROD_BACKEND = 'https://barq-e-insaf.vercel.app/api';
 
 function getBaseUrl() {
-  // Directly connect to the live cloud backend so local dev works out-of-the-box without needing a local .env
+  // Directly connect to the live cloud backend so all API calls connect to Supabase
   return PROD_BACKEND;
 }
 
