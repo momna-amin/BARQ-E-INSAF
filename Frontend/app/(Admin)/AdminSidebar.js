@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, TextInput, Alert, Platform } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
-import api from '../../constants/api';
+import api from '../../services/api';
 
 const MENU_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊', route: '/(Admin)/AdminDashboard' },
-  { id: 'appointments', label: 'Appointments', icon: '📅', route: '/(Admin)/AppointmentsPage', badge: '4' },
-  { id: 'queue', label: 'Verification Queue', icon: '⏳', route: '/(Admin)/VerificationQueue', badge: '12' },
+  { id: 'queue', label: 'Verification Queue', icon: '⏳', route: '/(Admin)/VerificationQueue' },
   { id: 'users', label: 'User Directory', icon: '👥', route: '/(Admin)/UserManagement' },
   { id: 'lawyers', label: 'Lawyer Directory', icon: '⚖️', route: '/(Admin)/LawyerManagement' },
-  { id: 'cases', label: 'Cases & Disputes', icon: '📁', route: '/(Admin)/CasesDisputes', badge: '14' },
-  { id: 'reports', label: 'Reports & Moderation', icon: '🚩', route: '/(Admin)/ReportsModeration', badge: '8' },
+  { id: 'cases', label: 'Cases', icon: '📁', route: '/(Admin)/CasesPage' },
+  { id: 'reports', label: 'Reports & Moderation', icon: '🚩', route: '/(Admin)/ReportsModeration' },
   { id: 'reviews', label: 'Reviews Moderation', icon: '⭐', route: '/(Admin)/ReviewsModeration' },
   { id: 'analytics', label: 'Analytics & Trends', icon: '📈', route: '/(Admin)/AnalyticsPage' },
   { id: 'audit', label: 'Audit Logs', icon: '🛡️', route: '/(Admin)/AuditLogs' },

@@ -1,0 +1,132 @@
+import { StyleSheet } from 'react-native';
+
+export default StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: '#f5f3ef',
+  },
+  header: {
+    backgroundColor: '#5C1A1A',
+    paddingHorizontal: 16,
+    paddingTop: 48,
+    paddingBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  backBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+  },
+  backBtnText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
+  logoBadge: {
+    backgroundColor: '#fff',
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoBadgeText: {
+    color: '#5C1A1A',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '750',
+    color: '#fff',
+  },
+  scroll: {
+    flex: 1,
+  },
+  content: {
+    padding: 16,
+    paddingBottom: 120,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '750',
+    color: '#1a1a1a',
+    marginBottom: 4,
+  },
+  caseName: {
+    fontSize: 13,
+    color: '#5c1a1a',
+    fontWeight: '700',
+    marginBottom: 10,
+  },
+  info: {
+    fontSize: 12,
+    color: '#666',
+    lineHeight: 18,
+    marginBottom: 16,
+  },
+  evidenceContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#ece9e4',
+    padding: 14,
+  },
+  evidenceCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f5f3ef',
+  },
+  bulletBox: {
+    width: 8,
+    height: 8,
+    borderRadius: 2,
+    backgroundColor: '#5C1A1A',
+    marginRight: 10,
+  },
+  evidenceText: {
+    fontSize: 13,
+    color: '#333',
+    fontWeight: '600',
+  },
+  emptyText: {
+    color: '#999',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    paddingVertical: 20,
+  },
+  bottomNav: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#ece9e4',
+    flexDirection: 'row',
+    height: 80,
+    paddingBottom: 24,
+    paddingTop: 10,
+  },
+  navItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#bbb',
+  },
+});

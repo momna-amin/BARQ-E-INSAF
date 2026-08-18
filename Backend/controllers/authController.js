@@ -3,7 +3,7 @@ const supabase = require('../config/supabase');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { sendMail } = require('../utils/mailer');
-const { otpEmail, welcomeOtpEmail } = require('../utils/emailTemplates');
+const { otpEmail, welcomeOtpEmail, citizenWelcomeEmail, lawyerPendingEmail, lawyerJoinRequestAdmin } = require('../utils/emailTemplates');
 const otpStore = require('../utils/otpStore');
 
 // ── Issue JWT Access + Refresh Token pair ────────────────────────────────────
@@ -262,6 +262,21 @@ const verifyRegisterOtpAndCreate = async (req, res) => {
           cnic: p.cnic || null,
         });
       if (lawyerError) console.error('Lawyer profile creation error:', lawyerError.message);
+
+      // Email to lawyer: your request is pending
+      const { subject: ls, html: lh } = lawyerPendingEmail(p.name);
+      sendMail({ to: p.email, subject: ls, html: lh }).catch(e => console.error('lawyer pending mail:', e.message));
+
+      // Email to admin: new lawyer join request
+      const adminEmail = process.env.ADMIN_NOTIFY_EMAIL;
+      if (adminEmail) {
+        const a = lawyerJoinRequestAdmin({ name: p.name, email: p.email, phone: p.phone, sbcNumber: p.sbcNumber, specialty: p.specialty, district: p.district, cnic: p.cnic });
+        sendMail({ to: adminEmail, subject: a.subject, html: a.html }).catch(e => console.error('admin notify mail:', e.message));
+      }
+    } else {
+      // Citizen / NGO welcome email
+      const { subject: ws, html: wh } = citizenWelcomeEmail(p.name);
+      sendMail({ to: p.email, subject: ws, html: wh }).catch(e => console.error('welcome mail:', e.message));
     }
 
     await otpStore.deleteOtp(cleanEmail, 'register');
@@ -354,6 +369,23 @@ const login = async (req, res) => {
       });
     }
 
+    // ── Lawyer pending/rejected gate
+    if (user.role === 'lawyer') {
+      const { data: lawyer } = await supabase
+        .from('lawyers').select('verification_status').eq('user_id', user.id).single();
+      if (!lawyer || lawyer.verification_status === 'pending') {
+        return res.status(403).json({ pendingApproval: true, message: 'Aapka account abhi admin approval ka intezaar kar raha hai.' });
+      }
+      if (lawyer.verification_status === 'rejected') {
+        return res.status(403).json({ rejected: true, message: 'Aapki registration reject ho chuki hai. Barq-e-Insaf support se rabta karein.' });
+      }
+    }
+
+    // ── Suspended gate
+    if (user.is_suspended) {
+      return res.status(403).json({ suspended: true, message: `Aapka account suspend hai. Wajah: ${user.suspension_reason || 'N/A'}` });
+    }
+
     // ── Issue tokens
     const tokens = issueTokens(user);
 
@@ -390,9 +422,9 @@ const getMe = async (req, res) => {
             user_id: req.user.id,
             sbc_number: 'SBC-' + Math.floor(1000 + Math.random() * 9000),
             specialty: 'General Practice',
-            verification_status: 'approved',
+            verification_status: 'pending',
             cnic: req.user.cnic || null,
-            is_verified: true,
+            is_verified: false,
           })
           .select()
           .single();

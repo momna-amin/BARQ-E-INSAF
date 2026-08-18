@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Constants from 'expo-constants';
 import {
   View,
@@ -21,7 +21,7 @@ import { usePathname } from 'expo-router';
 
 import api from '../services/api';
 // Import the new global theme
-import theme from '../constants/theme';
+import theme from '../constants/app-theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -31,9 +31,64 @@ const { colors, gradients, gradientDir, orbConfig, shadows } = theme;
 export default function AIChatFloatingButton() {
   const pathname = usePathname();
 
+  // SSR / Build-time guard: Return null when pre-rendering HTML on Node server
+  if (Platform.OS === 'web' && typeof window === 'undefined') {
+    return null;
+  }
+
   const [modalVisible, setModalVisible] = useState(false);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // --- NEW: Splash screen state ---
+  const [splashVisible, setSplashVisible] = useState(true);
+
+  // Hover animation (slight float)
+  const floatAnim = useRef(new Animated.Value(0)).current;
+  // Blink animation for eyes
+  const blinkAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    // --- NEW: Hide icon after splash screen finishes ---
+    const timer = setTimeout(() => {
+      setSplashVisible(false);
+    }, 600); // 600ms delay after app boots
+
+    // Slight floating hover animation (gentle up and down)
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(floatAnim, {
+          toValue: -8,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(floatAnim, {
+          toValue: 0,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // Very subtle blinking of the eyes
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(blinkAnim, {
+          toValue: 0.2,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(blinkAnim, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.delay(4000), // Blink every 4 seconds
+      ])
+    ).start();
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const [messages, setMessages] = useState([
     {
@@ -107,15 +162,32 @@ export default function AIChatFloatingButton() {
 
   // Chatbot only allowed on the entry screens (Start + Role Select).
   const normalizedPath = (pathname || '/').replace(/\/+$/, '') || '/';
+  
+  // --- NEW: Hide completely during splash screen ---
+  if (splashVisible) return null;
+
   const ALLOWED_PATHS = ['/', '/StartScreen', '/RoleSelectScreen'];
   const isAllowed = ALLOWED_PATHS.includes(normalizedPath);
   if (!isAllowed) return null;
 
+  // Fixed small orb size (56px)
+  const ORB_SIZE_SMALL = 56;
+  const scale = ORB_SIZE_SMALL / orbConfig.size; // Scale factor based on original theme
+
   return (
     <>
-      {/*  ULTRA-ATTRACTIVE DRAGGABLE ORB FLOATING BUTTON  */}
+      {/* ULTRA-ATTRACTIVE DRAGGABLE ORB FLOATING BUTTON (SMALL) */}
       <Animated.View
-        style={[styles.draggableFab, { transform: [{ translateX: pan.x }, { translateY: pan.y }] }]}
+        style={[
+          styles.draggableFab, 
+          { 
+            transform: [
+              { translateX: pan.x }, 
+              { translateY: pan.y },
+              { translateY: floatAnim } // Slight hover effect
+            ] 
+          }
+        ]}
         {...panResponder.panHandlers}
       >
         <TouchableOpacity 
@@ -123,14 +195,7 @@ export default function AIChatFloatingButton() {
           activeOpacity={0.88} 
           onPress={() => setModalVisible(true)}
         >
-          {/* Outer Glow */}
-          <View style={styles.outerGlow} />
-
-          {/* Orbiting Rings */}
-          <View style={styles.ring1} />
-          <View style={styles.ring2} />
-
-          {/* Main Orb Body */}
+          {/* Main Orb Body (Small fixed size) */}
           <LinearGradient
             colors={gradients.orb}
             style={styles.orbBody}
@@ -142,17 +207,30 @@ export default function AIChatFloatingButton() {
 
             {/* Orb Eyes (Blinking animation effect) */}
             <View style={styles.eyeRow}>
-              <View style={[styles.eye, { backgroundColor: colors.orbEye1 }]} />
-              <View style={[styles.eye, { backgroundColor: colors.orbEye1 }]} />
+              <Animated.View 
+                style={[
+                  styles.eye, 
+                  { 
+                    backgroundColor: colors.orbEye1,
+                    opacity: blinkAnim 
+                  }
+                ]} 
+              />
+              <Animated.View 
+                style={[
+                  styles.eye, 
+                  { 
+                    backgroundColor: colors.orbEye1,
+                    opacity: blinkAnim 
+                  }
+                ]} 
+              />
             </View>
 
             {/* Orb Shine Highlights */}
             <View style={[styles.shine1, { backgroundColor: colors.orbShine1 }]} />
             <View style={[styles.shine2, { backgroundColor: colors.orbShine2 }]} />
           </LinearGradient>
-
-          {/* Haze Ring Overlay */}
-          <View style={[styles.hazeRing, { backgroundColor: colors.orbHaze1 }]} />
         </TouchableOpacity>
       </Animated.View>
 
@@ -226,6 +304,9 @@ export default function AIChatFloatingButton() {
   );
 }
 
+const ORB_SIZE_SMALL = 56;
+const scale = ORB_SIZE_SMALL / (theme.ORB_SIZE || 200); // Scale everything down proportionally
+
 const styles = StyleSheet.create({
   draggableFab: { 
     position: 'absolute', 
@@ -235,41 +316,18 @@ const styles = StyleSheet.create({
     elevation: 12 
   },
 
-  // --- NEW ORB STYLES ---
+  // --- SMALL ORB STYLES (Fixed 56px) ---
   orbWrapper: {
-    width: orbConfig.size,
-    height: orbConfig.size,
+    width: ORB_SIZE_SMALL,
+    height: ORB_SIZE_SMALL,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
   },
-  outerGlow: {
-    position: 'absolute',
-    width: orbConfig.outerGlowSize,
-    height: orbConfig.outerGlowSize,
-    borderRadius: orbConfig.outerGlowSize / 2,
-    ...shadows.outerGlow,
-  },
-  ring1: {
-    position: 'absolute',
-    width: orbConfig.ring1Size,
-    height: orbConfig.ring1Size,
-    borderRadius: orbConfig.ring1Size / 2,
-    borderWidth: 2,
-    borderColor: colors.ring1,
-  },
-  ring2: {
-    position: 'absolute',
-    width: orbConfig.ring2Size,
-    height: orbConfig.ring2Size,
-    borderRadius: orbConfig.ring2Size / 2,
-    borderWidth: 1.5,
-    borderColor: colors.ring2,
-  },
   orbBody: {
-    width: orbConfig.size,
-    height: orbConfig.size,
-    borderRadius: orbConfig.borderRadius,
+    width: ORB_SIZE_SMALL,
+    height: ORB_SIZE_SMALL,
+    borderRadius: ORB_SIZE_SMALL / 2,
     justifyContent: 'center',
     alignItems: 'center',
     ...shadows.orbBody,
@@ -280,45 +338,39 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: orbConfig.borderRadius,
+    borderRadius: ORB_SIZE_SMALL / 2,
     backgroundColor: colors.orbVignette,
-    borderWidth: orbConfig.vignetteBorder,
+    borderWidth: 2,
     borderColor: 'rgba(0,0,0,0.15)',
   },
   eyeRow: {
     flexDirection: 'row',
-    gap: orbConfig.eyeGap,
-    marginTop: -8,
+    gap: 6, // Scaled down for 56px
+    marginTop: -2,
   },
   eye: {
-    width: orbConfig.eyeWidth,
-    height: orbConfig.eyeHeight,
-    borderRadius: orbConfig.eyeBorderRad,
+    width: 4, // Scaled down for 56px
+    height: 8, // Scaled down for 56px
+    borderRadius: 2,
   },
   shine1: {
     position: 'absolute',
-    top: orbConfig.shine1.top,
-    left: orbConfig.shine1.left,
-    width: orbConfig.shine1.width,
-    height: orbConfig.shine1.height,
-    borderRadius: 12,
+    top: 6,
+    left: 10,
+    width: 10,
+    height: 5,
+    borderRadius: 4,
   },
   shine2: {
     position: 'absolute',
-    top: orbConfig.shine2.top,
-    left: orbConfig.shine2.left,
-    width: orbConfig.shine2.size,
-    height: orbConfig.shine2.size,
-    borderRadius: 50,
-  },
-  hazeRing: {
-    position: 'absolute',
-    width: orbConfig.hazeRingSize,
-    height: orbConfig.hazeRingSize,
-    borderRadius: orbConfig.hazeRingSize / 2,
+    top: 12,
+    left: 32,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
   },
 
-  // --- MODAL STYLES (Kept mostly identical) ---
+  // --- MODAL STYLES (Unchanged) ---
   modalOverlay: { 
     flex: 1, 
     backgroundColor: 'rgba(0, 0, 0, 0.75)', 

@@ -1,0 +1,93 @@
+import { StyleSheet } from 'react-native';
+
+export default StyleSheet.create({
+  safe: { flex: 1, backgroundColor: '#f5f3ef' },
+  header: {
+    backgroundColor: '#0F2744', paddingHorizontal: 20, paddingTop: 14, paddingBottom: 16,
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+  },
+  backBtn: {
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.12)', justifyContent: 'center', alignItems: 'center',
+  },
+  backText: { fontSize: 16, color: '#fff' },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  logoBadge: {
+    backgroundColor: '#fff', width: 32, height: 32, borderRadius: 8,
+    justifyContent: 'center', alignItems: 'center',
+  },
+  logoBadgeText: { color: '#0F2744', fontSize: 14, fontWeight: '800' },
+  headerTitle: { fontSize: 16, fontWeight: '800', color: '#fff', flex: 1 },
+  scroll: { flex: 1 },
+  scrollContent: { padding: 16, paddingBottom: 40 },
+
+  reqCard: {
+    backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 12,
+    borderWidth: 1, borderColor: '#ece9e4',
+  },
+  reqTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  reqName: { fontSize: 15, fontWeight: '700', color: '#1a1a1a' },
+  badgeNew: {
+    fontSize: 10, fontWeight: '700',
+    backgroundColor: '#fef9c3', color: '#713f12',
+    borderWidth: 1, borderColor: '#fde68a',
+    paddingHorizontal: 9, paddingVertical: 3, borderRadius: 50,
+  },
+  reqMeta: { fontSize: 12, color: '#888', marginBottom: 3 },
+  problemBox: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 6,
+    marginBottom: 8,
+  },
+  problemLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#888',
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  reqDesc: { fontSize: 13, color: '#444', lineHeight: 18 },
+  securedNotice: {
+    backgroundColor: '#fef3c7',
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 10,
+  },
+  securedNoticeText: {
+    fontSize: 11,
+    color: '#92400e',
+    textAlign: 'center',
+  },
+  btnRow: { flexDirection: 'row', gap: 8, marginTop: 4 },
+  acceptBtn: { flex: 1, backgroundColor: '#0F2744', borderRadius: 10, paddingVertical: 10, alignItems: 'center' },
+  acceptText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  declineBtn: {
+    flex: 1, backgroundColor: '#f3f4f6', borderRadius: 10, paddingVertical: 10, alignItems: 'center',
+    borderWidth: 1, borderColor: '#e5e7eb',
+  },
+  declineText: { color: '#666', fontSize: 12, fontWeight: '700' },
+  emptyText: {
+    fontSize: 14,
+    color: '#888',
+    textAlign: 'center',
+    marginTop: 40,
+  },
+  bottomNav: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#ece9e4',
+    flexDirection: 'row',
+    height: 80,
+    paddingBottom: 24,
+    paddingTop: 10,
+  },
+  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  navLabel: { fontSize: 11, fontWeight: '600', color: '#bbb' },
+  navLabelActive: { color: '#0F2744' },
+});

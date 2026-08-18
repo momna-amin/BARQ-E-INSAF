@@ -1,50 +1,77 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Alert } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  View, Text, ScrollView, TouchableOpacity, SafeAreaView,
+  StatusBar, Alert, ActivityIndicator, RefreshControl,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import styles from './CaseRequests.styles';
-import { useMockStore, caseRequests, declineRequest, acceptRequest } from './MockStore';
+import api from '../../services/api';
 
 export default function CaseRequests() {
-  useMockStore();
   const router = useRouter();
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const handleAccept = (id) => {
+  const fetchRequests = useCallback(async () => {
+    try {
+      const res = await api.get('/requests/incoming');
+      setRequests(res.data || []);
+    } catch (err) {
+      console.log('Error fetching incoming requests:', err.message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchRequests(); }, [fetchRequests]);
+
+  const onRefresh = () => { setRefreshing(true); fetchRequests(); };
+
+  const handleAccept = (reqId) => {
     Alert.alert(
       'Accept Case',
-      'By accepting this case, you will be able to view the client\'s contact information and evidence.',
+      'By accepting this consultation request, you agree to represent this client.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Accept', 
-          onPress: () => {
-            acceptRequest(id);
-            Alert.alert('Case Accepted', 'Case has been moved to Active Cases. Client contact and evidence are now visible.');
+        {
+          text: 'Accept',
+          onPress: async () => {
+            try {
+              await api.patch(`/requests/${reqId}`, { status: 'accepted' });
+              Alert.alert('Case Accepted', 'Request accepted! Moving to active cases.');
+              fetchRequests();
+            } catch (err) {
+              Alert.alert('Error', err?.response?.data?.message || 'Failed to accept request.');
+            }
           }
         }
       ]
     );
   };
 
-  const handleDecline = (id) => {
+  const handleDecline = (reqId) => {
     Alert.alert(
       'Decline Request',
-      'Are you sure you want to decline and delete this request?',
+      'Are you sure you want to decline this request?',
       [
-        { text: 'Yes', onPress: () => {
-            declineRequest(id);
-            Alert.alert('Request Declined', 'The case request has been removed.');
+        { text: 'No', style: 'cancel' },
+        {
+          text: 'Yes, Decline',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await api.patch(`/requests/${reqId}`, { status: 'rejected' });
+              Alert.alert('Request Declined', 'The request has been declined.');
+              fetchRequests();
+            } catch (err) {
+              Alert.alert('Error', err?.response?.data?.message || 'Failed to decline request.');
+            }
           }
-        },
-        { text: 'No', style: 'cancel' }
+        }
       ]
     );
-  };
-
-  const handleViewCase = (id) => {
-    router.push({
-      pathname: '/(lawyer)/CaseDetail',
-      params: { caseId: id }
-    });
   };
 
   const handleNav = (lbl) => {
@@ -54,6 +81,8 @@ export default function CaseRequests() {
     if (lbl === 'schedule') router.push('/(lawyer)/Schedule');
     if (lbl === 'profile') router.push('/(lawyer)/LawyerProfile');
   };
+
+  const pendingRequests = requests.filter(r => r.status === 'pending');
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -68,46 +97,58 @@ export default function CaseRequests() {
           <View style={styles.logoBadge}>
             <Text style={styles.logoBadgeText}>BI</Text>
           </View>
-          <Text style={styles.headerTitle}>Case Requests</Text>
+          <Text style={styles.headerTitle}>Case Requests ({pendingRequests.length})</Text>
         </View>
       </View>
 
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {caseRequests.length > 0 ? (
-          caseRequests.map((r, i) => (
-            <View key={i} style={styles.reqCard}>
-              <TouchableOpacity onPress={() => handleViewCase(r.id)}>
-                <View style={styles.reqTop}>
-                  <Text style={styles.reqName}>{r.name} - {r.spec}</Text>
-                  <Text style={styles.badgeNew}>Pending</Text>
-                </View>
-                <Text style={styles.reqMeta}>Location: {r.location} · {r.time}</Text>
-                
-                <View style={styles.problemBox}>
-                  <Text style={styles.problemLabel}>Problem Statement:</Text>
-                  <Text style={styles.reqDesc}>{r.problemStatement || r.desc.substring(0, 80)}</Text>
-                </View>
-                
-                {/* Note detailing that contact and evidence are hidden until acceptance */}
-                <View style={styles.securedNotice}>
-                  <Text style={styles.securedNoticeText}>
-                    Contact and evidence are hidden until you accept this case.
-                  </Text>
-                </View>
-              </TouchableOpacity>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#0F2744']} />}
+      >
+        {loading ? (
+          <View style={{ padding: 40, alignItems: 'center' }}>
+            <ActivityIndicator size="large" color="#0F2744" />
+            <Text style={{ color: '#64748b', marginTop: 12 }}>Loading incoming requests...</Text>
+          </View>
+        ) : pendingRequests.length > 0 ? (
+          pendingRequests.map((r) => (
+            <View key={r.id} style={styles.reqCard}>
+              <View style={styles.reqTop}>
+                <Text style={styles.reqName}>{r.users?.name || 'Client Request'}</Text>
+                <Text style={styles.badgeNew}>Pending</Text>
+              </View>
+              <Text style={styles.reqMeta}>
+                Location: {r.users?.district || 'Sindh'} · {new Date(r.created_at).toLocaleDateString()}
+              </Text>
+              
+              <View style={styles.problemBox}>
+                <Text style={styles.problemLabel}>Problem Statement / Reason:</Text>
+                <Text style={styles.reqDesc}>{r.reason || 'Legal consultation requested.'}</Text>
+              </View>
+              
+              <View style={styles.securedNotice}>
+                <Text style={styles.securedNoticeText}>
+                  Client contact details will be shared via email once you accept this request.
+                </Text>
+              </View>
 
               <View style={styles.btnRow}>
                 <TouchableOpacity style={styles.acceptBtn} onPress={() => handleAccept(r.id)}>
-                  <Text style={styles.acceptText}>Accept Case</Text>
+                  <Text style={styles.acceptText}>✓ Accept Case</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.declineBtn} onPress={() => handleDecline(r.id)}>
-                  <Text style={styles.declineText}>Decline</Text>
+                  <Text style={styles.declineText}>✕ Decline</Text>
                 </TouchableOpacity>
               </View>
             </View>
           ))
         ) : (
-          <Text style={styles.emptyText}>No pending requests.</Text>
+          <View style={{ padding: 40, alignItems: 'center' }}>
+            <Text style={{ fontSize: 32, marginBottom: 8 }}>📩</Text>
+            <Text style={styles.emptyText}>No pending case requests at this time.</Text>
+          </View>
         )}
       </ScrollView>
 

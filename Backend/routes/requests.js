@@ -93,7 +93,8 @@ router.patch('/:id', protect, allowRoles('lawyer'), async (req, res) => {
         *,
         users:user_id ( id, name, email, phone, district ),
         lawyers:lawyer_id ( id, sbc_number, specialty,
-          lawyer_users:user_id ( name, email ) )
+          lawyer_users:user_id ( name, email ) ),
+        cases:case_id ( id, title )
       `)
       .single();
 
@@ -136,9 +137,11 @@ router.patch('/:id', protect, allowRoles('lawyer'), async (req, res) => {
       }
     }
 
+    const caseInfo = request.case_id ? { id: request.case_id, title: request.cases?.title || 'Case' } : null;
+
     // 2) Email to user
     if (userEmail) {
-      const { subject, html } = responseToUser(userName, lawyerName, status, reason);
+      const { subject, html } = responseToUser(userName, lawyerName, status, reason, caseInfo);
       sendMail({ to: userEmail, subject, html }).catch((err) =>
         console.error('User email failed:', err.message)
       );
@@ -147,7 +150,7 @@ router.patch('/:id', protect, allowRoles('lawyer'), async (req, res) => {
     // 3) Email to admin
     const adminEmail = process.env.ADMIN_NOTIFY_EMAIL;
     if (adminEmail) {
-      const { subject, html } = adminNotify(userName, lawyerName, status, reason);
+      const { subject, html } = adminNotify(userName, lawyerName, status, reason, caseInfo);
       sendMail({ to: adminEmail, subject, html }).catch((err) =>
         console.error('Admin email failed:', err.message)
       );
