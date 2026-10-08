@@ -1,25 +1,17 @@
 import React from 'react';
-// Import layout components from React Native:
-// View: acts like a division/box (similar to <div> in web)
-// Text: acts like a text container (similar to <p> or <span> in web)
-// StyleSheet: styling helper (similar to CSS in web)
-// SafeAreaView: prevents content from rendering behind notches/camera holes on phones
-// TouchableOpacity: a clickable button that fades slightly when pressed
-// StatusBar: controls the top battery/network bar colors
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, StatusBar } from 'react-native';
-import { useRouter } from 'expo-router'; // Routing helper
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 export default function VerificationPending() {
-  const router = useRouter(); // Initialize router to change screens
+  const router = useRouter();
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Configure phone status bar style */}
       <StatusBar barStyle="light-content" backgroundColor="#0F2744" />
       
-      {/* Box container holding the text cards */}
       <View style={styles.content}>
-        <Text style={styles.badge}>🛡️</Text> {/* Emoji badge */}
+        <Text style={styles.badge}>🛡️</Text>
         <Text style={styles.title}>Account Under Verification</Text>
         <Text style={styles.desc}>
           Thank you for registering on Barq-e-Insaf. We have received your Sindh Bar Council license credentials.
@@ -28,7 +20,6 @@ export default function VerificationPending() {
           Our administration team is currently validating your registration details. This process typically takes 12-24 hours. You will receive a notification once verified.
         </Text>
         
-        {/* Clickable button that redirects the user back to role selection screen */}
         <TouchableOpacity style={styles.btn} onPress={() => router.replace('/RoleSelectScreen')}>
           <Text style={styles.btnText}>Go Back to Roles</Text>
         </TouchableOpacity>
