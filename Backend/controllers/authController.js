@@ -148,6 +148,32 @@ const register = async (req, res) => {
       }
     }
 
+    // ── Send notifications based on role
+    if (cleanRole === 'lawyer') {
+      // 1. Email to lawyer: registration received, pending verification
+      const { subject: ls, html: lh } = lawyerPendingEmail(name.trim());
+      sendMail({ to: cleanEmail, subject: ls, html: lh }).catch(e => console.warn('lawyer pending mail notice:', e.message));
+
+      // 2. Email to admin: new lawyer join request notification
+      const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 'itshappyday777@gmail.com';
+      if (adminEmail) {
+        const a = lawyerJoinRequestAdmin({
+          name: name.trim(),
+          email: cleanEmail,
+          phone: phone || '—',
+          sbcNumber: sbcNumber || '—',
+          specialty: specialty || '—',
+          district: district || '—',
+          cnic: cnic || '—',
+        });
+        sendMail({ to: adminEmail, subject: a.subject, html: a.html }).catch(e => console.warn('admin notify mail notice:', e.message));
+      }
+    } else {
+      // Citizen welcome email
+      const { subject: ws, html: wh } = citizenWelcomeEmail(name.trim());
+      sendMail({ to: cleanEmail, subject: ws, html: wh }).catch(e => console.warn('welcome mail notice:', e.message));
+    }
+
     // ── Issue tokens
     const tokens = issueTokens(user);
 
@@ -449,13 +475,31 @@ const login = async (req, res) => {
 
     // ── Lawyer pending/rejected gate
     if (user.role === 'lawyer') {
-      const { data: lawyer } = await supabase
-        .from('lawyers').select('verification_status').eq('user_id', user.id).single();
-      if (!lawyer || lawyer.verification_status === 'pending') {
-        return res.status(403).json({ pendingApproval: true, message: 'Aapka account abhi admin approval ka intezaar kar raha hai.' });
+      let lawyerStatus = null;
+      if (supabase) {
+        try {
+          const { data: lawyer } = await supabase
+            .from('lawyers').select('verification_status').eq('user_id', user.id).single();
+          if (lawyer) lawyerStatus = lawyer.verification_status;
+        } catch { /* Supabase offline */ }
       }
-      if (lawyer.verification_status === 'rejected') {
-        return res.status(403).json({ rejected: true, message: 'Aapki registration reject ho chuki hai. Barq-e-Insaf support se rabta karein.' });
+
+      if (!lawyerStatus) {
+        const fallbackLawyer = fallbackDb.findLawyerByUserId(user.id);
+        if (fallbackLawyer) lawyerStatus = fallbackLawyer.verification_status;
+      }
+
+      if (!lawyerStatus || lawyerStatus === 'pending') {
+        return res.status(403).json({
+          pendingApproval: true,
+          message: 'Aapka account abhi admin approval ka intezaar kar raha hai. Approval ke baad login kar sakein gay.'
+        });
+      }
+      if (lawyerStatus === 'rejected') {
+        return res.status(403).json({
+          rejected: true,
+          message: 'Aapki registration reject ho chuki hai. Barq-e-Insaf support se rabta karein.'
+        });
       }
     }
 
@@ -529,12 +573,25 @@ const refreshToken = async (req, res) => {
   if (!token) return res.status(401).json({ message: 'Refresh token required' });
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
+    const payload = jwt.verify(
+      token,
+      process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || 'barq-jwt-refresh-secret-key-2026'
+    );
 
-    const { data: user, error } = await supabase
-      .from('users').select('*').eq('id', payload.id).single();
+    let user = null;
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('users').select('*').eq('id', payload.id).single();
+        if (!error && data) user = data;
+      } catch { /* Supabase offline */ }
+    }
 
-    if (error || !user) return res.status(401).json({ message: 'Session invalid — login karein' });
+    if (!user) {
+      user = fallbackDb.findUserById(payload.id);
+    }
+
+    if (!user) return res.status(401).json({ message: 'Session invalid — login karein' });
 
     const tokens = issueTokens(user);
     return res.json({

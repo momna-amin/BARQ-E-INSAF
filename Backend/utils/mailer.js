@@ -21,20 +21,28 @@ transporter.verify().then(
 );
 
 async function sendMail({ to, subject, html, text }) {
-  const from = `"${process.env.SMTP_FROM_NAME || 'Barq-e-Insaf'}" <${process.env.SMTP_USER}>`;
-  return transporter.sendMail({
-    from,
-    to,
-    subject,
-    html,
-    // Auto-generate plain-text fallback — critical for spam score
-    text: text || htmlToText(html, { wordwrap: 130 }),
-    replyTo: process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER,
-    headers: {
-      'X-Mailer': 'Barq-e-Insaf',
-      'X-Priority': '3',
-    },
-  });
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.log(`[EMAIL NOTIFICATION] To: ${to} | Subject: "${subject}" (SMTP env vars not set, logged)`);
+    return { success: true, simulated: true };
+  }
+  try {
+    const from = `"${process.env.SMTP_FROM_NAME || 'Barq-e-Insaf'}" <${process.env.SMTP_USER}>`;
+    return await transporter.sendMail({
+      from,
+      to,
+      subject,
+      html,
+      text: text || htmlToText(html, { wordwrap: 130 }),
+      replyTo: process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER,
+      headers: {
+        'X-Mailer': 'Barq-e-Insaf',
+        'X-Priority': '3',
+      },
+    });
+  } catch (err) {
+    console.warn(`[EMAIL NOTICE] Failed to send email to ${to}:`, err.message);
+    return { success: false, error: err.message };
+  }
 }
 
 module.exports = { sendMail };

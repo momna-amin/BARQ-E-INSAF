@@ -59,24 +59,41 @@ const getPendingLawyers = async (req, res) => {
 const verifyLawyer = async (req, res) => {
   try {
     const { status, reason } = req.body;
+    let data = null;
 
-    const { data, error } = await supabase
-      .from('lawyers')
-      .update({
-        verification_status: status,
-        is_verified: status === 'approved',
-      })
-      .eq('id', req.params.id)
-      .select('*, user:user_id(id, name, email)')
-      .single();
+    if (supabase) {
+      try {
+        const resDb = await supabase
+          .from('lawyers')
+          .update({
+            verification_status: status,
+            is_verified: status === 'approved',
+          })
+          .eq('id', req.params.id)
+          .select('*, user:user_id(id, name, email)')
+          .single();
+        if (!resDb.error && resDb.data) {
+          data = resDb.data;
+        }
+      } catch (e) { /* ignore */ }
+    }
 
-    if (error) return res.status(500).json({ message: error.message });
+    // Always update fallbackDb
+    const fallbackLawyer = fallbackDb.verifyLawyer(req.params.id, status);
+    if (!data && fallbackLawyer) {
+      data = fallbackLawyer;
+    }
+
+    if (!data) {
+      return res.status(404).json({ message: 'Lawyer record not found' });
+    }
 
     // Send decision email to lawyer
-    const lawyerEmail = data.user?.email;
+    const lawyerEmail = data.user?.email || data.email;
+    const lawyerName = data.user?.name || data.name || 'Advocate';
     if (lawyerEmail) {
-      const { subject, html } = lawyerDecisionEmail(data.user.name, status, reason);
-      sendMail({ to: lawyerEmail, subject, html }).catch(e => console.error('lawyer decision mail:', e.message));
+      const { subject, html } = lawyerDecisionEmail(lawyerName, status, reason);
+      sendMail({ to: lawyerEmail, subject, html }).catch(e => console.warn('lawyer decision mail:', e.message));
     }
 
     res.json(data);
@@ -194,28 +211,30 @@ const updateAdminProfile = async (req, res) => {
 
 // GET /api/admin/users?role=
 const getAllUsers = async (req, res) => {
+  const role = req.query.role;
+
   try {
     if (supabase) {
       let q = supabase
         .from('users')
         .select('*, lawyers(*)')
         .order('created_at', { ascending: false });
-      if (req.query.role) q = q.eq('role', req.query.role);
+      if (role) q = q.eq('role', role);
       const { data, error } = await q;
-      if (!error && data) return res.json(data);
+      if (!error && data && data.length > 0) return res.json(data);
     }
   } catch (error) {
     // fallback
   }
 
-  const role = req.query.role;
-  const lawyers = fallbackDb.getAllLawyers();
   if (role === 'lawyer') {
-    return res.json(lawyers.map(l => l.user || l));
+    return res.json(fallbackDb.getAllLawyerUsers());
   }
+
+  const lawyers = fallbackDb.getAllLawyerUsers();
   return res.json([
     { id: '1', name: 'Asad Khan', email: 'itshappyday777@gmail.com', role: 'admin' },
-    ...lawyers.map(l => l.user || l),
+    ...lawyers,
     { id: '6', name: 'Muhammad Usman', email: 'usman@gmail.com', role: 'citizen' },
     { id: '7', name: 'Fatima Zahra', email: 'fatima.z@gmail.com', role: 'citizen' }
   ]);

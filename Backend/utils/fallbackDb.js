@@ -247,15 +247,72 @@ function getPendingLawyers() {
   return pending;
 }
 
+function findLawyerByUserId(userId) {
+  if (!userId) return null;
+  for (const l of lawyersMap.values()) {
+    if (l.user_id === userId) return l;
+  }
+  return null;
+}
+
+function getAllLawyerUsers() {
+  const result = [];
+  for (const lawyer of lawyersMap.values()) {
+    const user = usersMap.get(lawyer.user_id) || lawyer.user || {};
+    result.push({
+      ...user,
+      id: user.id || lawyer.user_id,
+      name: user.name || lawyer.user?.name,
+      email: user.email || lawyer.user?.email,
+      phone: user.phone || lawyer.user?.phone,
+      district: user.district || lawyer.user?.district,
+      cnic: user.cnic || lawyer.user?.cnic,
+      role: 'lawyer',
+      lawyers: [
+        {
+          id: lawyer.id,
+          sbc_number: lawyer.sbc_number,
+          specialty: lawyer.specialty,
+          verification_status: lawyer.verification_status || 'pending',
+          is_verified: lawyer.is_verified || false,
+          district: lawyer.district,
+          experience_years: lawyer.experience_years,
+        }
+      ]
+    });
+  }
+  return result;
+}
+
 function getAllLawyers() {
   return Array.from(lawyersMap.values());
 }
 
 function verifyLawyer(id, status) {
-  const lawyer = lawyersMap.get(id);
+  let lawyer = lawyersMap.get(id);
+  if (!lawyer) {
+    for (const l of lawyersMap.values()) {
+      if (l.user_id === id) {
+        lawyer = l;
+        break;
+      }
+    }
+  }
   if (lawyer) {
     lawyer.verification_status = status;
     lawyer.is_verified = status === 'approved';
+    const user = usersMap.get(lawyer.user_id);
+    if (user) {
+      user.is_verified = status === 'approved';
+      if (user.lawyer) {
+        user.lawyer.verification_status = status;
+        user.lawyer.is_verified = status === 'approved';
+      }
+      if (user.lawyers?.[0]) {
+        user.lawyers[0].verification_status = status;
+        user.lawyers[0].is_verified = status === 'approved';
+      }
+    }
     return lawyer;
   }
   return null;
@@ -264,9 +321,11 @@ function verifyLawyer(id, status) {
 module.exports = {
   findUserByEmail,
   findUserById,
+  findLawyerByUserId,
   addUser,
   getStats,
   getPendingLawyers,
   getAllLawyers,
+  getAllLawyerUsers,
   verifyLawyer,
 };

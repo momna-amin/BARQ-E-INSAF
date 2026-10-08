@@ -24,12 +24,18 @@ export default function VerificationQueue() {
   const fetchLawyers = useCallback(async () => {
     try {
       setError(null);
-      // Fetch all lawyers with user info
       const res = await api.get('/admin/users?role=lawyer');
-      setLawyers(res.data || []);
+      const data = res.data || [];
+      setLawyers(data);
     } catch (err) {
       console.warn('VerificationQueue fetch warning:', err?.message || err);
-      setError('Data load nahi ho saka. Dobara try karein.');
+      // Fallback: retry with /admin/pending-lawyers if /admin/users had any issue
+      try {
+        const pendingRes = await api.get('/admin/pending-lawyers');
+        setLawyers(pendingRes.data || []);
+      } catch {
+        setError('Data load karne mein masla hua. Dobara try karein.');
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -40,17 +46,9 @@ export default function VerificationQueue() {
 
   const onRefresh = () => { setRefreshing(true); fetchLawyers(); };
 
-  // Map status from DB to filter labels
-  const statusMap = {
-    'pending': 'pending',
-    'approved': 'approved',
-    'rejected': 'rejected',
-  };
-
   const getLawyerStatus = (user) => {
-    const l = user.lawyers?.[0];
-    if (!l) return 'unknown';
-    return l.verification_status || 'pending';
+    const l = user.lawyers?.[0] || user.lawyer || user;
+    return l.verification_status || user.verification_status || 'pending';
   };
 
   const filteredLawyers = lawyers.filter((user) => {
@@ -67,19 +65,20 @@ export default function VerificationQueue() {
 
   const handleAction = async () => {
     if (!selectedLawyer) return;
-    const lawyerProfile = selectedLawyer.lawyers?.[0];
-    if (!lawyerProfile) return;
+    const lawyerProfile = selectedLawyer.lawyers?.[0] || selectedLawyer.lawyer || selectedLawyer;
+    const lawyerId = lawyerProfile.id || selectedLawyer.id;
+    if (!lawyerId) return;
 
     setActionLoading(true);
     try {
-      await api.put(`/admin/lawyers/${lawyerProfile.id}/verify`, {
+      await api.put(`/admin/lawyers/${lawyerId}/verify`, {
         status: actionType,
         reason: reason.trim() || undefined,
       });
       setReasonModal(false);
       Alert.alert(
         actionType === 'approved' ? '✅ Approved!' : '❌ Rejected',
-        `${selectedLawyer.name} ki request ${actionType === 'approved' ? 'approve' : 'reject'} ho gayi. Email bhej di gayi.`
+        `${selectedLawyer.name || 'Advocate'} ki request ${actionType === 'approved' ? 'approve' : 'reject'} ho gayi. Notification email bhej di gayi.`
       );
       fetchLawyers();
     } catch (err) {
@@ -169,8 +168,8 @@ export default function VerificationQueue() {
               </View>
             ) : (
               filteredLawyers.map((user) => {
-                const lawyerProfile = user.lawyers?.[0] || {};
-                const status = lawyerProfile.verification_status || 'pending';
+                const lawyerProfile = user.lawyers?.[0] || user.lawyer || user || {};
+                const status = getLawyerStatus(user);
                 return (
                   <View key={user.id} style={[styles.lawyerCard, status === 'rejected' && { borderLeftColor: '#dc2626' }, status === 'approved' && { borderLeftColor: '#16a34a' }]}>
                     <View style={styles.cardHeader}>
