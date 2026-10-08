@@ -38,7 +38,7 @@ export default function LawyerManagement() {
       const res = await api.get('/admin/users?role=lawyer');
       setUsers(res.data || []);
     } catch (err) {
-      console.error('LawyerManagement fetch error:', err);
+      console.warn('LawyerManagement fetch warning:', err?.message || err);
       setError('Lawyers load nahi ho sake.');
     } finally {
       setLoading(false);

@@ -6,5 +6,12 @@
     "build": "npm run build --prefix Frontend",
     "start": "npm start --prefix Backend",
     "dev": "npm run dev --prefix Backend"
+  },
+  "dependencies": {
+    "expo": "^57.0.27"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.4",
+    "typescript": "~6.0.3"
   }
 }

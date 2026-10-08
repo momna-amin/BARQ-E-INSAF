@@ -28,7 +28,7 @@ export default function VerificationQueue() {
       const res = await api.get('/admin/users?role=lawyer');
       setLawyers(res.data || []);
     } catch (err) {
-      console.error('VerificationQueue fetch error:', err);
+      console.warn('VerificationQueue fetch warning:', err?.message || err);
       setError('Data load nahi ho saka. Dobara try karein.');
     } finally {
       setLoading(false);

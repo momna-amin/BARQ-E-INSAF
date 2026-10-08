@@ -27,7 +27,7 @@ export default function UserManagement() {
       const res = await api.get('/admin/users');
       setUsers(res.data || []);
     } catch (err) {
-      console.error('UserManagement fetch error:', err);
+      console.warn('UserManagement fetch warning:', err?.message || err);
       setError('Users load nahi ho sake. Dobara try karein.');
     } finally {
       setLoading(false);

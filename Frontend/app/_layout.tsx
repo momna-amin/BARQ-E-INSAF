@@ -2,7 +2,10 @@ import React from 'react';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { LogBox } from 'react-native';
 import 'react-native-reanimated';
+
+LogBox.ignoreLogs(['SafeAreaView has been deprecated']);
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import AIChatFloatingButton from '../components/AIChatFloatingButton';

@@ -28,7 +28,7 @@ export default function CasesPage() {
       const res = await api.get('/admin/cases');
       setCases(res.data || []);
     } catch (err) {
-      console.error('CasesPage fetch error:', err);
+      console.warn('CasesPage fetch warning:', err?.message || err);
       setError('Cases load nahi ho sake. Dobara try karein.');
     } finally {
       setLoading(false);

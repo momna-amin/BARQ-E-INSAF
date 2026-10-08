@@ -7,7 +7,6 @@
     "icon": "./assets/images/logo.png",
     "scheme": "barqeinsafapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
@@ -16,7 +15,6 @@
         "backgroundColor": "#07152e",
         "foregroundImage": "./assets/images/logo.png"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.BarqEInsafApp"
     },
@@ -76,7 +74,9 @@
       ],
       "expo-font",
       "expo-web-browser",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-image",
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true

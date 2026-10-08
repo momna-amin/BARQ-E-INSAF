@@ -1,22 +1,28 @@
 const supabase = require('../config/supabase');
+const fallbackDb = require('../utils/fallbackDb');
 
 // GET /api/lawyers
 const getLawyers = async (req, res) => {
   try {
-    let query = supabase
-      .from('lawyers')
-      .select('*, user:user_id(id, name, email, phone)')
-      .eq('is_verified', true);
+    if (supabase) {
+      let query = supabase
+        .from('lawyers')
+        .select('*, user:user_id(id, name, email, phone)')
+        .eq('is_verified', true);
 
-    if (req.query.specialty) query = query.eq('specialty', req.query.specialty);
-    if (req.query.district)  query = query.eq('district',  req.query.district);
+      if (req.query.specialty) query = query.eq('specialty', req.query.specialty);
+      if (req.query.district)  query = query.eq('district',  req.query.district);
 
-    const { data, error } = await query;
-    if (error) return res.status(500).json({ message: error.message });
-    res.json(data);
+      const { data, error } = await query;
+      if (!error && data && data.length > 0) {
+        return res.json(data);
+      }
+    }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    // Supabase error, fall through to fallbackDb
   }
+
+  return res.json(fallbackDb.getAllLawyers());
 };
 
 // GET /api/lawyers/:id
