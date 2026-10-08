@@ -127,6 +127,23 @@ const register = async (req, res) => {
         sbcNumber,
         specialty,
       });
+    } else {
+      // Keep fallbackDb in sync with user created in Supabase
+      fallbackDb.addUser({
+        id: user.id,
+        name: name.trim(),
+        email: cleanEmail,
+        password: hashedPassword,
+        passwordHash: hashedPassword,
+        role: cleanRole,
+        phone: phone || null,
+        district: district || null,
+        cnic: cnic || null,
+        is_verified: true,
+        provider: 'email',
+        sbcNumber,
+        specialty,
+      });
     }
 
     // ── Create lawyer profile if role is lawyer

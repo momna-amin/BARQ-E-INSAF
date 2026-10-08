@@ -2,9 +2,17 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { clearTokens } from '../../services/authStorage';
 
 export default function VerificationPending() {
   const router = useRouter();
+
+  const handleGoBack = async () => {
+    try {
+      await clearTokens();
+    } catch { /* noop */ }
+    router.replace('/RoleSelectScreen');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -20,7 +28,7 @@ export default function VerificationPending() {
           Our administration team is currently validating your registration details. This process typically takes 12-24 hours. You will receive a notification once verified.
         </Text>
         
-        <TouchableOpacity style={styles.btn} onPress={() => router.replace('/RoleSelectScreen')}>
+        <TouchableOpacity style={styles.btn} onPress={handleGoBack}>
           <Text style={styles.btnText}>Go Back to Roles</Text>
         </TouchableOpacity>
       </View>

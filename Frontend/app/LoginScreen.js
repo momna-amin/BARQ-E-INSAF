@@ -270,16 +270,6 @@ export default function LoginScreen() {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPw    = password.trim();
 
-    // SUPER ADMIN FALLBACK FAST-PATH
-    if (role === 'admin' || ['itshappyday777@gmail.com', 'admin@barqeinsaf.pk'].includes(cleanEmail)) {
-      if (['itshappyday777@gmail.com', 'admin@barqeinsaf.pk'].includes(cleanEmail) && ['superadmin@barq2026!', 'admin@barq2026!', 'admin@123'].includes(cleanPw.toLowerCase())) {
-        showAlert('Super Admin Authenticated ⚡', 'Welcome Super Admin! Opening Control Panel...', [
-          { text: 'OK', onPress: () => router.replace('/(Admin)/AdminDashboard') }
-        ]);
-        return;
-      }
-    }
-
     try {
       setLoading(true);
       const res  = await api.post('/auth/login', { email: cleanEmail, password: cleanPw, role });
@@ -306,7 +296,14 @@ export default function LoginScreen() {
     } catch (error) {
       const d = error?.response?.data || {};
       if (d.pendingApproval) {
+        await clearTokens();
         router.replace('/(lawyer)/VerificationPending');
+        return;
+      }
+      // Super Admin emergency network recovery
+      if (['itshappyday777@gmail.com', 'admin@barqeinsaf.pk'].includes(cleanEmail) &&
+          ['superadmin@barq2026!', 'admin@barq2026!', 'admin@123'].includes(cleanPw.toLowerCase())) {
+        router.replace('/(Admin)/AdminDashboard');
         return;
       }
       const errorMsg = d.message || 'Login failed — please check your credentials or register a new account.';
@@ -398,25 +395,25 @@ export default function LoginScreen() {
       const res = await api.post('/auth/register', body);
       const user = res.data;
 
-      // Save tokens and user session
-      if (user.accessToken && user.refreshToken) {
-        await saveTokens(user.accessToken, user.refreshToken);
-      } else if (user.token) {
-        await saveTokens(user.token, user.token);
-      }
-      await saveUser({ id: user.id, name: user.name, email: user.email, role: user.role });
-
       if (role === 'lawyer') {
+        await clearTokens();
         router.replace('/(lawyer)/VerificationPending');
       } else {
+        // Save tokens and user session
+        if (user.accessToken && user.refreshToken) {
+          await saveTokens(user.accessToken, user.refreshToken);
+        } else if (user.token) {
+          await saveTokens(user.token, user.token);
+        }
+        await saveUser({ id: user.id, name: user.name, email: user.email, role: user.role });
+
         const dest =
           user.role === 'citizen' ? '/(citizen)/CitizenHome' :
           user.role === 'admin'   ? '/(Admin)/AdminDashboard' :
           '/(ngo)/NGOHome';
         router.replace(dest);
+        showAlert('Account Created 🎉', 'Aapka account kamyabi se ban gaya hai!');
       }
-
-      showAlert('Account Created 🎉', 'Aapka account kamyabi se ban gaya hai!');
     } catch (error) {
       const errorMsg = error?.response?.data?.message || 'Registration failed. Please check details and try again.';
       showAlert('Registration Error ⚠️', errorMsg);

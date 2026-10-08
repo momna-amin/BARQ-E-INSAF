@@ -146,6 +146,7 @@ SEED_USERS.forEach((u) => {
   usersMap.set(u.email.toLowerCase(), u);
   usersMap.set(u.id, u);
   if (u.lawyer) {
+    u.lawyers = [u.lawyer];
     lawyersMap.set(u.lawyer.id, {
       ...u.lawyer,
       user_id: u.id,
@@ -161,6 +162,41 @@ SEED_USERS.forEach((u) => {
     });
   }
 });
+
+// Load persistent state from /tmp if available
+const STATE_FILE = '/tmp/barq_fallback_state.json';
+const fs = require('fs');
+
+function loadState() {
+  try {
+    if (fs.existsSync(STATE_FILE)) {
+      const raw = fs.readFileSync(STATE_FILE, 'utf8');
+      const data = JSON.parse(raw);
+      if (Array.isArray(data.users)) {
+        data.users.forEach((u) => {
+          usersMap.set(u.email.toLowerCase(), u);
+          usersMap.set(u.id, u);
+        });
+      }
+      if (Array.isArray(data.lawyers)) {
+        data.lawyers.forEach((l) => lawyersMap.set(l.id, l));
+      }
+    }
+  } catch (e) {
+    /* ignore load error */
+  }
+}
+loadState();
+
+function saveState() {
+  try {
+    const users = Array.from(usersMap.values()).filter((u, i, arr) => arr.findIndex(x => x.id === u.id) === i);
+    const lawyers = Array.from(lawyersMap.values());
+    fs.writeFileSync(STATE_FILE, JSON.stringify({ users, lawyers }), 'utf8');
+  } catch (e) {
+    /* ignore save error */
+  }
+}
 
 function findUserByEmail(email) {
   if (!email) return null;
@@ -181,8 +217,6 @@ function addUser(user) {
     email: cleanEmail,
     created_at: new Date().toISOString(),
   };
-  usersMap.set(cleanEmail, record);
-  usersMap.set(id, record);
 
   if (user.role === 'lawyer' || user.sbcNumber) {
     const lawyerId = `lawyer-${Date.now()}`;
@@ -205,7 +239,13 @@ function addUser(user) {
       },
     };
     lawyersMap.set(lawyerId, lawyerRecord);
+    record.lawyer = lawyerRecord;
+    record.lawyers = [lawyerRecord];
   }
+
+  usersMap.set(cleanEmail, record);
+  usersMap.set(id, record);
+  saveState();
 
   return record;
 }
@@ -313,6 +353,7 @@ function verifyLawyer(id, status) {
         user.lawyers[0].is_verified = status === 'approved';
       }
     }
+    saveState();
     return lawyer;
   }
   return null;

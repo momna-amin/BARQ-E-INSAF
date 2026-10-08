@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, TextInput, Alert, Platform } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import api from '../../services/api';
+import { clearTokens } from '../../services/authStorage';
 
 const MENU_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊', route: '/(Admin)/AdminDashboard' },
@@ -45,7 +46,10 @@ export default function AdminSidebar({ activeRoute, isOpen, onClose }) {
     handleClose();
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await clearTokens();
+    } catch { /* noop */ }
     router.replace('/RoleSelectScreen');
   };
 
