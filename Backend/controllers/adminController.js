@@ -91,12 +91,17 @@ const verifyLawyer = async (req, res) => {
     // Send decision email to lawyer
     const lawyerEmail = data.user?.email || data.email;
     const lawyerName = data.user?.name || data.name || 'Advocate';
+    let emailStatus = null;
     if (lawyerEmail) {
-      const { subject, html } = lawyerDecisionEmail(lawyerName, status, reason);
-      sendMail({ to: lawyerEmail, subject, html }).catch(e => console.warn('lawyer decision mail:', e.message));
+      try {
+        const { subject, html } = lawyerDecisionEmail(lawyerName, status, reason);
+        emailStatus = await sendMail({ to: lawyerEmail, subject, html });
+      } catch (e) {
+        console.warn('lawyer decision mail error:', e.message);
+      }
     }
 
-    res.json(data);
+    res.json({ ...data, emailStatus });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

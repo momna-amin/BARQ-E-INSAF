@@ -89,8 +89,9 @@ export default function VerificationQueue() {
 
     setActionLoading(true);
     try {
+      let putRes;
       try {
-        await api.put(`/admin/lawyers/${lawyerId}/verify`, {
+        putRes = await api.put(`/admin/lawyers/${lawyerId}/verify`, {
           status: actionType,
           reason: reason.trim() || undefined,
         });
@@ -103,7 +104,7 @@ export default function VerificationQueue() {
           });
           if (loginRes.data?.accessToken) {
             await saveTokens(loginRes.data.accessToken, loginRes.data.refreshToken);
-            await api.put(`/admin/lawyers/${lawyerId}/verify`, {
+            putRes = await api.put(`/admin/lawyers/${lawyerId}/verify`, {
               status: actionType,
               reason: reason.trim() || undefined,
             });
@@ -113,9 +114,16 @@ export default function VerificationQueue() {
         }
       }
       setReasonModal(false);
+      const emailInfo = putRes?.data?.emailStatus;
+      const emailMsg = emailInfo?.success
+        ? 'Notification email inbox mein deliver ho gayi hai.'
+        : emailInfo?.simulated
+        ? 'Status update ho gaya. (Real email bhejne ke liye Gmail SMTP credentials zaroori hain).'
+        : 'Notification email bhej di gayi.';
+
       Alert.alert(
         actionType === 'approved' ? '✅ Approved!' : '❌ Rejected',
-        `${selectedLawyer.name || selectedLawyer.user?.name || 'Advocate'} ki request ${actionType === 'approved' ? 'approve' : 'reject'} ho gayi. Notification email bhej di gayi.`
+        `${selectedLawyer.name || selectedLawyer.user?.name || 'Advocate'} ki request ${actionType === 'approved' ? 'approve' : 'reject'} ho gayi. ${emailMsg}`
       );
       fetchLawyers();
     } catch (err) {
