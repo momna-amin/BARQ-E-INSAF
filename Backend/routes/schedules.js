@@ -28,14 +28,23 @@ router.get('/', protect, async (req, res) => {
 // Fetch logged-in lawyer's schedules
 router.get('/my', protect, allowRoles('lawyer'), async (req, res) => {
   try {
-    const { data: lawyerRow, error: le } = await supabase
-      .from('lawyers')
-      .select('id')
-      .eq('user_id', req.user.id)
-      .single();
+    let lawyerRow = null;
+    try {
+      const { data: lr } = await supabase
+        .from('lawyers')
+        .select('id')
+        .eq('user_id', req.user.id)
+        .single();
+      lawyerRow = lr;
+    } catch (e) { /* ignore */ }
 
-    if (le || !lawyerRow) {
-      return res.status(404).json({ message: 'Lawyer profile not found' });
+    if (!lawyerRow) {
+      const fallbackDb = require('../utils/fallbackDb');
+      lawyerRow = fallbackDb.findLawyerByUserId(req.user.id);
+    }
+
+    if (!lawyerRow) {
+      return res.json([]);
     }
 
     const { data, error } = await supabase
@@ -43,10 +52,10 @@ router.get('/my', protect, allowRoles('lawyer'), async (req, res) => {
       .select('*')
       .eq('lawyer_id', lawyerRow.id);
 
-    if (error) return res.status(500).json({ message: error.message });
+    if (error || !data) return res.json([]);
     return res.json(data);
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    return res.json([]);
   }
 });
 

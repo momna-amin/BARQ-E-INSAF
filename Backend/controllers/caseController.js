@@ -27,14 +27,23 @@ const getMyCases = async (req, res) => {
     let query = supabase.from('cases');
 
     if (req.user.role === 'lawyer') {
-      const { data: lawyerRow, error: le } = await supabase
-        .from('lawyers')
-        .select('id')
-        .eq('user_id', req.user.id)
-        .single();
+      let lawyerRow = null;
+      try {
+        const { data: lr } = await supabase
+          .from('lawyers')
+          .select('id')
+          .eq('user_id', req.user.id)
+          .single();
+        lawyerRow = lr;
+      } catch (e) { /* ignore */ }
 
-      if (le || !lawyerRow) {
-        return res.status(404).json({ message: 'Lawyer profile not found' });
+      if (!lawyerRow) {
+        const fallbackDb = require('../utils/fallbackDb');
+        lawyerRow = fallbackDb.findLawyerByUserId(req.user.id);
+      }
+
+      if (!lawyerRow) {
+        return res.json([]);
       }
 
       query = query
